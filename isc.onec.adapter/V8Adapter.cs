@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 using NLog;
 
 namespace isc.onec.bridge
@@ -15,14 +16,18 @@ namespace isc.onec.bridge
         private string url;
         private object connector;
         //TODO check this
-        private static ReaderWriterLock connectorLock;
+        private static ReaderWriterLock connectorLock = new ReaderWriterLock();
 
         public bool isConnected = false;
+        public bool inDisconnectingMode = false;
         public enum V8Version { V80, V81, V82 };
         //private static readonly object syncHandle = new object();
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
-
+        public V8Adapter()
+        {
+            logger.Debug("V8Adapter is created");
+        }
         public object get(object target, string name)
         {
             object result;
@@ -39,6 +44,9 @@ namespace isc.onec.bridge
         }
         public void set(object target, string name, object value)
         {
+            /*
+             *  target.comObject.GetType().InvokeMember(propertyName, BindingFlags.PutDispProperty | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly, null, target.comObject, new object[] { propertyValue });
+             */
             try
             {
                 target.GetType().InvokeMember(name, BindingFlags.SetProperty | BindingFlags.Public, null, target, new object[] { value });
@@ -56,7 +64,9 @@ namespace isc.onec.bridge
             try
             {
                 //obj2 = target.comObject.GetType().InvokeMember(methodName, BindingFlags.InvokeMethod, null, target.comObject, methodParams, modifiers, null, null);
-                obj = target.GetType().InvokeMember(method, BindingFlags.InvokeMethod | BindingFlags.Public, null, target, args,null);
+                // | BindingFlags.Public
+                // TODO Modifiers
+                obj = target.GetType().InvokeMember(method, BindingFlags.InvokeMethod, null, target, args,null,null,null);
             }
             catch (TargetInvocationException exception)
             {
@@ -75,12 +85,20 @@ namespace isc.onec.bridge
                 //TODO Check this
                 connectorLock.AcquireReaderLock(-1);
                 this.connector = createConnector(version);
+                logger.Debug("New V8.ComConnector is created");
                 context = invoke(this.connector, "Connect", new object[] { url });
 
                 isConnected = true;
                 this.url = url;
 
-                logger.Debug("Connected to " + this.url);
+                logger.Debug("Connection is established");
+            }
+            catch (Exception e)
+            {
+                free(this.connector);
+                stimulateGC();
+                isConnected = false;
+                throw e;
             }
             finally {
                 //TODO Check this
@@ -92,11 +110,17 @@ namespace isc.onec.bridge
 
         public void disconnect()
         {
+            if (inDisconnectingMode)
+            {
+                throw new InvalidOperationException("Already in disconnecting mode.");
+            }
+          
             free(this.connector);
             stimulateGC();
             isConnected = false;
 
-            logger.Debug("Disconnected from " + this.url);
+            logger.Debug("Disconnection is done.");
+            
         }
 
         public bool isAlive(string url)
@@ -156,9 +180,16 @@ namespace isc.onec.bridge
         {
             if (rcw != null)
             {
+
+                logger.Debug("Releasing object " + ((MarshalByRefObject)rcw).ToString());
+                Marshal.ReleaseComObject(rcw);
                 Marshal.FinalReleaseComObject(rcw);
+           
                 rcw = null;
             }
+            //
+            //this.Dispose(true);
+            //GC.SuppressFinalize(this);
         }
         public bool isObject(object val)
         {

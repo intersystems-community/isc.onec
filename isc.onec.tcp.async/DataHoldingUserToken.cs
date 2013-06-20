@@ -46,10 +46,10 @@ namespace isc.onec.tcp.async
         //It is different from the transmission ID in the DataHolder, which relates
         //to one TCP message. A connected session could have many messages, if you
         //set up your app to allow it.
-        private Int32 sessionId;                
+        //private Int32 sessionId;                
 
         //MODIFIED
-        private Server server;
+        public Server server;
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -66,7 +66,11 @@ namespace isc.onec.tcp.async
             this.receiveMessageOffset = rOffset + receivePrefixLength;
             this.permanentReceiveMessageOffset = this.receiveMessageOffset;            
         }
-
+        ~DataHoldingUserToken()
+        {
+            logger.Debug("DataHoldingUserToken destructor is called");
+            this.server = null;
+        }
         //Let's use an ID for this object during testing, just so we can see what
         //is happening better if we want to.
         public Int32 TokenId
@@ -79,23 +83,24 @@ namespace isc.onec.tcp.async
 
         internal void CreateNewDataHolder()
         {
+            //this.server = null;
             theDataHolder = new DataHolder();
         }
                 
         //Used to create sessionId variable in DataHoldingUserToken.
         //Called in ProcessAccept().
-        internal void CreateSessionId()
+        /*internal void CreateSessionId()
         {
             sessionId = Interlocked.Increment(ref TCPAsyncServer.mainSessionId);                        
-        }
+        }*/
 
-        public Int32 SessionId
+        /*public Int32 SessionId
         {
             get
             {
                 return this.sessionId;
             }
-        }
+        }*/
 
         public void Reset()
         {
@@ -107,12 +112,31 @@ namespace isc.onec.tcp.async
 
         public void CleanUp()
         {
+            logger.Debug("Cleanup is called");
             if (this.server!=null) {
-               //logger.Info("cleanup");
-               if (this.server.isConnected()) this.server.sendDisconnect();
-               this.server = null;
+                this.server.service = null;
+                this.server = null;
+                /*try
+                {
+                    logger.Debug("cleanUp is trying to send disconnect.Server isConnected?:" + this.server.isConnected());
+                    if (this.server.isConnected())
+                    {
+                        logger.Debug("Sending disconnect one more time");
+                        this.server.sendDisconnect();
+                        
+                    }
+                 
+                }
+                catch (Exception e) {
+                    logger.DebugException("cleanUp gets error", e);
+                }
+                finally
+                {
+                    this.server = null;
+                } */
             }
-            
+
+            this.server = null;
         }
 
         public Server getServer()
@@ -122,7 +146,9 @@ namespace isc.onec.tcp.async
 
         internal void StartSession()
         {
+            logger.Debug("Creating new isc.onec.bridge.Server");
             this.server = new Server();
+            
         }
     }
 }

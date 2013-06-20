@@ -10,8 +10,9 @@ namespace isc.gateway.net
         //TODO normalize object state
     
         private static Logger logger = LogManager.GetCurrentClassLogger();
-        private int port = 9100;
+        private int port = DEFAULTPORT;
         private bool keepAlive = true;
+        private static int DEFAULTPORT = 9101;
 
         public TCPAsyncServer server;
 
@@ -27,14 +28,14 @@ namespace isc.gateway.net
            
             if (args == null)
             {
-                this.port = 9100;
+                this.port = DEFAULTPORT;
                 this.keepAlive = true;
 
                 return;
             }
             if (args.Length == 0)
             {
-                this.port = 9100;
+                this.port = DEFAULTPORT;
                 this.keepAlive = true;
 
                 return;

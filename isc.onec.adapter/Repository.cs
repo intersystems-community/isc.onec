@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using NLog;
 
 namespace isc.onec.bridge
 {
@@ -8,10 +9,15 @@ namespace isc.onec.bridge
         public delegate void ObjectProcessor(object rcw);
         private Dictionary<long,object> cache;
         private long counter;
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         public Repository()
         {
             this.cache = new Dictionary<long, object>();
             this.counter = 0;
+        }
+        ~Repository()
+        {
+            logger.Debug("Repository destructor. Cache has " + cache.Count + " items.");
         }
         public object find(string oid)
         {
@@ -45,6 +51,7 @@ namespace isc.onec.bridge
         }
         public void cleanAll(ObjectProcessor processor)
         {    
+           
             if(processor!= null) {
                 List<object> toBeRemoved = new List<object>();
                 foreach(KeyValuePair<long,object> pair in cache) {

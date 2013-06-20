@@ -6,9 +6,10 @@ namespace isc.onec.bridge
     public class Server
     {
         public enum Commands:int { GET=1,SET=2,INVOKE=3,CONNECT=4,DISCONNET=5,FREE=6,COUNT=7 };
-        private V8Service service;
+        public V8Service service;
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static int counter=0;
 
         public Server()
         {
@@ -17,10 +18,18 @@ namespace isc.onec.bridge
 
             this.service = new V8Service(adapter, repository);
         }
+        ~Server()
+        {
+            string client = "";
+            if (service != null) client = service.client;
+            logger.Debug("Server destructor is called for #" + client);
+            if (service != null) service = null;
+        }
         //TODO Code smells - should have formalized protocol in commands not something general
         public string[] run(int command,string target,string operand,string[] vals,int[] types) {
             Request targetObject;
             //if target is "." it is context
+          
             if (target != ".") targetObject = new Request(target);
             else targetObject = new Request("");
 
@@ -34,11 +43,24 @@ namespace isc.onec.bridge
             }
             catch (Exception e)
             {
+                string client = "null";
+                if (service != null)
+                {
+                    client = service.client;
+                }
                 logger.ErrorException(
-                    "On cmd:"+commandType.ToString()+",target:"+target
-                    +",operand:"+operand+" ,vals:"+vals.ToString()+",types:"+types.ToString()
+                    service.client+" :"+commandType.ToString()+":"+target
+                    +":"+operand+":"+vals.ToString()+":"+types.ToString()
                     , e);
+                if (service != null)
+                {
+                    logger.Debug(service.getJournalReport());
+                }
                 response = new Response(e);
+
+                service.disconnect();
+                service = null;
+
             }
 
             string[] reply = serialize(response);
@@ -67,9 +89,27 @@ namespace isc.onec.bridge
                     Request[] args = buildRequestList(vals, types);
                     return service.invoke(obj, operand, args);
                     
-                case Commands.CONNECT: return service.connect(operand);
+                case Commands.CONNECT:
+                    if (types.Length > 0)
+                    {
+                        Request client = new Request(types[0], vals[0]);
+                        return service.connect(operand, (String)client.value);
+                    }
+                    else
+                    {
+                        return service.connect(operand, null);
+                    }
 
-                case Commands.DISCONNET: Response response = service.disconnect(); this.service = null; return response;
+                case Commands.DISCONNET:
+                    counter = (counter + 1)%10;
+                    if (counter == 0)
+                    {
+                        logger.Debug(service.getJournalReport());
+                    }
+                    Response response = service.disconnect(); 
+                    this.service = null;
+                   
+                    return response;
                     
                 case Commands.FREE: return service.free(obj);
                

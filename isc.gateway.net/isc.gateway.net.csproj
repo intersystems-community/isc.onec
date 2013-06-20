@@ -50,7 +50,6 @@
   -->
   <ItemGroup>
     <Compile Include="BridgeStarter.cs" />
-    <Compile Include="Class1.cs" />
     <Compile Include="ConsoleLogger.cs" />
     <Compile Include="ILogger.cs" />
   </ItemGroup>

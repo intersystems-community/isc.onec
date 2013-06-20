@@ -13,7 +13,7 @@ namespace isc.onec.tcp.async
         private OutgoingDataPreparer theOutgoingDataPreparer;
         private DataHolder theDataHolder;
         private SocketAsyncEventArgs saeaObject;
-        private DataHoldingUserToken receiveSendToken;
+        //private DataHoldingUserToken receiveSendToken;
        
         public Mediator(SocketAsyncEventArgs e)
         {

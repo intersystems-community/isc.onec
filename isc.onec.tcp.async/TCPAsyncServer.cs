@@ -56,9 +56,9 @@ namespace isc.onec.tcp.async
 
      
 
-        public static Int32 mainTransMissionId = 10000;
-        public static Int32 startingTid; //
-        public static Int32 mainSessionId = 1000000000;
+        //public static Int32 mainTransMissionId = 10000;
+        //public static Int32 startingTid; //
+        //public static Int32 mainSessionId = 1000000000;
         // Const end
 
 
@@ -127,7 +127,7 @@ namespace isc.onec.tcp.async
                 //you would create.
 
                 // Just used to calculate # of received transmissions at the end.
-                startingTid = mainTransMissionId;
+                //startingTid = mainTransMissionId;
                 SocketListenerSettings theSocketListenerSettings = new SocketListenerSettings
         (maxNumberOfConnections, excessSaeaObjectsInPool,
         backlog, maxSimultaneousAcceptOps,
@@ -445,7 +445,7 @@ namespace isc.onec.tcp.async
             //SocketAsyncEventArgs objects
             SocketAsyncEventArgs receiveSendEventArgs = this.poolOfRecSendEventArgs.Pop();
             //Create sessionId in UserToken.
-            ((DataHoldingUserToken)receiveSendEventArgs.UserToken).CreateSessionId();
+            //((DataHoldingUserToken)receiveSendEventArgs.UserToken).CreateSessionId();
             ((DataHoldingUserToken)receiveSendEventArgs.UserToken).StartSession();
                         
             //A new socket was created by the AcceptAsync method. The 
@@ -814,6 +814,7 @@ namespace isc.onec.tcp.async
         // we finish receiving and sending on a connection.        
         private void CloseClientSocket(SocketAsyncEventArgs e)
         {
+            logger.Debug("CloseClientSocket.");
             var receiveSendToken = (e.UserToken as DataHoldingUserToken);
 
             
@@ -849,7 +850,8 @@ namespace isc.onec.tcp.async
             //connected to the server, for testing
             Interlocked.Decrement(ref this.numberOfAcceptedSockets);
 
-          
+            logger.Debug("Cleaning data holder");
+            receiveSendToken.CleanUp(); 
             logger.Debug(receiveSendToken.TokenId + " disconnected. " + this.numberOfAcceptedSockets + " client(s) connected.");
             
 
@@ -857,7 +859,7 @@ namespace isc.onec.tcp.async
             //This must be done AFTER putting the SocketAsyncEventArg back into the pool,
             //or you can run into problems.
             this.theMaxConnectionsEnforcer.Release();
-            receiveSendToken.CleanUp();
+            
         }
 
         //____________________________________________________________________________

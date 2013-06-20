@@ -56,7 +56,7 @@ namespace isc.onec.tcp
             string value = (new System.Text.UnicodeEncoding()).GetString(data, current, length*2);
             current += length * 2;
 
-            logger.Debug("value=" + value);
+            //logger.Debug("value=" + value);
 
             return value;
         }

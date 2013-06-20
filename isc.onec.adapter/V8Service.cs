@@ -1,4 +1,7 @@
 ﻿using System;
+using NLog;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace isc.onec.bridge
 {
@@ -8,21 +11,80 @@ namespace isc.onec.bridge
         //MarshalByRefObject System.__COMObject
         private object context;
         private Repository repository;
+        public String client = null;
+
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+        public static Dictionary<string, string> journal = new Dictionary<string,string>();
 
         public V8Service(V8Adapter adapter, Repository repository)
         {
+            logger.Debug("isc.onec.bridge.V8Service is created");
             this.adapter = adapter;
             this.repository = repository;
         }
 
+        ~V8Service()
+        {
+            logger.Debug("V8Service destructor is called for #"+client);
+            repository.cleanAll(delegate(object rcw) { adapter.free(rcw); });
+
+            adapter.free(context);
+            if (isConnected())
+            {
+                adapter.disconnect();
+            }
+
+            clearJournal();
+        }
+
+        private void clearJournal()
+        {
+            if (client != null)
+            {
+                journal.Remove(client);
+            }
+        }
+
+        private void addToJournal(string client, string operand)
+        {
+            if (client != null) { journal.Add(client, operand); }
+        }
+
         public Response connect(string url)
         {
+           
             this.context = adapter.connect(url);
 
             Response response = new Response();
 
+           
+
             return response;
         }
+
+        public Response connect(string operand, String client)
+        {
+            
+            this.client = client;
+            logger.Debug("connect from session with #" + client);
+            if (clientExistsInJournal(client))
+            {
+                Thread.Sleep(1000);
+                if (clientExistsInJournal(client))
+                {
+                    throw new InvalidOperationException("Attempt to create more than one connection to 1C from the same job. Client #" + client);
+                }
+            }
+            Response response = connect(operand);
+
+            addToJournal(client, operand);
+
+            return response;
+        }
+
+
+
+       
         public Response set(Request target, string property, Request value)
         {
             object rcw = find(target);
@@ -59,6 +121,8 @@ namespace isc.onec.bridge
             object rcw = find(request);
             remove(request);
             adapter.free(rcw);
+
+            logger.Debug("Freeing object on request " + request.ToString());
             
             Response response = new Response();
 
@@ -67,6 +131,7 @@ namespace isc.onec.bridge
 
         public Response disconnect()
         {
+            logger.Debug("disconnecting from #" + client +". Adapter is "+adapter.ToString());
             repository.cleanAll(delegate(object rcw) { adapter.free(rcw); });
 
             adapter.free(context);
@@ -76,6 +141,23 @@ namespace isc.onec.bridge
 
             return response;
         }
+        public string getJournalReport() {
+            string report = "\n\r";
+
+            foreach (KeyValuePair<string, string> pair in journal)
+            {
+                report += (pair.Key+"   "+pair.Value+"\n\r");
+            }
+
+            return report;
+        }
+
+        private bool clientExistsInJournal(string key)
+        {
+            if (key == null) return false;
+            return journal.ContainsKey(key);
+        }
+
         public bool isConnected()
         {
             if (adapter != null) return adapter.isConnected;
@@ -160,5 +242,7 @@ namespace isc.onec.bridge
 
             repository.remove(obj.value.ToString());
         }
+
+        
     }
 }

@@ -18,9 +18,9 @@ namespace isc.onec.tcp.async
         //DataHolder has this byte array to which you can copy the data.
         internal Byte[] dataMessageReceived;
 
-        internal Int32 receivedTransMissionId;
+        //internal Int32 receivedTransMissionId;
 
-        internal Int32 sessionId;
+        //internal Int32 sessionId;
 
         //for testing. With a packet analyzer this can help you see specific connections.
         internal EndPoint remoteEndpoint;

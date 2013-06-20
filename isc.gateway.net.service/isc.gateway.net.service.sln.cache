@@ -111,11 +111,11 @@
     <AspNetConfiguration>$(Configuration)</AspNetConfiguration>
   </PropertyGroup>
   <PropertyGroup>
-    <SolutionDir>C:\src\export\isc.gateway.net.service\</SolutionDir>
+    <SolutionDir>C:\src\final\isc.gateway.net.service\</SolutionDir>
     <SolutionExt>.sln</SolutionExt>
     <SolutionFileName>isc.gateway.net.service.sln</SolutionFileName>
     <SolutionName>isc.gateway.net.service</SolutionName>
-    <SolutionPath>C:\src\export\isc.gateway.net.service\isc.gateway.net.service.sln</SolutionPath>
+    <SolutionPath>C:\src\final\isc.gateway.net.service\isc.gateway.net.service.sln</SolutionPath>
   </PropertyGroup>
   <PropertyGroup>
     <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == '' and '$(MSBuildToolsVersion)' == '2.0'">v2.0</TargetFrameworkVersion>
