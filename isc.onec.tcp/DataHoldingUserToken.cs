@@ -1,9 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Net.Sockets;
 using System.Threading;
-//for testing
-using NLog;
+using System.Text; //for testing
 using isc.onec.bridge;
+using isc.onec.tcp;
+using NLog;
 
 namespace isc.onec.tcp.async
 {

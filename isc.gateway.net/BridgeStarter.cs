@@ -13,7 +13,6 @@ namespace isc.gateway.net
         private int port = 9100;
         private bool keepAlive = true;
 
-
         public TCPAsyncServer server;
 
         public static void Main(string[] args)
