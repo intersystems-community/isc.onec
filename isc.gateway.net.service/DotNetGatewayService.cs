@@ -10,7 +10,8 @@ namespace isc.gateway.net
     public class DotNetGatewayService : ServiceBase
     {
 
-        public const string serviceName = "Caché One C Bridge";
+        //public const string serviceName = "Caché One C Bridge";
+        public const string serviceName = "Cache One C Bridge";
         private String[] args;
         private BackgroundWorker bw;
         //private ChangedDotNetGatewaySS worker;

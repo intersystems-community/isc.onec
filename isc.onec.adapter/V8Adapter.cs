@@ -14,6 +14,9 @@ namespace isc.onec.bridge
     {
         private string url;
         private object connector;
+        //TODO check this
+        private static ReaderWriterLock connectorLock;
+
         public bool isConnected = false;
         public enum V8Version { V80, V81, V82 };
         //private static readonly object syncHandle = new object();
@@ -52,7 +55,8 @@ namespace isc.onec.bridge
             object obj;
             try
             {
-                obj = target.GetType().InvokeMember(method, BindingFlags.InvokeMethod | BindingFlags.Public, null, target, args);
+                //obj2 = target.comObject.GetType().InvokeMember(methodName, BindingFlags.InvokeMethod, null, target.comObject, methodParams, modifiers, null, null);
+                obj = target.GetType().InvokeMember(method, BindingFlags.InvokeMethod | BindingFlags.Public, null, target, args,null);
             }
             catch (TargetInvocationException exception)
             {
@@ -64,14 +68,24 @@ namespace isc.onec.bridge
 
         public object connect(string url)
         {
-            V8Version version = getVersion(url);
-            this.connector = createConnector(version);
-            object context = invoke(this.connector, "Connect", new object[] { url });
+            object context;
+            try
+            {
+                V8Version version = getVersion(url);
+                //TODO Check this
+                connectorLock.AcquireReaderLock(-1);
+                this.connector = createConnector(version);
+                context = invoke(this.connector, "Connect", new object[] { url });
 
-            isConnected = true;
-            this.url = url;
+                isConnected = true;
+                this.url = url;
 
-            logger.Debug("Connected to " + this.url);
+                logger.Debug("Connected to " + this.url);
+            }
+            finally {
+                //TODO Check this
+                 connectorLock.ReleaseReaderLock();
+            }
 
             return context;
         }
