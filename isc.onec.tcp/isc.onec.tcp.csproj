@@ -14,6 +14,8 @@
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -51,9 +53,7 @@
   <ItemGroup>
     <Compile Include="Decoder.cs" />
     <Compile Include="Encoder.cs" />
-    <Compile Include="Processor.cs" />
     <Compile Include="RequestMessage.cs" />
-    <Compile Include="TCPServer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="NLog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
@@ -61,6 +61,9 @@
       <HintPath>..\lib\NLog.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Net">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -70,5 +73,8 @@
       <Project>{8C6CFF56-9ECA-423C-AF0F-122E7B414EFF}</Project>
       <Name>isc.onec.adapter</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
 </Project>

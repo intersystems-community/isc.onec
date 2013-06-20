@@ -5,15 +5,13 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{751F7A50-FCFE-422F-8858-8C51F8C53E8C}</ProjectGuid>
+    <ProjectGuid>{F397C56B-7F6F-4FCB-B8CF-7D0D501F8801}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>isc.gateway.net.service</RootNamespace>
-    <AssemblyName>isc.onec.service</AssemblyName>
+    <RootNamespace>isc.onec.tcp.thread</RootNamespace>
+    <AssemblyName>isc.onec.tcp.thread</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <StartupObject>
-    </StartupObject>
     <TargetFrameworkSubset>
     </TargetFrameworkSubset>
   </PropertyGroup>
@@ -51,34 +49,29 @@
   </Target>
   -->
   <ItemGroup>
-    <Compile Include="DotNetGatewayService.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="DotNetGatewayServiceInstaller.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="EventLogLogger.cs" />
+    <Compile Include="TCPParser.cs" />
+    <Compile Include="ThreadedServer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="NLog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\NLog.dll</HintPath>
+      <HintPath>..\..\export\lib\NLog.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\isc.gateway.net\isc.gateway.net.csproj">
-      <Project>{3B20395B-FC40-436C-8958-9C66C8840441}</Project>
-      <Name>isc.gateway.net</Name>
+    <ProjectReference Include="..\isc.onec.adapter\isc.onec.adapter.csproj">
+      <Project>{8C6CFF56-9ECA-423C-AF0F-122E7B414EFF}</Project>
+      <Name>isc.onec.adapter</Name>
     </ProjectReference>
-    <ProjectReference Include="..\isc.onec.tcp.async\isc.onec.tcp.async.csproj">
-      <Project>{68324091-B714-4667-906C-150FA65F7BEE}</Project>
-      <Name>isc.onec.tcp.async</Name>
+    <ProjectReference Include="..\isc.onec.tcp\isc.onec.tcp.csproj">
+      <Project>{CFE2C47D-294A-410E-A319-C1627531A293}</Project>
+      <Name>isc.onec.tcp</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

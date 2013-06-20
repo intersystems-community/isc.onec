@@ -18,7 +18,9 @@ rm -rf %PDIR%\bin\*
 cp %BDIR%\bin\x86\Release\* %PDIR%\bin
 
 cp -r %PDIR%\dist\* .
-
+echo Copying config
+cp %PDIR%\isc.onec.adapter\bin\x86\Release\isc.onec.adapter.dll.config %PDIR%\bin
+cp %PDIR%\isc.onec.tcp.async\bin\x86\Release\isc.onec.tcp.async.dll.config %PDIR%\bin
 
 cd %PDIR%\bin
 call install
@@ -28,6 +30,6 @@ rem net start "Caché One C Bridge"
 net start "Cache One C Bridge"
 echo Done.
 cd %PDIR%
-call test.cmd
+rem call test.cmd
 
 cd %PDIR%
