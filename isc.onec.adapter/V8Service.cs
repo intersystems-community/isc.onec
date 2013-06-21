@@ -23,7 +23,7 @@ namespace isc.onec.bridge
             this.repository = repository;
         }
 
-        ~V8Service()
+       /* ~V8Service()
         {
             logger.Debug("V8Service destructor is called for #"+client);
             repository.cleanAll(delegate(object rcw) { adapter.free(rcw); });
@@ -35,7 +35,7 @@ namespace isc.onec.bridge
             }
 
             clearJournal();
-        }
+        }*/
 
         private void clearJournal()
         {
@@ -136,6 +136,9 @@ namespace isc.onec.bridge
 
             adapter.free(context);
             adapter.disconnect();
+
+            adapter = null;
+            clearJournal();
 
             Response response = new Response();
 
