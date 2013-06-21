@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C# Express 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C# Express 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "isc.gateway.net.service", "isc.gateway.net.service.csproj", "{751F7A50-FCFE-422F-8858-8C51F8C53E8C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "isc.gateway.net", "..\isc.gateway.net\isc.gateway.net.csproj", "{3B20395B-FC40-436C-8958-9C66C8840441}"
