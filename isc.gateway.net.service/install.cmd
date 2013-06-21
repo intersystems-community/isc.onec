@@ -1,4 +1,4 @@
-@ECHO OFF
+﻿@ECHO OFF
 
 REM The following directory is for .NET 2.0
 set DOTNETFX2=%SystemRoot%\Microsoft.NET\Framework\v2.0.50727
