@@ -14,8 +14,6 @@
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
-    <TargetFrameworkSubset>
-    </TargetFrameworkSubset>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -64,12 +62,6 @@
     <Compile Include="MessageHandler.cs" />
     <Compile Include="OutgoingDataPreparer.cs" />
     <Compile Include="PrefixHandler.cs" />
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
     <Compile Include="SocketAsyncEventArgsPool.cs" />
     <Compile Include="SocketListenerSettings.cs" />
     <Compile Include="TCPAsyncServer.cs" />
@@ -80,9 +72,6 @@
       <HintPath>..\lib\NLog.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
     <Reference Include="System.Net">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -96,13 +85,5 @@
       <Project>{CFE2C47D-294A-410E-A319-C1627531A293}</Project>
       <Name>isc.onec.tcp</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 </Project>

@@ -18,24 +18,28 @@ namespace isc.onec.bridge
 
             this.service = new V8Service(adapter, repository);
         }
-        /*~Server()
+        ~Server()
         {
             string client = "";
             if (service != null) client = service.client;
             logger.Debug("Server destructor is called for #" + client);
             if (service != null) service = null;
-        }*/
+        }
         //TODO Code smells - should have formalized protocol in commands not something general
         public string[] run(int command,string target,string operand,string[] vals,int[] types) {
             Request targetObject;
-            Response response;
-            Commands commandType = Request.numToEnum<Commands>(command);
             //if target is "." it is context
-            try
-            {
+          
             if (target != ".") targetObject = new Request(target);
             else targetObject = new Request("");
-            response = doCommand(commandType, targetObject, operand, vals, types);
+
+            Commands commandType = Request.numToEnum<Commands>(command);
+
+            Response response;
+
+            try
+            {
+                response = doCommand(commandType, targetObject, operand, vals, types);
             }
             catch (Exception e)
             {
@@ -44,12 +48,10 @@ namespace isc.onec.bridge
                 {
                     client = service.client;
                 }
-               
-                String msg = e.Message+" "+e.Source;
-                if(service != null) msg+=service.client + " :";
-                msg+=commandType.ToString()+":";
-                msg += target + ":" + operand + ":" + vals.ToString() + ":" + types.ToString();
-                logger.ErrorException(msg, e);
+                logger.ErrorException(
+                    service.client+" :"+commandType.ToString()+":"+target
+                    +":"+operand+":"+vals.ToString()+":"+types.ToString()
+                    , e);
                 if (service != null)
                 {
                     logger.Debug(service.getJournalReport());
@@ -100,17 +102,12 @@ namespace isc.onec.bridge
 
                 case Commands.DISCONNET:
                     counter = (counter + 1)%10;
-                    //if (counter == 0)
-                    //{
+                    if (counter == 0)
+                    {
                         logger.Debug(service.getJournalReport());
-                    //}
+                    }
                     Response response = service.disconnect(); 
                     this.service = null;
-
-                    //string client = "";
-                    //if (service != null) client = service.client;
-                    //logger.Debug("Server destructor is called for #" + client);
-                    if (service != null) service = null;
                    
                     return response;
                     

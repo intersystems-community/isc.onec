@@ -24,24 +24,22 @@ namespace isc.onec.tcp.async
         //value does not get exceeded.
         //Max # of connections to a socket can be limited by the Windows Operating System
         //also.
-        public static Int32 maxNumberOfConnections = Properties.Settings.Default.maxNumberOfConnections;
+        public const Int32 maxNumberOfConnections = 100;
 
+   
 
-        public static bool keepAlive = Properties.Settings.Default.keepAlive;
-        public static int port = Properties.Settings.Default.port;
-       
         //You would want a buffer size larger than 25 probably, unless you know the
         //data will almost always be less than 25. It is just 25 in our test app.
-        public static Int32 testBufferSize = Properties.Settings.Default.testBufferSize;
+        public const Int32 testBufferSize = 128;
 
         //This is the maximum number of asynchronous accept operations that can be 
         //posted simultaneously. This determines the size of the pool of 
         //SocketAsyncEventArgs objects that do accept operations. Note that this
         //is NOT the same as the maximum # of connections.
-        public static Int32 maxSimultaneousAcceptOps = Properties.Settings.Default.maxSimultaneousAcceptOps;
+        public const Int32 maxSimultaneousAcceptOps = 40;
 
         //The size of the queue of incoming connections for the listen socket.
-        public static Int32 backlog = Properties.Settings.Default.backlog;
+        public const Int32 backlog = 100;
 
         //For the BufferManager
         public const Int32 opsToPreAlloc = 2;    // 1 for receive, 1 for send
@@ -54,12 +52,16 @@ namespace isc.onec.tcp.async
         //you change the code, because 4 is the length of 32 bit integer, which
         //is what we are using as prefix.
         public const Int32 receivePrefixLength = 4;
-        public const Int32 sendPrefixLength = 4;     
+        public const Int32 sendPrefixLength = 4;
+
+     
 
         //public static Int32 mainTransMissionId = 10000;
         //public static Int32 startingTid; //
         //public static Int32 mainSessionId = 1000000000;
         // Const end
+
+
 
         internal Int32 numberOfAcceptedSockets;
 
@@ -97,17 +99,20 @@ namespace isc.onec.tcp.async
         // pool of reusable SocketAsyncEventArgs objects for receive and send socket operations
         SocketAsyncEventArgsPool poolOfRecSendEventArgs;
 
+  
+        bool keepAlive = true;
+
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         public static void Main()
         {
 
             //instantiate the SocketListener.
-            new TCPAsyncServer(getSettings());
+            new TCPAsyncServer(true, getSettings(9100));
             Console.ReadLine();
         }
         //TODO bad code - refactor
-        public static SocketListenerSettings getSettings()
+        public static SocketListenerSettings getSettings(int port)
         {
 
             try
@@ -115,22 +120,7 @@ namespace isc.onec.tcp.async
                 // Get endpoint for the listener.                
                 IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, port);
 
-                string str = "Server will listen on TCP port: " + port
-                + "\n\tmaxNumberOfConnections: " + maxNumberOfConnections
-                + "\n\tkeepAlive: " + keepAlive
-                + "\n\ttestBufferSize: " + testBufferSize
-                + "\n\tmaxSimultaneousAcceptOps: " + maxSimultaneousAcceptOps
-                + "\n\tbacklog: " + backlog
-                + "\n\tisConnectionWithTimeout: " + isc.onec.bridge.Properties.Settings.Default.isConnectionWithTimeout
-                + "\n\tisPooled: " + isc.onec.bridge.Properties.Settings.Default.isPooled
-                + "\n\tmaxConnections: " + isc.onec.bridge.Properties.Settings.Default.maxConnections
-                + "\n\tpoolCapacity: " + isc.onec.bridge.Properties.Settings.Default.poolCapacity
-                + "\n\tpoolTimeout: " + isc.onec.bridge.Properties.Settings.Default.poolTimeout
-                + "\n\tconnectionTimeout: " + isc.onec.bridge.Properties.Settings.Default.connectionTimeout;
-
-                logger.Info(str);
-
-
+                logger.Info("Server will listen on TCP port " + port);
                 //This object holds a lot of settings that we pass from Main method
                 //to the SocketListener. In a real app, you might want to read
                 //these settings from a database or windows registry settings that
@@ -154,8 +144,11 @@ namespace isc.onec.tcp.async
             }
 
         }
-        public TCPAsyncServer(SocketListenerSettings theSocketListenerSettings)        
-        { 
+        public TCPAsyncServer(bool keepAlive,SocketListenerSettings theSocketListenerSettings)        
+        {
+            
+            this.keepAlive = keepAlive;
+
             this.socketListenerSettings = theSocketListenerSettings;
             this.prefixHandler = new PrefixHandler();
             this.messageHandler = new MessageHandler();
@@ -178,13 +171,10 @@ namespace isc.onec.tcp.async
             StartListen();
         }
 
-       
-
-        /* ~TCPAsyncServer()
+        ~TCPAsyncServer()
         {
             logger.Info("AsyncTCPServer exits");
         }
-        */
 
         //____________________________________________________________________________
         // initializes the server by preallocating reusable buffers and 
@@ -464,7 +454,7 @@ namespace isc.onec.tcp.async
             //a reference for that socket to the SocketAsyncEventArgs 
             //object which will do receive/send.
             receiveSendEventArgs.AcceptSocket = acceptEventArgs.AcceptSocket;
-            if (keepAlive)
+            if (this.keepAlive)
             {
                 SetDesiredKeepAlive(receiveSendEventArgs.AcceptSocket);
                 logger.Debug("KeepAlive is On");

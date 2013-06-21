@@ -52,6 +52,8 @@ namespace isc.gateway.net
 
         }
 
+       
+
         public void Dispose()
         {
 
@@ -66,9 +68,9 @@ namespace isc.gateway.net
                 //isc.onec.tcp.async.TCPAsyncServer.Run(port, keepAlive);
 
                 //instantiate the SocketListener.
-                this.server = new TCPAsyncServer(TCPAsyncServer.getSettings());
+                this.server = new TCPAsyncServer(keepAlive, TCPAsyncServer.getSettings(port));
 
-                //logger.Info("TCP Server started on port " + port + ". KeepAlive is " + keepAlive);
+                logger.Info("TCP Server started on port " + port + ". KeepAlive is " + keepAlive);
             }
             catch(Exception ex) {
                 logger.Error("Unable to start TCP Server: "+ex.Message);

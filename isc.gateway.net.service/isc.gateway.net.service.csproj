@@ -14,8 +14,6 @@
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
-    <TargetFrameworkSubset>
-    </TargetFrameworkSubset>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -70,9 +68,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration.Install" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
     <Reference Include="System.ServiceProcess" />
   </ItemGroup>
   <ItemGroup>
@@ -80,12 +75,5 @@
       <Project>{3B20395B-FC40-436C-8958-9C66C8840441}</Project>
       <Name>isc.gateway.net</Name>
     </ProjectReference>
-    <ProjectReference Include="..\isc.onec.tcp.async\isc.onec.tcp.async.csproj">
-      <Project>{68324091-B714-4667-906C-150FA65F7BEE}</Project>
-      <Name>isc.onec.tcp.async</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
   </ItemGroup>
 </Project>

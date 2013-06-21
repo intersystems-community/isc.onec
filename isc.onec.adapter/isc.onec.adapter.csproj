@@ -14,8 +14,6 @@
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
-    <TargetFrameworkSubset>
-    </TargetFrameworkSubset>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -55,18 +53,12 @@
   </Target>
   -->
   <ItemGroup>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
     <Compile Include="Repository.cs" />
     <Compile Include="Request.cs" />
     <Compile Include="Response.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="V8Adapter.cs" />
     <Compile Include="V8Service.cs" />
-    <Compile Include="WaitFor.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="NLog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
@@ -74,17 +66,8 @@
       <HintPath>..\lib\NLog.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core">
+    <Reference Include="System.Net">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
   </ItemGroup>
 </Project>
