@@ -1,4 +1,4 @@
 /bin
 /obj
-/UpgradeLog.XML
+/UpgradeLog*.XML
 /_UpgradeReport_Files
