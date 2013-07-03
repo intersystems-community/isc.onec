@@ -1,4 +1,5 @@
 /.project
 *.suo
+*.swp
 isc.gateway.net.service/InstallUtil.exe
 isc.gateway.net.service/InstallUtilLib.dll
