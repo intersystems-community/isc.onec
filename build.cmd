@@ -1,10 +1,12 @@
 ﻿REM
 set PDIR=%CD%
-cd "C:\Program Files\Microsoft Visual Studio 9.0\VC\"
-call "C:\Program Files\Microsoft Visual Studio 9.0\VC\vcvarsall.bat" x86
+set VS_VERSION=10.0
+set CONFIGURATION=Release
+cd "%ProgramFiles%\Microsoft Visual Studio %VS_VERSION%\VC\"
+call "%ProgramFiles%\Microsoft Visual Studio %VS_VERSION%\VC\vcvarsall.bat" x86
 cd %PDIR%
 cd isc.gateway.net.service
-msbuild isc.gateway.net.service.sln /t:Rebuild /p:Configuration=Release /p:Platform="x86"
+msbuild isc.gateway.net.service.sln /t:Rebuild /p:Configuration=%CONFIGURATION% /p:Platform="x86"
 set BDIR=%CD%
 rem net stop "Caché One C Bridge"
 rem net stop "Cache One C Bridge"
@@ -15,12 +17,12 @@ call uninstall
 
 rm -rf %PDIR%\bin\*
 
-cp %BDIR%\bin\x86\Release\* %PDIR%\bin
+cp %BDIR%\bin\x86\%CONFIGURATION%\* %PDIR%\bin
 
 cp -r %PDIR%\dist\* .
 echo Copying config
-cp %PDIR%\isc.onec.adapter\bin\x86\Release\isc.onec.adapter.dll.config %PDIR%\bin
-cp %PDIR%\isc.onec.tcp.async\bin\x86\Release\isc.onec.tcp.async.dll.config %PDIR%\bin
+cp %PDIR%\isc.onec.adapter\bin\x86\%CONFIGURATION%\isc.onec.adapter.dll.config %PDIR%\bin
+cp %PDIR%\isc.onec.tcp.async\bin\x86\%CONFIGURATION%\isc.onec.tcp.async.dll.config %PDIR%\bin
 
 cd %PDIR%\bin
 call install
