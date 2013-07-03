@@ -1,4 +1,4 @@
-﻿REM
+REM
 set PDIR=%CD%
 set VS_VERSION=10.0
 set CONFIGURATION=Release
