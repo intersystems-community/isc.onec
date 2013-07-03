@@ -671,7 +671,7 @@ namespace isc.onec.tcp.async
             }
 
             
-            if (incomingTcpMessageIsReady == true)
+            if (incomingTcpMessageIsReady)
             {
 
                 

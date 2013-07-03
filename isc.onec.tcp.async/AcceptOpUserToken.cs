@@ -18,7 +18,7 @@ namespace isc.onec.tcp.async
             id = identifier;
             
 
-            //if (Program.watchProgramFlow == true)   //for testing
+            //if (Program.watchProgramFlow)   //for testing
             //{
             //    Program.testWriter.WriteLine("AcceptOpUserToken constructor, idOfThisObject " + id);
             //}

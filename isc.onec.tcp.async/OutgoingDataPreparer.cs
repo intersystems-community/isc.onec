@@ -41,7 +41,7 @@ namespace isc.onec.tcp.async
             //Determine the length of all the data that we will send back.
             //Int32 lengthOfCurrentOutgoingMessage = idByteArray.Length + theDataHolder.dataMessageReceived.Length;
             Byte[] reply;
-            if (theDataHolder.isError == true)
+            if (theDataHolder.isError)
             {
                 reply = sendError(theUserToken.getServer());
             }

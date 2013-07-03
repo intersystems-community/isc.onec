@@ -18,7 +18,7 @@ namespace isc.onec.tcp.async
             //already done it in a previous loop.
             if (receiveSendToken.receivedPrefixBytesDoneCount == 0)
             {
-                /*if (Program.watchProgramFlow == true)   //for testing
+                /*if (Program.watchProgramFlow)   //for testing
                 {
                     Program.testWriter.WriteLine("PrefixHandler, create prefix array " + receiveSendToken.TokenId);
                 }*/
@@ -30,7 +30,7 @@ namespace isc.onec.tcp.async
             // length of the message that we are working on.
             if (remainingBytesToProcess >= receiveSendToken.receivePrefixLength - receiveSendToken.receivedPrefixBytesDoneCount)
             {
-                /*if (Program.watchProgramFlow == true)   //for testing
+                /*if (Program.watchProgramFlow)   //for testing
                 {
                     Program.testWriter.WriteLine("PrefixHandler, enough for prefix " + receiveSendToken.TokenId + ". remainingBytesToProcess = " + remainingBytesToProcess);
                 }*/
@@ -50,7 +50,7 @@ namespace isc.onec.tcp.async
 
                 
 
-                /*if (Program.watchData == true)
+                /*if (Program.watchData)
                 {
                     //Now see what integer the prefix bytes represent, for the length.
                     StringBuilder sb = new StringBuilder(receiveSendToken.byteArrayForPrefix.Length);
@@ -71,7 +71,7 @@ namespace isc.onec.tcp.async
             //of this prefix in this receive operation, but not all.
             else
             {
-               /* if (Program.watchProgramFlow == true)   //for testing
+               /* if (Program.watchProgramFlow)   //for testing
                 {
                     Program.testWriter.WriteLine("PrefixHandler, NOT all of prefix " + receiveSendToken.TokenId + ". remainingBytesToProcess = " + remainingBytesToProcess);
                 }*/
