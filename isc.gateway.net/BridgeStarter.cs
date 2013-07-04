@@ -10,8 +10,8 @@ namespace isc.gateway.net
         //TODO normalize object state
     
         private static Logger logger = LogManager.GetCurrentClassLogger();
-        private int port = DEFAULTPORT;
-        private bool keepAlive = true;
+        private readonly int port;
+        private readonly bool keepAlive;
         private static int DEFAULTPORT = 9101;
 
         public TCPAsyncServer server;
@@ -23,36 +23,15 @@ namespace isc.gateway.net
             Console.ReadLine();
         }
 
-        public BridgeStarter(string[] args)
-        {
-           
-            if (args == null)
-            {
-                this.port = DEFAULTPORT;
-                this.keepAlive = true;
-
-                return;
-            }
-            if (args.Length == 0)
-            {
-                this.port = DEFAULTPORT;
-                this.keepAlive = true;
-
-                return;
-            }
-            if (args.Length > 0)
-            {
-                this.port = Convert.ToInt32(args[0]);
-                this.keepAlive = true;
-            }
-            if (args.Length > 1)
-            {
-                this.keepAlive = Convert.ToBoolean(args[1]);
-            }
-
-        }
-
-       
+	public BridgeStarter(string[] args) {
+		if (args == null || args.Length == 0) {
+			this.port = DEFAULTPORT;
+			this.keepAlive = true;
+		} else {
+			this.port = Convert.ToInt32(args[0]);
+			this.keepAlive = args.Length > 1 ? this.keepAlive = Convert.ToBoolean(args[1]) : true;
+		}
+	}
 
         public void Dispose()
         {
@@ -68,7 +47,7 @@ namespace isc.gateway.net
                 //isc.onec.tcp.async.TCPAsyncServer.Run(port, keepAlive);
 
                 //instantiate the SocketListener.
-                this.server = new TCPAsyncServer(keepAlive, TCPAsyncServer.getSettings(port));
+                this.server = new TCPAsyncServer(keepAlive, TCPAsyncServer.getSettings(this.port));
 
                 logger.Info("TCP Server started on port " + port + ". KeepAlive is " + keepAlive);
             }
