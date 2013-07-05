@@ -1,18 +1,13 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.ServiceProcess;
-using System.Threading;
-using System.ComponentModel;
 using NLog;
 
 namespace isc.gateway.net
 {
     public class DotNetGatewayService : ServiceBase
     {
-
-        //public const string serviceName = "Caché One C Bridge";
-        public const string serviceName = "Cache One C Bridge";
-
 		/// <summary>
 		/// Arguments of the Windows service which are passed to BridgeStarter intance.
 		/// Currently, the TCP port number and, optionally, the KeepAlive value. 
@@ -26,7 +21,6 @@ namespace isc.gateway.net
 
         public DotNetGatewayService()
         {
-            this.ServiceName = serviceName;
             this.EventLog.Log = "Application";
 
             this.CanHandlePowerEvent = false;
