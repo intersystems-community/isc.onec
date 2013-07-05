@@ -1,6 +1,6 @@
 ﻿using System;
-using NLog;
 using isc.onec.tcp.async;
+using NLog;
 
 namespace isc.gateway.net
 {   
@@ -12,7 +12,7 @@ namespace isc.gateway.net
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private readonly int port;
         private readonly bool keepAlive;
-        private static int DEFAULTPORT = 9101;
+        private static int DefaultPort = 9101;
 
         public TCPAsyncServer server;
 
@@ -25,7 +25,7 @@ namespace isc.gateway.net
 
 	public BridgeStarter(string[] args) {
 		if (args == null || args.Length == 0) {
-			this.port = DEFAULTPORT;
+			this.port = DefaultPort;
 			this.keepAlive = true;
 		} else {
 			this.port = Convert.ToInt32(args[0]);
