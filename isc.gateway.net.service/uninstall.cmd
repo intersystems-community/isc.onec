@@ -1,13 +1,12 @@
-@ECHO OFF
+@echo off
 
-REM The following directory is for .NET 4.0
 set DOTNETFX4=%SystemRoot%\Microsoft.NET\Framework\v4.0.30319
 set PATH=%PATH%;%DOTNETFX4%
-set CONFIGURATION=Release
+set CONFIGURATION=Debug
 
-echo Installing WindowsService...
-echo ---------------------------------------------------
 cd bin\x86\%CONFIGURATION%
-InstallUtil /u isc.onec.service.exe
-echo ---------------------------------------------------
-echo Done.
+
+:loop
+set /p PORT="Please enter the target TCP port number: "
+if not defined PORT goto loop
+InstallUtil /u /port=%PORT% isc.onec.service.exe
