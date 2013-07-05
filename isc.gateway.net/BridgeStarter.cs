@@ -5,13 +5,13 @@ using NLog;
 namespace isc.gateway.net
 {   
    
-    public class BridgeStarter : IDisposable
-    {
-        //TODO normalize object state
-    
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-        private readonly int port;
-        private readonly bool keepAlive;
+	public class BridgeStarter : IDisposable
+	{
+		//TODO normalize object state
+	
+		private static Logger logger = LogManager.GetCurrentClassLogger();
+		private readonly int port;
+		private readonly bool keepAlive;
 
 		/// <summary>
 		/// The default server port number. Must be consistent with the value
@@ -19,14 +19,14 @@ namespace isc.gateway.net
 		/// </summary>
 		private static int DefaultPort = 9101;
 
-        public TCPAsyncServer server;
+		public TCPAsyncServer server;
 
-        public static void Main(string[] args)
-        {
-            Console.WriteLine("BridgeStarter");
-            new BridgeStarter(args).processConnections();
-            Console.ReadLine();
-        }
+		public static void Main(string[] args)
+		{
+			Console.WriteLine("BridgeStarter");
+			new BridgeStarter(args).processConnections();
+			Console.ReadLine();
+		}
 
 	public BridgeStarter(string[] args) {
 		if (args == null || args.Length == 0) {
@@ -38,29 +38,29 @@ namespace isc.gateway.net
 		}
 	}
 
-        public void Dispose()
-        {
+		public void Dispose()
+		{
 
-            logger.Debug("BridgeStarter exits");
-        }
+			logger.Debug("BridgeStarter exits");
+		}
 
-        public void processConnections()
-        {
-            try
-            {
-                //isc.onec.tcp.Processor.Run(port, keepAlive);
-                //isc.onec.tcp.async.TCPAsyncServer.Run(port, keepAlive);
+		public void processConnections()
+		{
+			try
+			{
+				//isc.onec.tcp.Processor.Run(port, keepAlive);
+				//isc.onec.tcp.async.TCPAsyncServer.Run(port, keepAlive);
 
-                //instantiate the SocketListener.
-                this.server = new TCPAsyncServer(keepAlive, TCPAsyncServer.getSettings(this.port));
+				//instantiate the SocketListener.
+				this.server = new TCPAsyncServer(keepAlive, TCPAsyncServer.getSettings(this.port));
 
-                logger.Info("TCP Server started on port " + port + ". KeepAlive is " + keepAlive);
-            }
-            catch(Exception ex) {
-                logger.Error("Unable to start TCP Server: "+ex.Message);
-            }
-        }
+				logger.Info("TCP Server started on port " + port + ". KeepAlive is " + keepAlive);
+			}
+			catch(Exception ex) {
+				logger.Error("Unable to start TCP Server: "+ex.Message);
+			}
+		}
 
-     
-    }
+	 
+	}
 }

@@ -6,15 +6,15 @@ using System.ServiceProcess;
 
 namespace isc.gateway.net
 {
-    [RunInstaller(true)]
-    public class DotNetGatewayServiceInstaller : Installer
-    {
+	[RunInstaller(true)]
+	public class DotNetGatewayServiceInstaller : Installer
+	{
 		/// <summary>
 		/// Must be pure ASCII, no acute allowed.
 		/// </summary>
 		private const string ServiceName = "Cache One C Bridge";
 
-		private const string DisplayName = "Caché One C Bridge";
+		private const string DisplayName = "Cache One C Bridge";
 
 		private const string ParameterPort = "port";
 
@@ -22,24 +22,24 @@ namespace isc.gateway.net
 
 		private readonly ServiceInstaller serviceInstaller;
 
-        public DotNetGatewayServiceInstaller()
-        {
-            ServiceProcessInstaller serviceProcessInstaller = new ServiceProcessInstaller();
-		this.serviceInstaller = new ServiceInstaller();
-		this.serviceInstaller.StartType = ServiceStartMode.Automatic;
-		/*
-		 * Template value for debug purposes.
-		 */
-		this.serviceInstaller.ServiceName = ServiceName;
+		public DotNetGatewayServiceInstaller()
+		{
+			ServiceProcessInstaller serviceProcessInstaller = new ServiceProcessInstaller();
+			this.serviceInstaller = new ServiceInstaller();
+			this.serviceInstaller.StartType = ServiceStartMode.Automatic;
+			/*
+			 * Template value for debug purposes.
+			 */
+			this.serviceInstaller.ServiceName = ServiceName;
 
-            serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
-            serviceProcessInstaller.Username = null;
-            serviceProcessInstaller.Password = null;
-            serviceProcessInstaller.Context = new InstallContext();
+			serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
+			serviceProcessInstaller.Username = null;
+			serviceProcessInstaller.Password = null;
+			serviceProcessInstaller.Context = new InstallContext();
 
-		this.Installers.Add(serviceProcessInstaller);
-		this.Installers.Add(this.serviceInstaller);
-        }
+			this.Installers.Add(serviceProcessInstaller);
+			this.Installers.Add(this.serviceInstaller);
+		}
 
 		public override void Install(IDictionary stateSaver) {
 			var portString = this.Context.Parameters[ParameterPort];
@@ -52,7 +52,7 @@ namespace isc.gateway.net
 				var port = Convert.ToInt32(portString);
 				this.serviceInstaller.ServiceName = ServiceName + ' ' + port;
 				this.serviceInstaller.DisplayName = DisplayName + ' ' + port;
-				this.serviceInstaller.Description = "Runs Caché .NET Gateway at TCP port " + port;
+				this.serviceInstaller.Description = "Runs Cache .NET Gateway at TCP port " + port;
 				base.Install(stateSaver);
 
 				WriteLine("Service \"" + this.serviceInstaller.ServiceName + "\" installed successfully.", ConsoleColor.Green);
