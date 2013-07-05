@@ -12,7 +12,12 @@ namespace isc.gateway.net
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private readonly int port;
         private readonly bool keepAlive;
-        private static int DefaultPort = 9101;
+
+		/// <summary>
+		/// The default server port number. Must be consistent with the value
+		/// of DEFAULT_PORT constant defined in install.cmd/uninstall.cmd batch scripts.
+		/// </summary>
+		private static int DefaultPort = 9101;
 
         public TCPAsyncServer server;
 

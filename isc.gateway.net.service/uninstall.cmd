@@ -6,7 +6,7 @@ set CONFIGURATION=Debug
 
 cd bin\x86\%CONFIGURATION%
 
-:loop
-set /p PORT="Please enter the target TCP port number: "
-if not defined PORT goto loop
+set DEFAULT_PORT=9101
+set /p PORT="Please enter the target TCP port number [%DEFAULT_PORT%]: "
+if not defined PORT set PORT=%DEFAULT_PORT%
 InstallUtil /u /port=%PORT% isc.onec.service.exe
