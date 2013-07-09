@@ -2,12 +2,20 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.ServiceProcess;
+using Microsoft.Win32;
 using NLog;
 
 namespace isc.gateway.net
 {
 	public class DotNetGatewayService : ServiceBase
 	{
+		/// <summary>
+		/// Must be pure ASCII, no acute allowed.
+		/// </summary>
+		internal const string ServiceNameTemplate = "Cache One C Bridge";
+
+		private const string DefaultLogName = "Application";
+
 		/// <summary>
 		/// Arguments of the Windows service which are passed to BridgeStarter intance.
 		/// Currently, the TCP port number and, optionally, the KeepAlive value. 
@@ -21,7 +29,20 @@ namespace isc.gateway.net
 
 		public DotNetGatewayService()
 		{
-			this.EventLog.Log = "Application";
+			this.EventLog.Log = DefaultLogName;
+			var commandLineArgs = Environment.GetCommandLineArgs();
+			this.ServiceName = commandLineArgs.Length == 0 ? ServiceNameTemplate : ServiceNameTemplate + ' ' + commandLineArgs[1];
+			this.EventLog.Source = this.ServiceName;
+			/*-
+			 * Safety net:
+			 *
+			 * as long as we're using source name template,
+			 * it may be nont known to the system,
+			 * as service installer uses a different name (which contains the port number).
+			 */
+			if (!EventLog.SourceExists(this.EventLog.Source)) {
+				EventLog.CreateEventSource(this.EventLog.Source, DefaultLogName);
+			}
 
 			this.CanHandlePowerEvent = false;
 			this.CanHandleSessionChangeEvent = false;
@@ -55,15 +76,20 @@ namespace isc.gateway.net
 			//It has really no sense on normal server, but RG has troubles with virtual machine start time
 			this.RequestAdditionalTime(120000);
 
-		if (args.Length != 0) {
-			this.changeStartParameters(this.args = args);
-		}
+			/*
+			 * TODO: Service name is guessed based on the args supplied (ImagePath).
+			 * So if a service instance is started on a non-standard port,
+			 * don't update the ImagePath.
+			 */
+			if (args.Length != 0) {
+				this.ChangeStartParameters(this.args = args);
+			}
 
-		/*
-		 * Either use the updated args passed to the OnStart(...) method,
-		 * or fall back to those supplied during service creation.
-		 */
-		this.worker = new BridgeStarter(this.args);
+			/*
+			 * Either use the updated args passed to the OnStart(...) method,
+			 * or fall back to those supplied during service creation.
+			 */
+			this.worker = new BridgeStarter(this.args);
 			//worker.addLogger(new EventLogLogger(this.EventLog));
 
 			this.bw = new BackgroundWorker();
@@ -75,20 +101,26 @@ namespace isc.gateway.net
 			bw.RunWorkerAsync(worker);
 		}
 
-		private void changeStartParameters(string[] args)
-		{
-			Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.LocalMachine
-													.OpenSubKey("System")
-													.OpenSubKey("CurrentControlSet")
-													.OpenSubKey("Services")
-													.OpenSubKey(this.ServiceName, true);
+		private void ChangeStartParameters(string[] args) {
+			ChangeStartParameters(this.ServiceName, args);
+		}
 
-			string imagePath = (string)key.GetValue("ImagePath");
-			string path = imagePath.Split(' ')[0];
+		/// <summary>
+		/// Also invoked by service installer.
+		/// </summary>
+		/// <param name="ServiceName"></param>
+		/// <param name="args"></param>
+		internal static void ChangeStartParameters(string ServiceName, string[] args) {
+			var key = Registry.LocalMachine
+					.OpenSubKey("System")
+					.OpenSubKey("CurrentControlSet")
+					.OpenSubKey("Services")
+					.OpenSubKey(ServiceName, true);
+			var imagePath = (string)key.GetValue("ImagePath");
+			var path = imagePath.Split(' ')[0];
 			key.SetValue("ImagePath", path + " " + String.Join(" ", args));
 
-			logger.Warn("\\System\\CurrentControlSet\\Services\\" + this.ServiceName + "\\ImagePath is changed.\nOld value:" + imagePath + "\nNew value:" + key.GetValue("ImagePath"));
-
+			logger.Warn("\\System\\CurrentControlSet\\Services\\" + ServiceName + "\\ImagePath is changed.\nOld value:" + imagePath + "\nNew value:" + key.GetValue("ImagePath"));
 		}
 
 		void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)

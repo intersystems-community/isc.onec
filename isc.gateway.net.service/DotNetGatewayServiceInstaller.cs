@@ -9,11 +9,6 @@ namespace isc.gateway.net
 	[RunInstaller(true)]
 	public class DotNetGatewayServiceInstaller : Installer
 	{
-		/// <summary>
-		/// Must be pure ASCII, no acute allowed.
-		/// </summary>
-		private const string ServiceName = "Cache One C Bridge";
-
 		private const string DisplayName = "Cache One C Bridge";
 
 		private const string ParameterPort = "port";
@@ -30,7 +25,7 @@ namespace isc.gateway.net
 			/*
 			 * Template value for debug purposes.
 			 */
-			this.serviceInstaller.ServiceName = ServiceName;
+			this.serviceInstaller.ServiceName = DotNetGatewayService.ServiceNameTemplate;
 
 			serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
 			serviceProcessInstaller.Username = null;
@@ -50,10 +45,18 @@ namespace isc.gateway.net
 			}
 			try {
 				var port = Convert.ToInt32(portString);
-				this.serviceInstaller.ServiceName = ServiceName + ' ' + port;
+				this.serviceInstaller.ServiceName = DotNetGatewayService.ServiceNameTemplate + ' ' + port;
 				this.serviceInstaller.DisplayName = DisplayName + ' ' + port;
 				this.serviceInstaller.Description = "Runs Cache .NET Gateway at TCP port " + port;
 				base.Install(stateSaver);
+
+				/*
+				 * Once the service is installed,
+				 * update the ImagePath registry key with the port information.
+				 */
+				if (false /* buggy -- see https://bitbucket.org/bass/isc.onec/issue/1, so disabled */) {
+					DotNetGatewayService.ChangeStartParameters(this.serviceInstaller.ServiceName, new string[] { portString });
+				}
 
 				WriteLine("Service \"" + this.serviceInstaller.ServiceName + "\" installed successfully.", ConsoleColor.Green);
 			} catch (Exception e) {
@@ -72,7 +75,7 @@ namespace isc.gateway.net
 			}
 			try {
 				var port = Convert.ToInt32(portString);
-				this.serviceInstaller.ServiceName = ServiceName + ' ' + port;
+				this.serviceInstaller.ServiceName = DotNetGatewayService.ServiceNameTemplate + ' ' + port;
 				base.Uninstall(savedState);
 				WriteLine("Service \"" + this.serviceInstaller.ServiceName + "\" uninstalled successfully.", ConsoleColor.Green);
 			} catch (Exception e) {
