@@ -30,7 +30,7 @@ namespace isc.gateway.net
 		{
 			this.EventLog.Log = DefaultLogName;
 			var commandLineArgs = Environment.GetCommandLineArgs();
-			this.ServiceName = commandLineArgs.Length == 0 ? ServiceNameTemplate : ServiceNameTemplate + ' ' + commandLineArgs[1];
+			this.ServiceName = commandLineArgs.Length == 1 ? ServiceNameTemplate : ServiceNameTemplate + ' ' + commandLineArgs[1];
 			this.EventLog.Source = this.ServiceName;
 			/*-
 			 * Safety net:
