@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.ServiceProcess;
-using Microsoft.Win32;
 using NLog;
 
 namespace isc.gateway.net
@@ -77,15 +76,6 @@ namespace isc.gateway.net
 			this.RequestAdditionalTime(120000);
 
 			/*
-			 * TODO: Service name is guessed based on the args supplied (ImagePath).
-			 * So if a service instance is started on a non-standard port,
-			 * don't update the ImagePath.
-			 */
-			if (args.Length != 0) {
-				this.ChangeStartParameters(this.args = args);
-			}
-
-			/*
 			 * Either use the updated args passed to the OnStart(...) method,
 			 * or fall back to those supplied during service creation.
 			 */
@@ -99,28 +89,6 @@ namespace isc.gateway.net
 			bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
 
 			bw.RunWorkerAsync(worker);
-		}
-
-		private void ChangeStartParameters(string[] args) {
-			ChangeStartParameters(this.ServiceName, args);
-		}
-
-		/// <summary>
-		/// Also invoked by service installer.
-		/// </summary>
-		/// <param name="ServiceName"></param>
-		/// <param name="args"></param>
-		internal static void ChangeStartParameters(string ServiceName, string[] args) {
-			var key = Registry.LocalMachine
-					.OpenSubKey("System")
-					.OpenSubKey("CurrentControlSet")
-					.OpenSubKey("Services")
-					.OpenSubKey(ServiceName, true);
-			var imagePath = (string)key.GetValue("ImagePath");
-			var path = imagePath.Split(' ')[0];
-			key.SetValue("ImagePath", path + " " + String.Join(" ", args));
-
-			logger.Warn("\\System\\CurrentControlSet\\Services\\" + ServiceName + "\\ImagePath is changed.\nOld value:" + imagePath + "\nNew value:" + key.GetValue("ImagePath"));
 		}
 
 		void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)

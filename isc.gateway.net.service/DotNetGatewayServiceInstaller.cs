@@ -3,6 +3,8 @@ using System.Collections;
 using System.ComponentModel;
 using System.Configuration.Install;
 using System.ServiceProcess;
+using Microsoft.Win32;
+using NLog;
 
 namespace isc.gateway.net
 {
@@ -16,6 +18,8 @@ namespace isc.gateway.net
 		private const string ErrorPortMissing = "Missing parameter: \"port\" (use /port=[port number] switch).";
 
 		private readonly ServiceInstaller serviceInstaller;
+
+		private static Logger logger = LogManager.GetCurrentClassLogger();
 
 		public DotNetGatewayServiceInstaller()
 		{
@@ -55,7 +59,7 @@ namespace isc.gateway.net
 				 * update the ImagePath registry key with the port information.
 				 */
 				if (false /* buggy -- see https://bitbucket.org/bass/isc.onec/issue/1, so disabled */) {
-					DotNetGatewayService.ChangeStartParameters(this.serviceInstaller.ServiceName, new string[] { portString });
+					ChangeStartParameters(this.serviceInstaller.ServiceName, new string[] { portString });
 				}
 
 				WriteLine("Service \"" + this.serviceInstaller.ServiceName + "\" installed successfully.", ConsoleColor.Green);
@@ -83,6 +87,23 @@ namespace isc.gateway.net
 				WriteLine(e.Message, ConsoleColor.Red);
 				throw e;
 			}
+		}
+
+		/// <summary>
+		/// </summary>
+		/// <param name="ServiceName"></param>
+		/// <param name="args"></param>
+		private static void ChangeStartParameters(string ServiceName, string[] args) {
+			var key = Registry.LocalMachine
+					.OpenSubKey("System")
+					.OpenSubKey("CurrentControlSet")
+					.OpenSubKey("Services")
+					.OpenSubKey(ServiceName, true);
+			var imagePath = (string)key.GetValue("ImagePath");
+			var path = imagePath.Split(' ')[0];
+			key.SetValue("ImagePath", path + " " + String.Join(" ", args));
+
+			logger.Warn("\\System\\CurrentControlSet\\Services\\" + ServiceName + "\\ImagePath is changed.\nOld value:" + imagePath + "\nNew value:" + key.GetValue("ImagePath"));
 		}
 
 		private static void WriteLine(string message, ConsoleColor color) {
