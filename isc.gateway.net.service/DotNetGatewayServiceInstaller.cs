@@ -3,6 +3,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Configuration.Install;
 using System.ServiceProcess;
+using System.Text.RegularExpressions;
 using Microsoft.Win32;
 using NLog;
 
@@ -58,9 +59,7 @@ namespace isc.gateway.net
 				 * Once the service is installed,
 				 * update the ImagePath registry key with the port information.
 				 */
-				if (false /* buggy -- see https://bitbucket.org/bass/isc.onec/issue/1, so disabled */) {
-					ChangeStartParameters(this.serviceInstaller.ServiceName, new string[] { portString });
-				}
+				ChangeStartParameters(this.serviceInstaller.ServiceName, new string[] { portString });
 
 				WriteLine("Service \"" + this.serviceInstaller.ServiceName + "\" installed successfully.", ConsoleColor.Green);
 			} catch (Exception e) {
@@ -99,11 +98,35 @@ namespace isc.gateway.net
 					.OpenSubKey("CurrentControlSet")
 					.OpenSubKey("Services")
 					.OpenSubKey(ServiceName, true);
-			var imagePath = (string)key.GetValue("ImagePath");
-			var path = imagePath.Split(' ')[0];
-			key.SetValue("ImagePath", path + " " + String.Join(" ", args));
+			const string subKey = "ImagePath";
+			var imagePath = (string) key.GetValue(subKey);
 
-			logger.Warn("\\System\\CurrentControlSet\\Services\\" + ServiceName + "\\ImagePath is changed.\nOld value:" + imagePath + "\nNew value:" + key.GetValue("ImagePath"));
+			/*-
+			 * Group #1 is the path to EXE.
+			 * Group #3 (if any) is the port number.
+			 * Group #5 (if any) is the keepalive flag.
+			 */
+			const string imagePathPattern = "^\\\"?([^\\\"]+\\.[Ee][Xx][Ee])\\\"?(\\s+(\\d+)(\\s+([Tt][Rr][Uu][Ee]|[Ff][Aa][Ll][Ss][Ee]))?)?\\s*$";
+			if (!Regex.IsMatch(imagePath, imagePathPattern)) {
+				/*
+				 * Never.
+				 */
+				WriteLine("ImagePath doesn't match the pattern.", ConsoleColor.Red);
+				return;
+			}
+
+			var match = Regex.Match(imagePath, imagePathPattern);
+			if (match.Groups.Count < 2) {
+				/*
+				 * Never.
+				 */
+				WriteLine("Matcher is missing the group #1.", ConsoleColor.Red);
+				return;
+			}
+
+			key.SetValue(subKey, '"' + match.Groups[1].Value + "\" " + String.Join(" ", args));
+
+			logger.Warn("\\System\\CurrentControlSet\\Services\\" + ServiceName + "\\ImagePath is changed.\nOld value:" + imagePath + "\nNew value:" + key.GetValue(subKey));
 		}
 
 		private static void WriteLine(string message, ConsoleColor color) {
