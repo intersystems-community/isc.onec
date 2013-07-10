@@ -75,6 +75,10 @@ namespace isc.gateway.net
 			//It has really no sense on normal server, but RG has troubles with virtual machine start time
 			this.RequestAdditionalTime(120000);
 
+			if (args.Length != 0) {
+				this.args = args;
+			}
+
 			/*
 			 * Either use the updated args passed to the OnStart(...) method,
 			 * or fall back to those supplied during service creation.
