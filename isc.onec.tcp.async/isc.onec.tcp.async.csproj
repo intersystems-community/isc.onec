@@ -44,6 +44,7 @@
     <LangVersion>3</LangVersion>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -82,6 +83,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\isc.general\isc.general.csproj">
+      <Project>{FABBFE25-1022-4CC3-B255-896045BB555F}</Project>
+      <Name>isc.general</Name>
+    </ProjectReference>
     <ProjectReference Include="..\isc.onec.adapter\isc.onec.adapter.csproj">
       <Project>{8C6CFF56-9ECA-423C-AF0F-122E7B414EFF}</Project>
       <Name>isc.onec.adapter</Name>

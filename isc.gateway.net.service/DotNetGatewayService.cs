@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.ServiceProcess;
+using isc.general;
 using NLog;
 
 namespace isc.gateway.net
@@ -99,6 +100,7 @@ namespace isc.gateway.net
 		{
 			if (e.Error != null)
 			{
+				this.EventLog.WriteEntry(e.Error.ToStringWithIlOffsets(), EventLogEntryType.Error);
 				logger.ErrorException("bw_RunWorkerCompleted: Exception happened, stopping ... ", e.Error);
 				this.ExitCode = 1;
 				this.Stop();
@@ -114,7 +116,7 @@ namespace isc.gateway.net
 		private void unhandledExceptionHandler(object sender, UnhandledExceptionEventArgs ue)
 		{
 			Exception e = (Exception)ue.ExceptionObject;
-			this.EventLog.WriteEntry("Stopping. Unhandled exception happened. "+e.Message+" "+e.StackTrace, EventLogEntryType.Error);
+			this.EventLog.WriteEntry(e.ToStringWithIlOffsets(), EventLogEntryType.Error);
 			logger.ErrorException("Stopping. Unhandled exception happened. ",e);
 			this.ExitCode = 1;
 			this.Stop();

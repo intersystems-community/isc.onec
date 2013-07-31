@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Net.Sockets;
-using NLog;
+using isc.general;
 using isc.onec.bridge;
-using isc.onec.tcp;
+using NLog;
 
 namespace isc.onec.tcp.async
 {
@@ -87,27 +87,28 @@ namespace isc.onec.tcp.async
 			return new MessageEncoder(reply).encode();
 		}
 
-		private byte[] process(Server server,byte[] data) {
+		private static byte[] process(Server server,byte[] data) {
+			string[] reply;
+			try {
+				RequestMessage request = (new MessageDecoder(data)).decode();
 
-			RequestMessage request = (new MessageDecoder(data)).decode();
+				//TODO Debug why?
+				if (server == null) {
+					//throw new Exception("OutgoingDataPreparer.process(): no server object");
+					logger.Error("OutgoingDataPreparer.process(): no server object.");
+					reply = new string[] { Convert.ToInt32(Response.Type.EXCEPTION).ToString(), "OutgoingDataPreparer.process(): no server object" };
 
-			//TODO Debug why?
-			if (server == null)
-			{
-				//throw new Exception("OutgoingDataPreparer.process(): no server object");
-				logger.Error("OutgoingDataPreparer.process(): no server object.");
-				string[] reply = new string[] {((int)Response.Type.EXCEPTION).ToString(), "OutgoingDataPreparer.process(): no server object" };
-				
-				return new MessageEncoder(reply).encode();
+				} else {
+					reply = server.run(request.command, request.target, request.operand, request.vals, request.types);
+					//logger.Debug("reply:" + reply[0] + "," + reply[1]);
+				}
+			} catch (Exception e) {
+				reply = new string[] {
+					Convert.ToInt32(Response.Type.EXCEPTION).ToString(),
+					e.ToStringWithIlOffsets()
+				};
 			}
-			else
-			{
-				string[] reply = server.run(request.command, request.target, request.operand, request.vals, request.types);
-
-				//logger.Debug("reply:" + reply[0] + "," + reply[1]);
-
-				return new MessageEncoder(reply).encode();
-			}
+			return new MessageEncoder(reply).encode();
 		}
 	}
 }
