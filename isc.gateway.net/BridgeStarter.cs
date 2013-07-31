@@ -26,13 +26,6 @@ namespace isc.gateway.net
 
 		public TCPAsyncServer server;
 
-		public static void Main(string[] args)
-		{
-			Console.WriteLine("BridgeStarter");
-			new BridgeStarter(args).processConnections();
-			Console.ReadLine();
-		}
-
 	public BridgeStarter(string[] args) {
 		if (args == null || args.Length == 0) {
 			this.port = DefaultPort;

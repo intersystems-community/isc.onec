@@ -105,13 +105,6 @@ namespace isc.onec.tcp.async
 
 		private static EventLog eventLog = EventLogFactory.Instance;
 
-		public static void Main()
-		{
-
-			//instantiate the SocketListener.
-			new TCPAsyncServer(true, getSettings(9100));
-			Console.ReadLine();
-		}
 		//TODO bad code - refactor
 		public static SocketListenerSettings getSettings(int port)
 		{
