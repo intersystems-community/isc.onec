@@ -37,12 +37,18 @@ namespace isc.gateway.net
 			 * Safety net:
 			 *
 			 * as long as we're using source name template,
-			 * it may be nont known to the system,
+			 * it may be not known to the system,
 			 * as service installer uses a different name (which contains the port number).
 			 */
 			if (!EventLog.SourceExists(this.EventLog.Source)) {
 				EventLog.CreateEventSource(this.EventLog.Source, DefaultLogName);
 			}
+
+			/*
+			 * Okay, now we have service name known and event log source set up.
+			 * Let's initialise the (singleton) event logger.
+			 */
+			EventLogFactory.Initialize(this);
 
 			this.CanHandlePowerEvent = false;
 			this.CanHandleSessionChangeEvent = false;

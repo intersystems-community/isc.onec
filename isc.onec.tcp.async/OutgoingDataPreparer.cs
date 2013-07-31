@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net.Sockets;
 using isc.general;
 using isc.onec.bridge;
@@ -12,6 +13,8 @@ namespace isc.onec.tcp.async
 		private DataHolder theDataHolder;
 
 		private static Logger logger = LogManager.GetCurrentClassLogger();
+
+		private static EventLog eventLog = EventLogFactory.Instance;
 
 		public OutgoingDataPreparer()
 		{			
@@ -94,18 +97,24 @@ namespace isc.onec.tcp.async
 
 				//TODO Debug why?
 				if (server == null) {
-					//throw new Exception("OutgoingDataPreparer.process(): no server object");
-					logger.Error("OutgoingDataPreparer.process(): no server object.");
-					reply = new string[] { Convert.ToInt32(Response.Type.EXCEPTION).ToString(), "OutgoingDataPreparer.process(): no server object" };
+					const string message = "OutgoingDataPreparer.process(): no server object.";
+					logger.Error(message);
+					eventLog.WriteEntry(message, EventLogEntryType.Error);
+					reply = new string[] {
+						Convert.ToInt32(Response.Type.EXCEPTION).ToString(),
+						message
+					};
 
 				} else {
 					reply = server.run(request.command, request.target, request.operand, request.vals, request.types);
 					//logger.Debug("reply:" + reply[0] + "," + reply[1]);
 				}
 			} catch (Exception e) {
+				var message = e.ToStringWithIlOffsets();
+				eventLog.WriteEntry(message, EventLogEntryType.Error);
 				reply = new string[] {
 					Convert.ToInt32(Response.Type.EXCEPTION).ToString(),
-					e.ToStringWithIlOffsets()
+					message
 				};
 			}
 			return new MessageEncoder(reply).encode();

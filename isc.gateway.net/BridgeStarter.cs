@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using isc.general;
 using isc.onec.tcp.async;
 using NLog;
 
@@ -10,6 +12,9 @@ namespace isc.gateway.net
 		//TODO normalize object state
 	
 		private static Logger logger = LogManager.GetCurrentClassLogger();
+
+		private static EventLog eventLog = EventLogFactory.Instance;
+
 		private readonly int port;
 		private readonly bool keepAlive;
 
@@ -54,10 +59,13 @@ namespace isc.gateway.net
 				//instantiate the SocketListener.
 				this.server = new TCPAsyncServer(keepAlive, TCPAsyncServer.getSettings(this.port));
 
-				logger.Info("TCP Server started on port " + port + ". KeepAlive is " + keepAlive);
+				var message = "TCP Server started on port " + port + ". KeepAlive is " + keepAlive;
+				logger.Info(message);
+				eventLog.WriteEntry(message);
 			}
 			catch(Exception ex) {
 				logger.Error("Unable to start TCP Server: "+ex.Message);
+				eventLog.WriteEntry(ex.ToStringWithIlOffsets(), EventLogEntryType.Error);
 			}
 		}
 
