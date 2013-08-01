@@ -27,41 +27,32 @@ namespace isc.onec.bridge
 		}*/
 
 		//TODO Code smells - should have formalized protocol in commands not something general
-		public string[] run(int command,string target,string operand,string[] vals,int[] types) {
-			Request targetObject;
+		public string[] run(int command, string target, string operand, string[] vals, int[] types) {
 			Response response;
 			Commands commandType = Request.numToEnum<Commands>(command);
 			//if target is "." it is context
 			try {
-				if (target != ".") {
-					targetObject = new Request(target);
-				} else {
-					targetObject = new Request("");
-				}
-				response = doCommand(commandType, targetObject, operand, vals, types);
+				var targetObject = new Request(target == "." ? "" : target);
+				response = this.doCommand(commandType, targetObject, operand, vals, types);
 			} catch (Exception e) {
-				string client = "null";
-				if (service != null) {
-					client = service.client;
-				}
+				var client = this.service == null ? "null" : this.service.client;
 
 				String msg = e.Message + " " + e.Source;
-				if (service != null) {
-					msg += service.client + " :";
-				}
+				msg += client + " :";
 				msg += commandType.ToString() + ":";
 				msg += target + ":" + operand + ":" + vals.ToString() + ":" + types.ToString();
 				logger.ErrorException(msg, e);
+				
 				if (service != null) {
 					logger.Debug(service.getJournalReport());
+					service.disconnect();
+					service = null;
 				}
-				response = new Response(e);
 
-				service.disconnect();
-				service = null;
+				response = new Response(e);
 			}
 
-			string[] reply = serialize(response);
+			string[] reply = this.serialize(response);
 
 			return reply;
 		}
