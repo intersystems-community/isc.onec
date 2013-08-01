@@ -20,7 +20,6 @@ namespace isc.onec.tcp.thread
 		private static Logger logger = LogManager.GetCurrentClassLogger();
 
 		public delegate void MessageHandler(byte[] Packet);
-		public event MessageHandler Return_Packet;
 
 		public static void Main(string[] args)
 		{
