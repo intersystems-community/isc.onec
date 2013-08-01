@@ -7,7 +7,7 @@ using NLog;
 namespace isc.gateway.net
 {   
    
-	public class BridgeStarter : IDisposable
+	public sealed class BridgeStarter : IDisposable
 	{
 		//TODO normalize object state
 	
@@ -38,7 +38,6 @@ namespace isc.gateway.net
 
 		public void Dispose()
 		{
-
 			logger.Debug("BridgeStarter exits");
 		}
 
