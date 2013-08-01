@@ -43,10 +43,10 @@ namespace isc.onec.bridge
 				msg += target + ":" + operand + ":" + vals.ToString() + ":" + types.ToString();
 				logger.ErrorException(msg, e);
 				
-				if (service != null) {
-					logger.Debug(service.getJournalReport());
-					service.disconnect();
-					service = null;
+				if (this.service != null) {
+					logger.Debug(this.service.getJournalReport());
+					this.service.disconnect();
+					this.service = null;
 				}
 
 				response = new Response(e);
