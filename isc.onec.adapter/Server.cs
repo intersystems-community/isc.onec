@@ -25,40 +25,40 @@ namespace isc.onec.bridge
 			logger.Debug("Server destructor is called for #" + client);
 			if (service != null) service = null;
 		}*/
+
 		//TODO Code smells - should have formalized protocol in commands not something general
 		public string[] run(int command,string target,string operand,string[] vals,int[] types) {
 			Request targetObject;
 			Response response;
 			Commands commandType = Request.numToEnum<Commands>(command);
 			//if target is "." it is context
-			try
-			{
-			if (target != ".") targetObject = new Request(target);
-			else targetObject = new Request("");
-			response = doCommand(commandType, targetObject, operand, vals, types);
-			}
-			catch (Exception e)
-			{
+			try {
+				if (target != ".") {
+					targetObject = new Request(target);
+				} else {
+					targetObject = new Request("");
+				}
+				response = doCommand(commandType, targetObject, operand, vals, types);
+			} catch (Exception e) {
 				string client = "null";
-				if (service != null)
-				{
+				if (service != null) {
 					client = service.client;
 				}
-			   
-				String msg = e.Message+" "+e.Source;
-				if(service != null) msg+=service.client + " :";
-				msg+=commandType.ToString()+":";
+
+				String msg = e.Message + " " + e.Source;
+				if (service != null) {
+					msg += service.client + " :";
+				}
+				msg += commandType.ToString() + ":";
 				msg += target + ":" + operand + ":" + vals.ToString() + ":" + types.ToString();
 				logger.ErrorException(msg, e);
-				if (service != null)
-				{
+				if (service != null) {
 					logger.Debug(service.getJournalReport());
 				}
 				response = new Response(e);
 
 				service.disconnect();
 				service = null;
-
 			}
 
 			string[] reply = serialize(response);
