@@ -7,7 +7,7 @@ using NLog;
 
 namespace isc.gateway.net
 {
-	public class DotNetGatewayService : ServiceBase
+	public sealed class DotNetGatewayService : ServiceBase
 	{
 		/// <summary>
 		/// Must be pure ASCII, no acute allowed.
@@ -74,6 +74,7 @@ namespace isc.gateway.net
 		protected override void Dispose(bool disposing)
 		{
 			base.Dispose(disposing);
+			this.worker.Dispose();
 		}
 
 
