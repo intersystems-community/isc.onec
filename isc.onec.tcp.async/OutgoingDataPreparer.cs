@@ -90,13 +90,17 @@ namespace isc.onec.tcp.async
 			return new MessageEncoder(reply).encode();
 		}
 
-		private static byte[] process(Server server,byte[] data) {
+		private static byte[] process(Server server, byte[] data) {
 			string[] reply;
 			try {
 				RequestMessage request = (new MessageDecoder(data)).decode();
 
 				//TODO Debug why?
 				if (server == null) {
+					/*
+					 * Most probably, this doesn't ever happen,
+					 * and the NullReferenceException observed is https://bitbucket.org/bass/isc.onec/issue/4
+					 */
 					const string message = "OutgoingDataPreparer.process(): no server object.";
 					logger.Error(message);
 					eventLog.WriteEntry(message, EventLogEntryType.Error);
