@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using isc.general;
 using NLog;
 
 namespace isc.onec.bridge
@@ -9,7 +11,10 @@ namespace isc.onec.bridge
 		public V8Service service;
 
 		private static Logger logger = LogManager.GetCurrentClassLogger();
-		private static int counter=0;
+
+		private static EventLog eventLog = EventLogFactory.Instance;
+
+		private static int counter = 0;
 
 		public Server()
 		{
@@ -29,7 +34,7 @@ namespace isc.onec.bridge
 		//TODO Code smells - should have formalized protocol in commands not something general
 		public string[] run(int command, string target, string operand, string[] vals, int[] types) {
 			Response response;
-			Commands commandType = Request.numToEnum<Commands>(command);
+			var commandType = Request.numToEnum<Commands>(command);
 			//if target is "." it is context
 			try {
 				var targetObject = new Request(target == "." ? "" : target);
@@ -37,14 +42,19 @@ namespace isc.onec.bridge
 			} catch (Exception e) {
 				var client = this.service == null ? "null" : this.service.client;
 
-				String msg = e.Message + " " + e.Source;
-				msg += client + " :";
-				msg += commandType.ToString() + ":";
-				msg += target + ":" + operand + ":" + vals.ToString() + ":" + types.ToString();
-				logger.ErrorException(msg, e);
+				var message = e.Message + " " + e.Source;
+				message += client + " :";
+				message += commandType.ToString() + ":";
+				message += target + ":" + operand + ":" + vals.ToString() + ":" + types.ToString();
+				logger.ErrorException(message, e);
+				eventLog.WriteEntry(e.ToStringWithIlOffsets(), EventLogEntryType.Error);
+				eventLog.WriteEntry(message, EventLogEntryType.Error);
 				
 				if (this.service != null) {
-					logger.Debug(this.service.getJournalReport());
+					var journalReport = this.service.getJournalReport();
+					logger.Debug(journalReport);
+					eventLog.WriteEntry(journalReport, EventLogEntryType.Error);
+
 					this.service.disconnect();
 					this.service = null;
 				}
