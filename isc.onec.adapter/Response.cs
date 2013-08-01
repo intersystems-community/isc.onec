@@ -1,4 +1,5 @@
 ﻿using System;
+using isc.general;
 
 namespace isc.onec.bridge
 {
@@ -16,7 +17,7 @@ namespace isc.onec.bridge
 		public Response(Exception e)
 		{
 			this.type = Type.EXCEPTION;
-			this.value = e.Message;
+			this.value = e.ToStringWithIlOffsets();
 		}
 		public Response(bool value)
 		{

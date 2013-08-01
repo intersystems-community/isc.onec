@@ -75,4 +75,10 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\isc.general\isc.general.csproj">
+      <Project>{FABBFE25-1022-4CC3-B255-896045BB555F}</Project>
+      <Name>isc.general</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>
