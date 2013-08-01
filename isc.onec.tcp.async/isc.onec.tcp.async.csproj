@@ -68,6 +68,7 @@
     <Compile Include="MessageHandler.cs" />
     <Compile Include="OutgoingDataPreparer.cs" />
     <Compile Include="PrefixHandler.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SocketAsyncEventArgsPool.cs" />
     <Compile Include="SocketListenerSettings.cs" />
     <Compile Include="TCPAsyncServer.cs" />
