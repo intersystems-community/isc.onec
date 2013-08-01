@@ -65,7 +65,7 @@ namespace isc.gateway.net
 			} catch (Exception e) {
 				WriteLine("Service \"" + this.serviceInstaller.ServiceName + "\" failed to install.", ConsoleColor.Red);
 				WriteLine(e.Message, ConsoleColor.Red);
-				throw e;
+				throw;
 			}
 		}
 
@@ -84,7 +84,7 @@ namespace isc.gateway.net
 			} catch (Exception e) {
 				WriteLine("Service \"" + this.serviceInstaller.ServiceName + "\" failed to uninstall.", ConsoleColor.Red);
 				WriteLine(e.Message, ConsoleColor.Red);
-				throw e;
+				throw;
 			}
 		}
 

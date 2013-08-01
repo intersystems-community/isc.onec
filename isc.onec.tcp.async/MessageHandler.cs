@@ -46,7 +46,7 @@ namespace isc.onec.tcp.async
 						", receiveSendToken.receivedMessageBytesDoneCount=" + receiveSendToken.receivedMessageBytesDoneCount +
 						", remainingBytesToProcess=" + remainingBytesToProcess
 						, e);
-					throw e;
+					throw;
 				}
 
 				incomingTcpMessageIsReady = true;
@@ -75,7 +75,7 @@ namespace isc.onec.tcp.async
 						", receiveSendToken.receivedMessageBytesDoneCount=" + receiveSendToken.receivedMessageBytesDoneCount +
 						", remainingBytesToProcess=" + remainingBytesToProcess
 						, e);
-					throw e;
+					throw;
 				}
 			}
 
