@@ -93,12 +93,12 @@ namespace isc.onec.bridge
 
 				logger.Debug("Connection is established");
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
 				free(this.connector);
 				stimulateGC();
 				isConnected = false;
-				throw e;
+				throw;
 			}
 			finally {
 				//TODO Check this
