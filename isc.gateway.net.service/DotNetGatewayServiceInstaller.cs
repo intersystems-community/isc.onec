@@ -24,22 +24,21 @@ namespace isc.gateway.net
 
 		public DotNetGatewayServiceInstaller()
 		{
+			ServiceProcessInstaller serviceProcessInstaller = new ServiceProcessInstaller();
 			this.serviceInstaller = new ServiceInstaller();
 			this.serviceInstaller.StartType = ServiceStartMode.Automatic;
 			/*
 			 * Template value for debug purposes.
 			 */
 			this.serviceInstaller.ServiceName = DotNetGatewayService.ServiceNameTemplate;
+
+			serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
+			serviceProcessInstaller.Username = null;
+			serviceProcessInstaller.Password = null;
+			serviceProcessInstaller.Context = new InstallContext();
+
+			this.Installers.Add(serviceProcessInstaller);
 			this.Installers.Add(this.serviceInstaller);
-
-			using (ServiceProcessInstaller serviceProcessInstaller = new ServiceProcessInstaller()) {
-				serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
-				serviceProcessInstaller.Username = null;
-				serviceProcessInstaller.Password = null;
-				serviceProcessInstaller.Context = new InstallContext();
-
-				this.Installers.Add(serviceProcessInstaller);
-			}
 		}
 
 		public override void Install(IDictionary stateSaver) {
