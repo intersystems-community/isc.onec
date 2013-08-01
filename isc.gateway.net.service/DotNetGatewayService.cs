@@ -74,7 +74,9 @@ namespace isc.gateway.net
 		protected override void Dispose(bool disposing)
 		{
 			base.Dispose(disposing);
-			this.worker.Dispose();
+			if (disposing) {
+				this.worker.Dispose();
+			}
 		}
 
 
