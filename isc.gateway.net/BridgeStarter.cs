@@ -39,6 +39,7 @@ namespace isc.gateway.net
 		public void Dispose()
 		{
 			logger.Debug("BridgeStarter exits");
+			this.server.Dispose();
 		}
 
 		public void processConnections()

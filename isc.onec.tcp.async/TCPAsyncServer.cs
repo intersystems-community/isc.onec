@@ -13,7 +13,7 @@ namespace isc.onec.tcp.async
 {   //____________________________________________________________________________
 	// Implements the logic for the socket server.
 
-	public class TCPAsyncServer
+	public sealed class TCPAsyncServer : IDisposable
 	{
 		// Const start
 		//This variable determines the number of
@@ -929,5 +929,9 @@ namespace isc.onec.tcp.async
 
 		}
 
+		public void Dispose() {
+			this.listenSocket.Dispose();
+			this.theMaxConnectionsEnforcer.Dispose();
+		}
 	}
 }
