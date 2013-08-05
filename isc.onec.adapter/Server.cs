@@ -66,7 +66,7 @@ namespace isc.onec.bridge {
 
 		public bool Connected {
 			get {
-				return this.service == null ? false : this.service.isConnected();
+				return this.service == null ? false : this.service.Connected;
 			}
 		}
 

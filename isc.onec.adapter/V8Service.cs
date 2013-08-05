@@ -161,10 +161,10 @@ namespace isc.onec.bridge
 			return journal.ContainsKey(key);
 		}
 
-		public bool isConnected()
-		{
-			if (adapter != null) return adapter.isConnected;
-			else return false;
+		public bool Connected {
+			get {
+				return this.adapter == null ? false : this.adapter.isConnected;
+			}
 		}
 		public bool isAlive(string url)
 		{
