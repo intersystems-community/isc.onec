@@ -69,12 +69,10 @@ namespace isc.onec.bridge
 			return reply;
 		}
 
-		public bool isConnected()
-		{
-			if (this.service != null) {
-				return this.service.isConnected();
+		public bool Connected {
+			get {
+				return this.service == null ? false : this.service.isConnected();
 			}
-			return false;
 		}
 
 		private Response doCommand(Commands command,Request obj, string operand, string[] vals, int[] types)
