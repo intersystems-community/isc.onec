@@ -113,7 +113,7 @@ namespace isc.onec.tcp.async
 		public void CleanUp() {
 			logger.Debug("Cleanup is called");
 			if (this.server != null) {
-				this.server.service = null;
+				this.server.Disconnect();
 				this.server = null;
 			}
 		}

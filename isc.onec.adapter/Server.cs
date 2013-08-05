@@ -15,7 +15,7 @@ namespace isc.onec.bridge {
 			COUNT = 7,
 		};
 
-		public V8Service service;
+		private V8Service service;
 
 		private static Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -37,24 +37,14 @@ namespace isc.onec.bridge {
 				var targetObject = new Request(target == "." ? "" : target);
 				response = this.doCommand(commandType, targetObject, operand, vals, types);
 			} catch (Exception e) {
-				var message = e.Message + " " + e.Source;
-				message += this.Client + " :";
+				var message = e.Source + ":" + this.Client + ":";
 				message += commandType.ToString() + ":";
 				message += target + ":" + operand + ":" + vals.ToString() + ":" + types.ToString();
 				logger.ErrorException(message, e);
-				eventLog.WriteEntry(e.ToStringWithIlOffsets(), EventLogEntryType.Error);
-				eventLog.WriteEntry(message, EventLogEntryType.Error);
-				
-				if (this.service != null) {
-					var journalReport = this.service.getJournalReport();
-					if (journalReport != null && journalReport.Length != 0) {
-						logger.Debug(journalReport);
-						eventLog.WriteEntry(journalReport, EventLogEntryType.Error);
-					}
+				eventLog.WriteEntry(e.ToStringWithIlOffsets(), EventLogEntryType.Warning);
+				eventLog.WriteEntry(message, EventLogEntryType.Warning);
 
-					this.service.disconnect();
-					this.service = null;
-				}
+				this.Disconnect();
 
 				response = new Response(e);
 			}
@@ -62,6 +52,26 @@ namespace isc.onec.bridge {
 			string[] reply = this.serialize(response);
 
 			return reply;
+		}
+
+		public Response Disconnect() {
+			try {
+				if (this.Connected) {
+					var journalReport = this.service.getJournalReport();
+					if (journalReport != null && journalReport.Length != 0) {
+						logger.Debug(journalReport);
+						eventLog.WriteEntry(journalReport, EventLogEntryType.Information);
+					}
+
+					return this.service.disconnect();
+				}
+				/*
+				 * DISCONNECT allows an empty response.
+				 */
+				return new Response();
+			} finally {
+				this.service = null;
+			}
 		}
 
 		public bool Connected {
@@ -102,16 +112,7 @@ namespace isc.onec.bridge {
 				}
 				return new Response(Response.Type.EXCEPTION, "Not connected");
 			case Commands.DISCONNET:
-				if (this.service != null) {
-					logger.Debug(this.service.getJournalReport());
-					Response response = this.service.disconnect();
-					this.service = null;
-					return response;
-				}
-				/*
-				 * DISCONNECT allows an empty response.
-				 */
-				return new Response();
+				return this.Disconnect();
 			case Commands.FREE:
 				/*
 				 * FREE allows an empty response.
