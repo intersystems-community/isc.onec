@@ -3,19 +3,25 @@ using System.Diagnostics;
 using isc.general;
 using NLog;
 
-namespace isc.onec.bridge
-{
-	public class Server
-	{
-		public enum Commands:int { GET=1,SET=2,INVOKE=3,CONNECT=4,DISCONNET=5,FREE=6,COUNT=7 };
+namespace isc.onec.bridge {
+	public class Server {
+		public enum Commands:int {
+			GET = 1,
+			SET = 2,
+			INVOKE = 3,
+			CONNECT = 4,
+			DISCONNET = 5,
+			FREE = 6,
+			COUNT = 7,
+		};
+
 		public V8Service service;
 
 		private static Logger logger = LogManager.GetCurrentClassLogger();
 
 		private static EventLog eventLog = EventLogFactory.Instance;
 
-		public Server()
-		{
+		public Server() {
 			V8Adapter adapter = new V8Adapter();
 			Repository repository = new Repository();
 
@@ -66,51 +72,42 @@ namespace isc.onec.bridge
 			}
 		}
 
-		private Response doCommand(Commands command,Request obj, string operand, string[] vals, int[] types)
-		{
-			//logger.Debug("cmd:" + command);
+		private Response doCommand(Commands command,Request obj, string operand, string[] vals, int[] types) {
 			switch (command) {
-				case Commands.GET:
-					return this.service.get(obj, operand);
+			case Commands.GET:
+				return this.service.get(obj, operand);
+			case Commands.SET:
+				Request value = new Request(types[0], vals[0]);
+				return this.service.set(obj, operand, value);
+			case Commands.INVOKE:
+				Request[] args = buildRequestList(vals, types);
+				return service.invoke(obj, operand, args);
+			case Commands.CONNECT:
+				if (types.Length > 0) {
+					Request client = new Request(types[0], vals[0]);
+					return service.connect(operand, (String) client.value);
+				} else {
+					return service.connect(operand, null);
+				}
+			case Commands.DISCONNET:
+				logger.Debug(this.service.getJournalReport());
+				Response response = this.service.disconnect(); 
+				this.service = null;
 
-				case Commands.SET:
-					Request value = new Request(types[0], vals[0]);
-					return this.service.set(obj, operand, value);
-
-				case Commands.INVOKE:
-					Request[] args = buildRequestList(vals, types);
-					return service.invoke(obj, operand, args);
-
-				case Commands.CONNECT:
-					if (types.Length > 0) {
-						Request client = new Request(types[0], vals[0]);
-						return service.connect(operand, (String) client.value);
-					} else {
-						return service.connect(operand, null);
-					}
-
-				case Commands.DISCONNET:
-					logger.Debug(this.service.getJournalReport());
-					Response response = this.service.disconnect(); 
+				if (this.service != null) {
 					this.service = null;
+				}
 
-					if (this.service != null) {
-						this.service = null;
-					}
-
-					return response;
-					
-				case Commands.FREE:
-					return this.service.free(obj);
-			   
-				case Commands.COUNT:
-					return this.service.getCounters();
-				
-				default:
-					throw new Exception("Command not supported");
-
+				return response;
+			case Commands.FREE:
+				return this.service.free(obj);
+			case Commands.COUNT:
+				return this.service.getCounters();
+			default:
+				throw new Exception("Command not supported");
 			}
 		}
+
 		private string[] serialize(Response response) {
 			string[] reply = new string[2];
 			reply[0] = ((int)response.type).ToString();
