@@ -82,44 +82,50 @@ namespace isc.onec.bridge {
 
 		public string Client {
 			get {
-				return this.service == null ? "null" : this.service.client;
+				return this.Connected ? this.service.client : "null";
 			}
+		}
+
+		private Response doCommandIfConnected(Func<Response> f) {
+			if (this.Connected) {
+				return f();
+			}
+			return new Response(Response.Type.EXCEPTION, "Not connected");
 		}
 
 		private Response doCommand(Commands command,Request obj, string operand, string[] vals, int[] types) {
 			switch (command) {
 			case Commands.GET:
-				if (this.service != null) {
+				return this.doCommandIfConnected(() => {
 					return this.service.get(obj, operand);
-				}
-				return new Response(Response.Type.EXCEPTION, "Not connected");
+				});
 			case Commands.SET:
-				if (this.service != null) {
+				return this.doCommandIfConnected(() => {
 					Request value = new Request(types[0], vals[0]);
 					return this.service.set(obj, operand, value);
-				}
-				return new Response(Response.Type.EXCEPTION, "Not connected");
+				});
 			case Commands.INVOKE:
-				if (this.service != null) {
+				return this.doCommandIfConnected(() => {
 					Request[] args = buildRequestList(vals, types);
 					return this.service.invoke(obj, operand, args);
-				}
-				return new Response(Response.Type.EXCEPTION, "Not connected");
+				});
 			case Commands.CONNECT:
 				if (this.service != null) {
 					var client = types.Length > 0 ? (string) (new Request(types[0], vals[0])).value : null;
 					return this.service.connect(operand, client);
 				}
-				return new Response(Response.Type.EXCEPTION, "Not connected");
+				return new Response(Response.Type.EXCEPTION, "Server#service is null");
 			case Commands.DISCONNET:
 				return this.Disconnect();
 			case Commands.FREE:
 				/*
 				 * FREE allows an empty response.
 				 */
-				return this.service == null ? new Response() : this.service.free(obj);
+				return this.Connected ? this.service.free(obj) : new Response();
 			case Commands.COUNT:
-				return this.service == null ? new Response(Response.Type.EXCEPTION, "Not connected") : this.service.getCounters();
+				return this.doCommandIfConnected(() => {
+					return this.service.getCounters();
+				});
 			default:
 				/*
 				 * Never.
