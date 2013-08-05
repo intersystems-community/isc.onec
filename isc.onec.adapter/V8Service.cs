@@ -11,7 +11,7 @@ namespace isc.onec.bridge
 		//MarshalByRefObject System.__COMObject
 		private object context;
 		private Repository repository;
-		public String client = null;
+		internal String client = null;
 
 		private static Logger logger = LogManager.GetCurrentClassLogger();
 		public static Dictionary<string, string> journal = new Dictionary<string,string>();

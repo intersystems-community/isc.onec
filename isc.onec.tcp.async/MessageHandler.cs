@@ -41,7 +41,7 @@ namespace isc.onec.tcp.async
 					Buffer.BlockCopy(receiveSendEventArgs.Buffer, receiveSendToken.receiveMessageOffset, receiveSendToken.theDataHolder.dataMessageReceived, receiveSendToken.receivedMessageBytesDoneCount, remainingBytesToProcess);
 				}
 				catch (Exception e){
-					logger.ErrorException("on #"+receiveSendToken.server.service.client+" HandleMessage():receiveSendToken.receiveMessageOffset=" + receiveSendToken.receiveMessageOffset +
+					logger.ErrorException("on #" + receiveSendToken.server.Client + " HandleMessage():receiveSendToken.receiveMessageOffset=" + receiveSendToken.receiveMessageOffset +
 						", receiveSendToken.theDataHolder.dataMessageReceived=" + receiveSendToken.theDataHolder.dataMessageReceived +
 						", receiveSendToken.receivedMessageBytesDoneCount=" + receiveSendToken.receivedMessageBytesDoneCount +
 						", remainingBytesToProcess=" + remainingBytesToProcess
@@ -70,7 +70,7 @@ namespace isc.onec.tcp.async
 				}
 				catch (Exception e)
 				{
-					logger.ErrorException("on #" + receiveSendToken.server.service.client + "  HandleMessage():receiveSendToken.receiveMessageOffset=" + receiveSendToken.receiveMessageOffset +
+					logger.ErrorException("on #" + receiveSendToken.server.Client + "  HandleMessage():receiveSendToken.receiveMessageOffset=" + receiveSendToken.receiveMessageOffset +
 						", receiveSendToken.theDataHolder.dataMessageReceived=" + receiveSendToken.theDataHolder.dataMessageReceived +
 						", receiveSendToken.receivedMessageBytesDoneCount=" + receiveSendToken.receivedMessageBytesDoneCount +
 						", remainingBytesToProcess=" + remainingBytesToProcess

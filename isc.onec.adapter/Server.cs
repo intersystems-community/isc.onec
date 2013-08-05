@@ -37,10 +37,8 @@ namespace isc.onec.bridge {
 				var targetObject = new Request(target == "." ? "" : target);
 				response = this.doCommand(commandType, targetObject, operand, vals, types);
 			} catch (Exception e) {
-				var client = this.service == null ? "null" : this.service.client;
-
 				var message = e.Message + " " + e.Source;
-				message += client + " :";
+				message += this.Client + " :";
 				message += commandType.ToString() + ":";
 				message += target + ":" + operand + ":" + vals.ToString() + ":" + types.ToString();
 				logger.ErrorException(message, e);
@@ -69,6 +67,12 @@ namespace isc.onec.bridge {
 		public bool Connected {
 			get {
 				return this.service == null ? false : this.service.isConnected();
+			}
+		}
+
+		public string Client {
+			get {
+				return this.service == null ? "null" : this.service.client;
 			}
 		}
 
