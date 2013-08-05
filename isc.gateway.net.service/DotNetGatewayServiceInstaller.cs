@@ -12,7 +12,7 @@ namespace isc.gateway.net
 	[RunInstaller(true)]
 	public class DotNetGatewayServiceInstaller : Installer
 	{
-		private const string DisplayName = "Cache One C Bridge";
+		private const string DisplayName = "Caché One C Bridge";
 
 		private const string ParameterPort = "port";
 
@@ -52,7 +52,7 @@ namespace isc.gateway.net
 				var port = Convert.ToInt32(portString);
 				this.serviceInstaller.ServiceName = DotNetGatewayService.ServiceNameTemplate + ' ' + port;
 				this.serviceInstaller.DisplayName = DisplayName + ' ' + port;
-				this.serviceInstaller.Description = "Runs Cache .NET Gateway at TCP port " + port;
+				this.serviceInstaller.Description = "Runs Caché .NET Gateway at TCP port " + port;
 				base.Install(stateSaver);
 
 				/*
