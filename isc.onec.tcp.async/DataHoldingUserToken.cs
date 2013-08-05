@@ -110,33 +110,12 @@ namespace isc.onec.tcp.async
 			this.receiveMessageOffset = this.permanentReceiveMessageOffset;
 		}
 
-		public void CleanUp()
-		{
+		public void CleanUp() {
 			logger.Debug("Cleanup is called");
-			if (this.server!=null) {
+			if (this.server != null) {
 				this.server.service = null;
 				this.server = null;
-				/*try
-				{
-					logger.Debug("cleanUp is trying to send disconnect.Server isConnected?:" + this.server.isConnected());
-					if (this.server.isConnected())
-					{
-						logger.Debug("Sending disconnect one more time");
-						this.server.sendDisconnect();
-						
-					}
-				 
-				}
-				catch (Exception e) {
-					logger.DebugException("cleanUp gets error", e);
-				}
-				finally
-				{
-					this.server = null;
-				} */
 			}
-
-			this.server = null;
 		}
 
 		public Server getServer()
