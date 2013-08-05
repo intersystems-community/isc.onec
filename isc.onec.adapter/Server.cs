@@ -79,35 +79,50 @@ namespace isc.onec.bridge {
 		private Response doCommand(Commands command,Request obj, string operand, string[] vals, int[] types) {
 			switch (command) {
 			case Commands.GET:
-				return this.service.get(obj, operand);
-			case Commands.SET:
-				Request value = new Request(types[0], vals[0]);
-				return this.service.set(obj, operand, value);
-			case Commands.INVOKE:
-				Request[] args = buildRequestList(vals, types);
-				return service.invoke(obj, operand, args);
-			case Commands.CONNECT:
-				if (types.Length > 0) {
-					Request client = new Request(types[0], vals[0]);
-					return service.connect(operand, (String) client.value);
-				} else {
-					return service.connect(operand, null);
-				}
-			case Commands.DISCONNET:
-				logger.Debug(this.service.getJournalReport());
-				Response response = this.service.disconnect(); 
-				this.service = null;
-
 				if (this.service != null) {
-					this.service = null;
+					return this.service.get(obj, operand);
 				}
-
-				return response;
+				return new Response(Response.Type.EXCEPTION, "Not connected");
+			case Commands.SET:
+				if (this.service != null) {
+					Request value = new Request(types[0], vals[0]);
+					return this.service.set(obj, operand, value);
+				}
+				return new Response(Response.Type.EXCEPTION, "Not connected");
+			case Commands.INVOKE:
+				if (this.service != null) {
+					Request[] args = buildRequestList(vals, types);
+					return this.service.invoke(obj, operand, args);
+				}
+				return new Response(Response.Type.EXCEPTION, "Not connected");
+			case Commands.CONNECT:
+				if (this.service != null) {
+					var client = types.Length > 0 ? (string) (new Request(types[0], vals[0])).value : null;
+					return this.service.connect(operand, client);
+				}
+				return new Response(Response.Type.EXCEPTION, "Not connected");
+			case Commands.DISCONNET:
+				if (this.service != null) {
+					logger.Debug(this.service.getJournalReport());
+					Response response = this.service.disconnect();
+					this.service = null;
+					return response;
+				}
+				/*
+				 * DISCONNECT allows an empty response.
+				 */
+				return new Response();
 			case Commands.FREE:
-				return this.service.free(obj);
+				/*
+				 * FREE allows an empty response.
+				 */
+				return this.service == null ? new Response() : this.service.free(obj);
 			case Commands.COUNT:
-				return this.service.getCounters();
+				return this.service == null ? new Response(Response.Type.EXCEPTION, "Not connected") : this.service.getCounters();
 			default:
+				/*
+				 * Never.
+				 */
 				throw new Exception("Command not supported");
 			}
 		}
