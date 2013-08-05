@@ -69,33 +69,32 @@ namespace isc.onec.bridge
 
 		public bool isConnected()
 		{
-			if(service!=null) return service.isConnected();
+			if (this.service != null) {
+				return this.service.isConnected();
+			}
 			return false;
 		}
 
 		private Response doCommand(Commands command,Request obj, string operand, string[] vals, int[] types)
 		{
 			//logger.Debug("cmd:" + command);
-			switch (command)
-			{
-				case Commands.GET: return service.get(obj, operand);
-				   
+			switch (command) {
+				case Commands.GET:
+					return this.service.get(obj, operand);
+
 				case Commands.SET:
 					Request value = new Request(types[0], vals[0]);
-					return service.set(obj, operand, value);
-				   
+					return this.service.set(obj, operand, value);
+
 				case Commands.INVOKE:
 					Request[] args = buildRequestList(vals, types);
 					return service.invoke(obj, operand, args);
-					
+
 				case Commands.CONNECT:
-					if (types.Length > 0)
-					{
+					if (types.Length > 0) {
 						Request client = new Request(types[0], vals[0]);
-						return service.connect(operand, (String)client.value);
-					}
-					else
-					{
+						return service.connect(operand, (String) client.value);
+					} else {
 						return service.connect(operand, null);
 					}
 
@@ -103,24 +102,29 @@ namespace isc.onec.bridge
 					counter = (counter + 1)%10;
 					//if (counter == 0)
 					//{
-						logger.Debug(service.getJournalReport());
+					logger.Debug(this.service.getJournalReport());
 					//}
-					Response response = service.disconnect(); 
+					Response response = this.service.disconnect(); 
 					this.service = null;
 
 					//string client = "";
 					//if (service != null) client = service.client;
 					//logger.Debug("Server destructor is called for #" + client);
-					if (service != null) service = null;
-				   
+					if (this.service != null) {
+						this.service = null;
+					}
+
 					return response;
 					
-				case Commands.FREE: return service.free(obj);
+				case Commands.FREE:
+					return this.service.free(obj);
 			   
-				case Commands.COUNT: return service.getCounters();
+				case Commands.COUNT:
+					return this.service.getCounters();
 				
-				default: throw new Exception("Command not supported");
-				
+				default:
+					throw new Exception("Command not supported");
+
 			}
 		}
 		private string[] serialize(Response response) {
