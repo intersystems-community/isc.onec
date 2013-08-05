@@ -14,8 +14,6 @@ namespace isc.onec.bridge
 
 		private static EventLog eventLog = EventLogFactory.Instance;
 
-		private static int counter = 0;
-
 		public Server()
 		{
 			V8Adapter adapter = new V8Adapter();
@@ -23,13 +21,6 @@ namespace isc.onec.bridge
 
 			this.service = new V8Service(adapter, repository);
 		}
-		/*~Server()
-		{
-			string client = "";
-			if (service != null) client = service.client;
-			logger.Debug("Server destructor is called for #" + client);
-			if (service != null) service = null;
-		}*/
 
 		//TODO Code smells - should have formalized protocol in commands not something general
 		public string[] run(int command, string target, string operand, string[] vals, int[] types) {
@@ -99,17 +90,10 @@ namespace isc.onec.bridge
 					}
 
 				case Commands.DISCONNET:
-					counter = (counter + 1)%10;
-					//if (counter == 0)
-					//{
 					logger.Debug(this.service.getJournalReport());
-					//}
 					Response response = this.service.disconnect(); 
 					this.service = null;
 
-					//string client = "";
-					//if (service != null) client = service.client;
-					//logger.Debug("Server destructor is called for #" + client);
 					if (this.service != null) {
 						this.service = null;
 					}
