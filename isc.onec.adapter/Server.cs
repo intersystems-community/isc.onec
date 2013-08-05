@@ -52,8 +52,10 @@ namespace isc.onec.bridge
 				
 				if (this.service != null) {
 					var journalReport = this.service.getJournalReport();
-					logger.Debug(journalReport);
-					eventLog.WriteEntry(journalReport, EventLogEntryType.Error);
+					if (journalReport != null && journalReport.Length != 0) {
+						logger.Debug(journalReport);
+						eventLog.WriteEntry(journalReport, EventLogEntryType.Error);
+					}
 
 					this.service.disconnect();
 					this.service = null;
