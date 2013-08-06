@@ -144,12 +144,12 @@ namespace isc.onec.bridge
 
 			return response;
 		}
-		public string getJournalReport() {
-			string report = "\n\r";
+		internal string getJournalReport() {
+			var report = "";
 
 			foreach (KeyValuePair<string, string> pair in journal)
 			{
-				report += (pair.Key+"   "+pair.Value+"\n\r");
+				report += (pair.Key+"   "+pair.Value+"\n");
 			}
 
 			return report;
