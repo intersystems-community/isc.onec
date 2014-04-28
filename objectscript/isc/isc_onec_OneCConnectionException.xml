@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:16">
+<Class name="isc.onec.OneCConnectionException">
+<Super>%Exception.AbstractException</Super>
+<TimeChanged>62222,54654.830303</TimeChanged>
+<TimeCreated>61933,30708.837032</TimeCreated>
+
+<Method name="new">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>innerException</FormalSpec>
+<Implementation><![CDATA[
+		
+		s e = ..%New("Connection to 1C is broken","<ONECCON>")
+		s e.Data = "1C server  is down or network access is broken. Try reconnect with isc.onec.CF.createContext()"
+		s e.InnerException = innerException
+		
+		quit e
+]]></Implementation>
+</Method>
+</Class>
+</Export>

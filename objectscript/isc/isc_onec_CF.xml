@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:16">
+<Class name="isc.onec.CF">
+<Super>%RegisteredObject</Super>
+<TimeChanged>62227,51540.264692</TimeChanged>
+<TimeCreated>62176,63104.525636</TimeCreated>
+
+<Method name="createContext">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>desc:isc.onec.ConnectionDescription</FormalSpec>
+<ReturnType>isc.onec.Context</ReturnType>
+<Implementation><![CDATA[
+	#dim context as isc.onec.test.Context = ..getContext(desc)
+	
+	quit context
+]]></Implementation>
+</Method>
+
+<Method name="get">
+<ClassMethod>1</ClassMethod>
+<ReturnType>isc.onec.Context</ReturnType>
+<Implementation><![CDATA[
+	if (..isConnected()) {
+		quit %oneccontext
+	}
+	throw ##class(isc.onec.NoContextException).%New()
+]]></Implementation>
+</Method>
+
+<Method name="isConnected">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	if ($g(%oneccontext)&&$isObject(%oneccontext)) quit 1
+	quit 0
+]]></Implementation>
+</Method>
+
+<Method name="drop">
+<Description>
+TODO Refactor - bad code</Description>
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	    try {
+	    	s context = ..get().disconnect()
+	    }
+	    catch {
+	    }
+	    k %oneccontext
+]]></Implementation>
+</Method>
+
+<Method name="getContext">
+<Description>
+TODO Keep separate connections to 1C by accounts and servers</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>desc</FormalSpec>
+<Private>1</Private>
+<ReturnType>isc.onec.Context</ReturnType>
+<Implementation><![CDATA[
+	   
+	   if ($g(%oneccontext)&&$isObject(%oneccontext)) {
+			s context = %oneccontext
+			quit context
+		}
+		
+		
+		s context  = ..makeContext(desc)
+		s %oneccontext = context
+		
+		if (context="")||'$isObject(%oneccontext) {
+			throw ##class(isc.onec.ConnectionException).%New()
+		}
+		
+		quit context
+]]></Implementation>
+</Method>
+
+<Method name="makeContext">
+<Description>
+TODO check all this crazy stuff with conn and context and connector</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>desc:isc.onec.ConnectionDescription</FormalSpec>
+<Private>1</Private>
+<ReturnType>isc.onec.Context</ReturnType>
+<Implementation><![CDATA[
+	
+		s client = ##class(isc.onec.bridge.TcpClient).%New(desc.bridgeHost,desc.bridgePort)
+	 	d client.connect()
+	    //"Unable to create isc.onec.bridge.Server object")
+	    s bridge = ##class(isc.onec.bridge.Bridge).%New(client)
+	    //"Unable to create Bridge")
+	    s:desc.debug=1 context = ##class(DebugContext).%New(bridge)
+	    s:desc.debug=0 context = ##class(Context).%New(bridge)
+	   // $$$assert($isObject(gateway),"Unable to create global context for "_desc.gatewayDefinitionName)
+	    //TODO make connect part of bridge
+	    try {
+	    	d context.connect(desc.URL())
+	    }
+	    catch e {   	
+			//$$$assert($isObject(context),"Connection to 1C:Enterprise failed")
+			s context = ""
+			throw e
+	    }
+
+		quit context
+]]></Implementation>
+</Method>
+</Class>
+</Export>

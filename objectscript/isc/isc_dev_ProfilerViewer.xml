@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:15">
+<Class name="isc.dev.ProfilerViewer">
+<Super>%CSP.Page</Super>
+<TimeChanged>62160,60843.142415</TimeChanged>
+<TimeCreated>62140,55291.251966</TimeCreated>
+
+<Parameter name="HTTPERRORNOTIMPLEMENTED">
+<Description>
+TODO Add 500 Internal Server Error if something failed</Description>
+<Default>501</Default>
+</Parameter>
+
+<Parameter name="CONTENTTYPE">
+<Default>text/javascript</Default>
+</Parameter>
+
+<Parameter name="HTMLCONTENTYPE">
+<Default>text/html</Default>
+</Parameter>
+
+<Parameter name="MEASURETABLE">
+<Default>isc_poc.Measure</Default>
+</Parameter>
+
+<Method name="test">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	s object = ##class(Sample.Person).%New()
+	s object.Name = "Basil Pupkin"
+	s rows = ##class(isc.collection.List).%New()
+	d rows.add(object)
+	
+	w $$JSONFromObject^JSONencode(rows)
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	#dim %request as %CSP.Request
+	#dim %response as %CSP.Response
+	
+	if (%request.Method = "POST") quit 1
+	if (%request.Method = "GET") { 
+		s %response.ContentType = ..#HTMLCONTENTYPE
+		quit 1
+	}
+	
+	s %response.Status = ..#HTTPERRORNOTIMPLEMENTED
+
+	quit 0
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+
+	if (%request.Method = "POST") d ..doPost(%request,%response)
+	if (%request.Method = "GET") d ..doGet(%request,%response)
+	
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="doPost">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>request:%CSP.Request,response:%CSP.Response</FormalSpec>
+<Implementation><![CDATA[
+	
+	s operation = request.Get("cmd","default")
+	
+	if (operation = "getSeriesOfTypes") {
+		s in = $lfs($g(request.Data("args",1)))
+		d ..getSeriesOfTypes(in,.out)
+	}
+	else {
+	/*
+	rows:10
+page:1
+sidx:id
+sord:desc
+	*/
+	//TODO make proxy from POST form params
+	s page = request.Get("page",1)
+	s limit = request.Get("rows",1)
+	s start = (limit * page) - limit 
+	//s in = $lfs($g(request.Data("args",1)))
+	//if ($ll(in)=1)  s in = $lg(in,1)
+	s in = $lb(start,limit,page)
+	d ..default(in,.out)
+	
+	}
+	
+	w out
+	
+	
+	 //$system.Status.GetOneStatusText($g(%objlasterror))
+]]></Implementation>
+</Method>
+
+<Method name="doGet">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>request:%CSP.Request,response:%CSP.Response</FormalSpec>
+<Implementation><![CDATA[
+	&html<<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Profiler</title> 
+<link rel="stylesheet" type="text/css" media="screen" href="css/smoothness/jquery-ui-1.8.5.custom.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="css/ui.jqgrid.css" />
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+}
+</style>
+<script src="js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<script language="javascript" type="text/javascript" src="./js/jquery.flot.js"></script>
+<script src="js/jquery.jqGrid.min.js" type="text/javascript"></script>
+ 
+<script type="text/javascript">
+$(function(){ 
+jQuery("#list").jqGrid({
+	mtype:'POST',
+   	url:'isc.dev.ProfilerViewer.cls',
+	datatype: "json",
+   	colNames:['operation','cnt','avg','tot'],
+   	colModel:[
+   		{name:'operation',index:'op',formatter:'string',sortable:true, width:200},
+   		{name:'cnt',index:'cnt',formatter:'integer',sortable:true,sorttype:"int", width:200},
+   		{name:'avg',index:'avg',formatter:'number',sortable:true,sorttype:"float", width:200, align:"right"},
+   		{name:'tot',index:'tot', formatter:'number',sortable:true,sorttype:"float",width:200, align:"right"}		
+   	],
+   	rowNum:100,
+   	//rowList:[10,20,30],
+   	//pager: '#pager',
+   	loadonce: true,
+   	//sortname: 'cnt',
+    viewrecords: true,
+    //sortorder: "desc",
+    caption:"Profiler resuls",
+    // width: "100%",
+	height: 300,
+	shrinkToFit: true,
+    onSelectRow: function(id) {
+	    //var dataset = [];
+	    //dataset.push(id);
+	    // dataset.push();
+	    //"CHEQUE"
+	    $.post("#(..%ClassName(1))#.cls",{cmd:"getSeriesOfTypes",args:id},function(ds){
+					drawPlot(ds);
+				},"json");
+	}
+});
+//jQuery("#list").jqGrid('navGrid','#pager',{edit:false,add:false,del:false}); 
+ //$(window).bind('resize', function() {
+    	//jQuery("#list").setGridHeight($('#panel').height(), true);
+   // 	jQuery("#list").setGridWidth($('#panel').width(), true);
+    //	
+	//}).trigger('resize');
+}); 
+
+function drawPlot(series) {
+	var options = {
+		bars: {show:false},
+		lines: { show: true , steps: false },
+		points: { show: true }
+		,legend: {position: "ne"}
+		
+	 };
+
+	var placeholder = $("#graph");
+	var plot = $.plot(placeholder, series, options);
+}
+</script>
+</head>
+<body><div id="panel" width="100%" height="800">
+<table id="list" width="100%" height="800"></table> 
+<!--div id="pager"></div--></div>
+ <div id="graph" style="width:800px;height:400px">Click to see slices</div>
+</body>
+</html>>
+]]></Implementation>
+</Method>
+
+<Method name="default">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>in,res</FormalSpec>
+<Implementation><![CDATA[
+	s start = $lg(in,1) + 1
+	s limit = $lg(in,2)
+	s end = start + limit -1
+	
+	s rows = ..select(limit,end)
+	
+	
+	s list = ##class(isc.collection.HashMap).%New()
+	
+	//d list.put("page",$lg(in,1))
+	//d list.put("page",10)
+	//d list.put("total",rows.size())
+	//d list.put("records",rows.size())
+	
+	d list.put("rows",rows)
+	 
+
+	s res = ..encode(list)
+]]></Implementation>
+</Method>
+
+<Method name="select">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>limit,end</FormalSpec>
+<ReturnType>isc.collection.HashMap</ReturnType>
+<Implementation><![CDATA[
+	
+	s list = ##class(Profiler).%New().listOperationsByAvg()
+	s it = list.iterator()
+	
+	s rows = ##class(isc.collection.List).%New()
+	
+	while(it.hasNext()) {
+		s op = it.next()
+		s m = list.get(op)
+		s count = $lg(m,1)
+		s avg = $j($lg(m,3),8,6)
+		s total = $j($lg(m,2),8,6)
+ 
+		s row = ##class(isc.collection.HashMap).%New()
+		d row.put("id",op)
+		s cells = ##class(isc.collection.List).%New()
+		d row.put("cell",cells)
+		d cells.add(op)
+		d cells.add(count)
+		d cells.add(avg)
+		d cells.add(total)
+		
+		d rows.add(row) 
+    }
+    
+    quit rows
+]]></Implementation>
+</Method>
+
+<Method name="getSeriesOfTypes">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>in,out</FormalSpec>
+<Implementation><![CDATA[
+	s data = ##class(isc.collection.List).%New()
+	
+	for i=1:1:$ll(in) {
+		s series = ""
+		d ..getSeriesByType($lg(in,i),.series)
+		d data.add(series)	
+	}
+	
+    s out = ..encode(data)
+]]></Implementation>
+</Method>
+
+<Method name="getSeriesByType">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>in,out</FormalSpec>
+<Implementation><![CDATA[
+		s type = in
+		#dim map = ##class(isc.dev.Profiler).get().getSliceForOperation(type)
+	    #dim it as isc.collection.Iterator = map.iterator()
+		s data = ##class(isc.collection.List).%New()
+		
+  		while(it.hasNext()) {
+	  		s key = it.next()
+	  		d data.add($lb(key,map.get(key)))
+        }
+        
+       s series = ##class(isc.collection.HashMap).%New()
+        
+		d series.put("label",type_" avg")
+		d series.put("data",data)
+		
+		//s out = ..encode(series)
+		s out = series
+]]></Implementation>
+</Method>
+
+<Method name="encode">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>cos</FormalSpec>
+<Implementation><![CDATA[		quit $$JSONFromObject^JSONencode(cos)
+]]></Implementation>
+</Method>
+</Class>
+</Export>

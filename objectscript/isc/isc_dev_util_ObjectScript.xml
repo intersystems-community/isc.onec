@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:15">
+<Class name="isc.dev.util.ObjectScript">
+<Super>%RegisteredObject</Super>
+<TimeChanged>62166,62604.843546</TimeChanged>
+<TimeCreated>62166,52754.788879</TimeCreated>
+
+<Method name="countObjects">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	set tOref = $zobjnext("")
+	set i = 0
+	while $isobject(tOref) {
+		set i = i +1
+		set tOref = $zobjnext(tOref)
+	}
+	quit i
+]]></Implementation>
+</Method>
+
+<Method name="groupObjectsByClass">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	s ref = $zobjnext("")
+	
+	while $isobject(ref) {
+		s class=ref.%ClassName(1)
+		s objects(class)=$i(objects(class))
+		
+		set ref = $zobjnext(ref)	
+	}
+
+   s class=""
+   for {
+      s class=$o(objects(class)) q:class=""
+      
+      write "class: "_class_" has "_objects(class)_" instances",!
+   }
+]]></Implementation>
+</Method>
+
+<Method name="findReferencesByClass">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>classname</FormalSpec>
+<Implementation><![CDATA[
+	
+	s ref = $zobjnext("")
+	
+	while $isobject(ref) {
+		s class=ref.%ClassName(1)
+		if (class=classname) {
+			w ref_":",!
+			d $system.OBJ.ShowReferences(ref,1)
+		}
+		
+		set ref = $zobjnext(ref)	
+	}
+]]></Implementation>
+</Method>
+</Class>
+</Export>

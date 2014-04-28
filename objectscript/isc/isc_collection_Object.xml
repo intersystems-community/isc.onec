@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:15">
+<Class name="isc.collection.Object">
+<Description>
+Расширение HashMap для удобной работы c динамическими объектами
+Гибрид объекта и HashMap.
+Пример: 
+s obj = ##class(isc.collection.Object).%New() 
+s obj.name = "Vasia"
+d obj.put("surname") = "Pupkin"
+w obj.get("name")_" "_obj.surname
+</Description>
+<Super>isc.collection.HashMap,isc.dispatch.DispatchProxy</Super>
+<TimeChanged>62140,53554.663051</TimeChanged>
+<TimeCreated>62025,53618.724124</TimeCreated>
+
+<Method name="%OnNew">
+<Description>
+Конструктор. Object может выступать как обертка вокруг существующего HashMap</Description>
+<FormalSpec>existingMap:isc.collection.HashMap=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s:$isObject(existingMap) ..items = existingMap.items
+	m:$d(existingMap) ..items = existingMap
+
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="insteadOfSet">
+<FormalSpec>property:%String,value</FormalSpec>
+<Implementation><![CDATA[	d ..put(property,value)
+]]></Implementation>
+</Method>
+
+<Method name="insteadOfGet">
+<FormalSpec>property:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s result = ..get(property)
+	
+	quit result
+]]></Implementation>
+</Method>
+</Class>
+</Export>

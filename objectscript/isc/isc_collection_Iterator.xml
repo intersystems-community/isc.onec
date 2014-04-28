@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:15">
+<Class name="isc.collection.Iterator">
+<Description>
+Абстрактный класс итераторов</Description>
+<Super>isc.lang.Object</Super>
+<TimeChanged>62084,71245.509052</TimeChanged>
+<TimeCreated>61754,49625.755037</TimeCreated>
+
+<Method name="hasNext">
+<Description>
+1 если есть еще не обойденные ключи</Description>
+<ReturnType>%Boolean</ReturnType>
+</Method>
+
+<Method name="next">
+<Description>
+следующий ключ</Description>
+<ReturnType>isc.lang.Object</ReturnType>
+</Method>
+</Class>
+</Export>

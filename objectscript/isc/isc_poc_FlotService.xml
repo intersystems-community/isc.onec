@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:16">
+<Class name="isc.poc.FlotService">
+<Super>%CSP.Page</Super>
+<TimeChanged>62063,54223.644149</TimeChanged>
+<TimeCreated>62004,57599.553209</TimeCreated>
+
+<Parameter name="HTTPERRORNOTIMPLEMENTED">
+<Description>
+TODO Add 500 Internal Server Error if something failed</Description>
+<Default>501</Default>
+</Parameter>
+
+<Parameter name="CONTENTTYPE">
+<Default>text/javascript</Default>
+</Parameter>
+
+<Parameter name="HTMLCONTENTYPE">
+<Default>text/html</Default>
+</Parameter>
+
+<Parameter name="MEASURETABLE">
+<Default>isc_poc.Measure</Default>
+</Parameter>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	#dim %request as %CSP.Request
+	#dim %response as %CSP.Response
+	
+	if (%request.Method = "POST") quit 1
+	if (%request.Method = "GET") { 
+		s %response.ContentType = ..#HTMLCONTENTYPE
+		quit 1
+	}
+	
+	s %response.Status = ..#HTTPERRORNOTIMPLEMENTED
+
+	quit 0
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	if (%request.Method = "POST") d ..doPost(%request,%response)
+	if (%request.Method = "GET") d ..doGet(%request,%response)
+	
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="doPost">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>request:%CSP.Request,response:%CSP.Response</FormalSpec>
+<Implementation><![CDATA[
+	
+	s operation = request.Get("cmd","default")
+	s in = $lfs($g(request.Data("args",1)))
+	//if ($ll(in)=1)  s in = $lg(in,1)
+	d $CLASSMETHOD($CLASSNAME($THIS),operation,in,.out)
+	
+	w out
+	
+	
+	 //$system.Status.GetOneStatusText($g(%objlasterror))
+]]></Implementation>
+</Method>
+
+<Method name="doGet">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>request:%CSP.Request,response:%CSP.Response</FormalSpec>
+<Implementation><![CDATA[
+	 //<!--./js/jquery.js"></script> http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>-->
+	 &html<<html> 
+ <head> 
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>Результаты</title> 
+    <link href="./css/layout.css" rel="stylesheet" type="text/css"/> 
+    <!--[if IE]><script language="javascript" type="text/javascript" src="./js/excanvas.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="./js/jquery.js"></script> 
+    <script language="javascript" type="text/javascript" src="./js/jquery.flot.js"></script> 
+ </head> 
+    <body><h1>Среднее количество сделок в секунду</h1> 
+    <div id="placeholder" style="width:600px;height:300px"></div> 
+    <p>Обрабатываемые сделки в секунду в зависимости от количества сделок.</p> 
+ 	<p>Show:</p><div  id="choices"></div>
+<script id="source" language="javascript" type="text/javascript"> 
+$(document).ready(function () {  
+	var ch = $('#choices');
+	var dataset = [];
+	$("#placeholder").html("Select tests to display ...");
+	$.post("isc.poc.FlotService.cls",{cmd:"getTestTypes"},function(data1){
+		//console.log(typeof(data1));
+		$.each(data1, function(i, v){
+			$('<input type="checkbox" id="'+v+'">')
+			.click(function(){
+				var checker = $(this), id = checker.attr('id');
+				if(checker.is(':checked')){
+					dataset.push(id);
+				}else{
+					dataset = $.map(dataset, function(n){
+						if(n == id) return null;
+						return n;
+					});
+				}
+				$.post("isc.poc.FlotService.cls",{cmd:"getSeriesOfTypes",args:[dataset]},function(ds){
+					drawPlot(ds);
+				},"json");
+			}).appendTo(ch);
+			ch.append('<label for="'+v+'">'+v+'</label><br/>');
+				
+		});
+	},"json");
+    
+    	
+});
+
+function drawPlot(series) {
+	var options = {
+		bars: {show:false},
+		lines: { show: true , steps: false },
+		points: { show: true }
+		,legend: {position: "ne"}
+	 };
+
+	var placeholder = $("#placeholder");
+	var plot = $.plot(placeholder, series, options);
+}
+</script> 
+ </body></html> >
+]]></Implementation>
+</Method>
+
+<Method name="getTestTypes">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>in,map</FormalSpec>
+<Implementation><![CDATA[
+	 s sql = "select distinct type  from "_..#MEASURETABLE
+	 #dim stmt as %SQL.Statement = ##class(%SQL.Statement).%New()
+  	 d stmt.%Prepare(sql)
+	 #dim rs as %SQL.StatementResult = stmt.%Execute() 
+	 //s map = ""
+	  s list=##class(isc.collection.List).%New()
+  	 while rs.%Next() {
+	   //s map = map _ $lb(rs.type)
+	   d list.add(rs.type)
+     }
+    s map = ..encode(list)
+]]></Implementation>
+</Method>
+
+<Method name="default">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>in,res</FormalSpec>
+<Implementation><![CDATA[	quit 0
+]]></Implementation>
+</Method>
+
+<Method name="getSeriesOfTypes">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>in,out</FormalSpec>
+<Implementation><![CDATA[
+	s data = ##class(isc.collection.List).%New()
+	
+	for i=1:1:$ll(in) {
+		s series = ""
+		d ..getSeriesByType($lg(in,i),.series)
+		d data.add(series)	
+	}
+	
+    s out = ..encode(data)
+]]></Implementation>
+</Method>
+
+<Method name="getSeriesByType">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>in,out</FormalSpec>
+<Implementation><![CDATA[
+	
+
+		s type = in
+		s sql = "select (num/avg(ms))*1000 as mn,num/avg(ms)*1000 as man,num from "_
+		..#MEASURETABLE_
+		" where type = '"_type_"' and ms <> 0 group by num order by num"
+	
+		#dim stmt as %SQL.Statement
+		
+		s stmt = ##class(%SQL.Statement).%New()
+  		d stmt.%Prepare(sql)
+  		
+  		#dim rs as %SQL.StatementResult = stmt.%Execute() 
+		
+		s data = ##class(isc.collection.List).%New()
+		
+		
+  		while rs.%Next() {
+	  		d data.add($lb(rs.num,rs.mn))
+        }
+        
+       s series = ##class(isc.collection.HashMap).%New()
+        
+		d series.put("label",type_" avg")
+		d series.put("data",data)
+		
+		//s out = ..encode(series)
+		s out = series
+]]></Implementation>
+</Method>
+
+<Method name="encode">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>cos</FormalSpec>
+<Implementation><![CDATA[		quit $$JSONFromObject^JSONencode(cos)
+]]></Implementation>
+</Method>
+</Class>
+</Export>

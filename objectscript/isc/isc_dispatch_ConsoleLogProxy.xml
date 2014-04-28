@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:15">
+<Class name="isc.dispatch.ConsoleLogProxy">
+<Description>
+@todo make ObservableProxy and add audit as a listener</Description>
+<Super>DirectProxy</Super>
+<TimeChanged>61485,80996.359019</TimeChanged>
+<TimeCreated>61433,65081.477247</TimeCreated>
+
+<Method name="before">
+<FormalSpec>method:%String,args...</FormalSpec>
+<Implementation><![CDATA[ w "isc.dispatch.AuditProxy:","onMethodCall:",..object.%ClassName(1),":",method,":reserved",!
+]]></Implementation>
+</Method>
+</Class>
+</Export>

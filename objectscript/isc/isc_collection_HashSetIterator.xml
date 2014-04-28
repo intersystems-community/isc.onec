@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:15">
+<Class name="isc.collection.HashSetIterator">
+<Description>
+Итератор для HashSet</Description>
+<Super>Iterator</Super>
+<TimeChanged>62084,71176.812677</TimeChanged>
+<TimeCreated>61754,51184.280113</TimeCreated>
+
+<Property name="hs">
+<Type>HashSet</Type>
+</Property>
+
+<Property name="next">
+</Property>
+
+<Method name="%OnNew">
+<FormalSpec>hs</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	 s ..hs =hs
+	 s ..next = $order(..hs.map.items(""))
+	 
+	 quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="hasNext">
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	quit '(..next = "")
+]]></Implementation>
+</Method>
+
+<Method name="next">
+<ReturnType>isc.lang.Object</ReturnType>
+<Implementation><![CDATA[
+   
+	s obj = ..hs.map.items(..next)
+	s ..next = $order(..hs.map.items(..next))
+	// TODO assert NoSuchElementException 
+	quit obj
+]]></Implementation>
+</Method>
+</Class>
+</Export>

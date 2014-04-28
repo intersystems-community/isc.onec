@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:15">
+<Class name="isc.lang.Object">
+<Description>
+Базовый класс для стандартных пакетов isc.*</Description>
+<Super>%RegisteredObject</Super>
+<TimeChanged>62166,59597.442628</TimeChanged>
+<TimeCreated>61748,63951.147961</TimeCreated>
+
+<UDLText name="T">
+<Content><![CDATA[
+//TODO implement constructor
+
+]]></Content>
+</UDLText>
+
+<Method name="oid">
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[	quit $p($this,"@")
+]]></Implementation>
+</Method>
+
+<Method name="isNull">
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	 //TODO make it more effective by using oref from %sngltns
+	 if ($classname() = ##class(Null).%ClassName(1)) quit 1
+	 quit 0
+]]></Implementation>
+</Method>
+
+<Method name="null">
+<ClassMethod>1</ClassMethod>
+<ReturnType>isc.lang.Null</ReturnType>
+<Implementation><![CDATA[	 quit ##class(Null).get()
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+/*Method %Close() As %Status [ CodeMode = generator, Final, Internal, ServerOnly = 1 ]
+{
+}*/
+]]></Content>
+</UDLText>
+
+<Method name="%OnClose">
+<Description>
+This method is deprecated because we now reference count objects automatically so there is no
+need to call this method. It is a no-op and just returns success %Status code.</Description>
+<Private>1</Private>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	//d ..dispose()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="dispose">
+<Implementation><![CDATA[	w "disposed "_$this,!
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:16">
+<Class name="isc.onec.Context">
+<Description>
+TODO rewrite with Request-Reply protocol that is processed by protocol implementation class
+TODO send as object reference Proxy object, not oid
+TODO Subclass of proxy?</Description>
+<Super>isc.dispatch.DispatchProxy,%RegisteredObject</Super>
+<TimeChanged>62229,58357.096153</TimeChanged>
+<TimeCreated>62176,66533.543653</TimeCreated>
+<Inheritance>right</Inheritance>
+
+<Property name="bridge">
+<Type>isc.onec.bridge.Bridge</Type>
+</Property>
+
+<Method name="%OnNew">
+<FormalSpec>bridge:isc.onec.bridge.Bridge</FormalSpec>
+<Private>1</Private>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	s ..bridge = bridge
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="get">
+<FormalSpec>proxy:Proxy,property</FormalSpec>
+<Implementation><![CDATA[
+	s path = proxy.getPath()_"."_property 
+	s oid = proxy.getOID()
+	
+	s reply = ..bridge.get(oid,property)
+	
+	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply,proxy.getPath()_"."_property)
+	
+	if (..bridge.isObject(reply)) { 
+		quit ##class(Proxy).%New($this,reply.GetAt(2),path)
+	}
+	
+	quit reply.GetAt(2)
+]]></Implementation>
+</Method>
+
+<Method name="set">
+<FormalSpec>proxy:Proxy,property,value</FormalSpec>
+<Implementation><![CDATA[
+	s oid = proxy.getOID()
+	
+	if ($isObject(value)) {
+		s type = ##class(isc.onec.bridge.Bridge).#OBJECTREQ
+		s value=value.getOID()
+	}
+	else {
+		s type = ##class(isc.onec.bridge.Bridge).#DATAREQ
+	}
+	
+	s reply = ..bridge.set(oid,property,value,type)
+	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply,proxy.getPath()_"."_property)
+]]></Implementation>
+</Method>
+
+<Method name="invoke">
+<FormalSpec>proxy,method,args...</FormalSpec>
+<Implementation><![CDATA[
+	s values = ##class(%ListOfDataTypes).%New()
+	s types = ##class(%ListOfDataTypes).%New()
+	
+    if ($data(args)) {
+		s num = args
+		//TODO  use unmarshall()
+		for i = 1:1:num {	
+			if ($isObject(args(i))) {
+				s v = args(i).getOID()
+				s t = ##class(isc.onec.bridge.Bridge).#OBJECTREQ
+			 }
+			 else {
+				 s v = args(i)
+				 if (..isNumber(args(i))) {
+					s t = ##class(isc.onec.bridge.Bridge).#NUMBERREQ
+				 }
+				 else {
+				 	s t = ##class(isc.onec.bridge.Bridge).#DATAREQ
+				 }
+			 }
+			 d values.Insert(v)
+			 d types.Insert(t)
+		 } 
+	}
+	
+	s oid = proxy.getOID()
+	
+	
+	s reply =  ..bridge.do(oid,method,values,types)
+	
+	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply,proxy.getPath()_"."_method_"()")
+	
+	if (..bridge.isObject(reply)) { 
+		s path = proxy.getPath()_"."_method_"()"
+		
+		quit ##class(Proxy).%New($this,reply.GetAt(2),path)
+	}
+	
+	quit reply.GetAt(2)
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+//TODO check other numbers: 1, -1, 0.1, -0.1, etc
+
+]]></Content>
+</UDLText>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Currently I suppose that only signed and unsigned integers are marshalled to integers
+
+]]></Content>
+</UDLText>
+
+<UDLText name="T">
+<Content><![CDATA[
+//All other numbers are interpreted as strings
+
+]]></Content>
+</UDLText>
+
+<Method name="isNumber">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>v</FormalSpec>
+<Implementation><![CDATA[
+	s t = $a($lb(v),2)
+	quit:t=4 1
+	quit:t=5 1
+	quit 0
+]]></Implementation>
+</Method>
+
+<Method name="connect">
+<FormalSpec>url</FormalSpec>
+<Implementation><![CDATA[
+	s reply = ..bridge.connect(url)
+	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply,"on connect to "_url)
+]]></Implementation>
+</Method>
+
+<Method name="free">
+<FormalSpec>proxy:Proxy</FormalSpec>
+<Implementation><![CDATA[	d:$isObject(..bridge) ..bridge.free(proxy.getOID())
+]]></Implementation>
+</Method>
+
+<Method name="showStat">
+<Implementation><![CDATA[	d ..bridge.statistics()
+]]></Implementation>
+</Method>
+
+<Method name="disconnect">
+<Implementation><![CDATA[
+	quit:'$isObject(..bridge)
+	
+	s reply = ..bridge.disconnect()
+	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply)	
+	s ..bridge = $$$NULLOREF
+]]></Implementation>
+</Method>
+
+<Method name="%OnClose">
+<Private>1</Private>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+		try {
+			d ..disconnect()
+		}
+		catch e {
+		}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="getOID">
+<Implementation><![CDATA[	quit ""
+]]></Implementation>
+</Method>
+
+<Method name="getPath">
+<Implementation><![CDATA[	quit ""
+]]></Implementation>
+</Method>
+
+<Method name="insteadOf">
+<FormalSpec>method:%String,args...</FormalSpec>
+<Implementation><![CDATA[	quit ..invoke($this,method,args...)
+]]></Implementation>
+</Method>
+
+<Method name="insteadOfSet">
+<FormalSpec>property:%String,value</FormalSpec>
+<Implementation><![CDATA[	d ..set($this,property,value)
+]]></Implementation>
+</Method>
+
+<Method name="insteadOfGet">
+<FormalSpec>property:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	quit ..get($this,property)
+]]></Implementation>
+</Method>
+</Class>
+</Export>

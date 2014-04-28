@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:15">
+<Class name="isc.lang.Null">
+<Description>
+Null  объект. Более четкий аналог $$$NULLOREF</Description>
+<Super>Singleton</Super>
+<TimeChanged>62084,72329.081724</TimeChanged>
+<TimeCreated>61754,62424.145596</TimeCreated>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+</Storage>
+</Class>
+</Export>

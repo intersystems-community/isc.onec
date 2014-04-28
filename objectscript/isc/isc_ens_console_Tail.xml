@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:15">
+<Class name="isc.ens.console.Tail">
+<Super>%RegisteredObject</Super>
+<TimeChanged>61556,56268.168793</TimeChanged>
+<TimeCreated>61556,53734.340332</TimeCreated>
+
+<Method name="last">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>n</FormalSpec>
+<Implementation><![CDATA[
+		s end = ^Ens.Util.LogD
+		if (end > n)  {
+			s start = end - n
+		} else {
+			s start = 1
+		}
+		while 1 {
+			try {
+			h 1
+			s prev = 0
+			s end = ^Ens.Util.LogD
+			if (end > prev) {
+				for i = start:1:end {
+					
+					s log = ##class(Ens.Util.Log).%OpenId(i)
+					w $ZCVT(##class(Ens.DataType.LogType).LogicalToDisplay(log.Type),"U")_" " //_log.TraceCat_" "
+					w "["_log.TimeLogged_"]" //."_i_"]"
+					
+					w " J"_log.Job_":"""_log.ConfigName_"""."_log.SourceClass_"."_log.SourceMethod_"() "
+					w log.Text
+					w " ("_log.SessionId_"/"_log.MessageId_") (sess/mes)"
+					w !
+					k log
+				}
+				s prev = end
+				s start = end + 1
+			}
+			}
+			catch e {
+				w "interrupted",!
+				goto end
+			}
+		}
+end     quit
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:15">
+<Class name="isc.collection.List">
+<Description>
+List</Description>
+<Super>isc.lang.Object</Super>
+<TimeChanged>62151,56177.610199</TimeChanged>
+<TimeCreated>61754,49821.635999</TimeCreated>
+
+<Property name="map">
+<Description>
+HashMap для хранения</Description>
+<Type>HashMap</Type>
+</Property>
+
+<Method name="%OnNew">
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s ..map = ##class(HashMap).%New()
+	
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="add">
+<Description>
+Добавить элемент - объект/примитив</Description>
+<FormalSpec>o:isc.lang.Object</FormalSpec>
+<Implementation><![CDATA[
+	s key = $i(..map.items)
+	d ..map.put(key,o)
+	
+	quit $this
+]]></Implementation>
+</Method>
+
+<Method name="contains">
+<Description>
+Проверка наличия элемента</Description>
+<FormalSpec>o:isc.lang.Object</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	  throw ##class(isc.exception.NotImplemented).%New()
+	  quit 0
+]]></Implementation>
+</Method>
+
+<Method name="iterator">
+<Description>
+Получение итератора</Description>
+<ReturnType>Iterator</ReturnType>
+<Implementation><![CDATA[	quit ##class(ListIterator).%New($this)
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+//@return int
+
+]]></Content>
+</UDLText>
+
+<Method name="size">
+<Implementation><![CDATA[	quit ..map.size()
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:15">
+<Class name="isc.event.Observable">
+<TimeChanged>61955,7422.659826</TimeChanged>
+<TimeCreated>61929,52042.121452</TimeCreated>
+
+<Property name="eventListener">
+<Type>isc.event.IEventListener</Type>
+</Property>
+
+<Method name="addListener">
+<FormalSpec>listener:isc.event.IEventListener</FormalSpec>
+<Implementation><![CDATA[	s ..eventListener = listener
+]]></Implementation>
+</Method>
+
+<Method name="notify">
+<FormalSpec>eventType,source</FormalSpec>
+<Implementation><![CDATA[
+	
+	if ('$isObject(..eventListener)) quit
+	s event = ##class(isc.event.Event).%New(source,eventType)
+	d ..eventListener.process(event)
+]]></Implementation>
+</Method>
+</Class>
+</Export>

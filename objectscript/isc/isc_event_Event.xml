@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:15">
+<Class name="isc.event.Event">
+<Super>isc.lang.Object</Super>
+<TimeChanged>61748,65198.805263</TimeChanged>
+<TimeCreated>61748,63916.491201</TimeCreated>
+
+<Property name="source">
+<Description>
+source</Description>
+<Type>isc.lang.Object</Type>
+</Property>
+
+<Property name="type">
+<Description>
+type</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="isAsync">
+<Description>
+isAsync</Description>
+<Type>%Boolean</Type>
+</Property>
+
+<Method name="Event">
+<FormalSpec>source,type</FormalSpec>
+<Implementation><![CDATA[
+	s ..source = source
+	s ..type = type
+]]></Implementation>
+</Method>
+
+<Method name="%OnNew">
+<FormalSpec>source,type</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	d ..Event(source,type)
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="stopPropagation">
+</Method>
+</Class>
+</Export>

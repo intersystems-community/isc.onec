@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:16">
+<Class name="isc.lang.Singleton">
+<Description>
+Базовая реализация паттерна singleton</Description>
+<Super>Object</Super>
+<TimeChanged>62143,57449.488892</TimeChanged>
+<TimeCreated>61754,61080.41776</TimeCreated>
+
+<Method name="get">
+<ClassMethod>1</ClassMethod>
+<ReturnType>Object</ReturnType>
+<Implementation><![CDATA[
+		if '(..hasInstance()) {
+			d ..addInstance()
+		}
+		
+		quit ..getInstance()
+]]></Implementation>
+</Method>
+
+<Method name="hasInstance">
+<ClassMethod>1</ClassMethod>
+<Private>1</Private>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	quit $get(%sngltns($classname()))
+	/*
+ set tOref = $zobjnext(""), rStatus = $$$OK
+	while $isobject(tOref) {
+		if tOref.%IsA("%Library.Persistent") {
+			set tSC = tOref.%Save()
+			set rStatus = $$$ADDSC(rStatus,tSC)
+		}
+		set tOref = $zobjnext(tOref)
+	}
+	quit rStatus
+ */
+]]></Implementation>
+</Method>
+
+<Method name="addInstance">
+<ClassMethod>1</ClassMethod>
+<Private>1</Private>
+<Implementation><![CDATA[	s %sngltns($classname()) = ..%New()
+]]></Implementation>
+</Method>
+
+<Method name="getInstance">
+<ClassMethod>1</ClassMethod>
+<Private>1</Private>
+<Implementation><![CDATA[	quit %sngltns($classname())
+]]></Implementation>
+</Method>
+</Class>
+</Export>

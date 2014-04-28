@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:16">
+<Class name="isc.onec.Proxy">
+<Description>
+TODO Extract proeprty and %OnNew to some ObjectProxy class???
+TODO Add the check for method interceptor that if the object is collection it would mimic COS collection (Next() and GetAt()). It is better to subclass for this.
+TODO Add default date type value "0100-01-01 00:00:00"
+TODO Make methods public and private
+TODO Make HandledExceptionProxy
+TODO Move to isc.onec</Description>
+<Super>isc.dispatch.DispatchProxy,%RegisteredObject</Super>
+<TimeChanged>62209,44503.05321</TimeChanged>
+<TimeCreated>61558,50066.484803</TimeCreated>
+<Inheritance>right</Inheritance>
+
+<Property name="oid">
+<Private>1</Private>
+</Property>
+
+<Property name="context">
+<Private>1</Private>
+</Property>
+
+<Property name="path">
+<Private>1</Private>
+</Property>
+
+<Method name="%OnNew">
+<FormalSpec>context,oid,path</FormalSpec>
+<Private>1</Private>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	s ..context = context
+	s ..oid = oid
+	s ..path = path
+	
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="getPath">
+<Implementation><![CDATA[	quit ..path
+]]></Implementation>
+</Method>
+
+<Method name="getOID">
+<Implementation><![CDATA[	quit ..oid
+]]></Implementation>
+</Method>
+
+<Method name="insteadOf">
+<FormalSpec>method:%String,args...</FormalSpec>
+<Implementation><![CDATA[	quit ..context.invoke($this,method,args...)
+]]></Implementation>
+</Method>
+
+<Method name="insteadOfSet">
+<FormalSpec>property:%String,value</FormalSpec>
+<Implementation><![CDATA[	d ..context.set($this,property,value)
+]]></Implementation>
+</Method>
+
+<Method name="insteadOfGet">
+<FormalSpec>property:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	quit ..context.get($this,property)
+]]></Implementation>
+</Method>
+
+<Method name="get">
+<FormalSpec>property:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	quit ..insteadOfGet(property)
+]]></Implementation>
+</Method>
+
+<Method name="%OnClose">
+<Private>1</Private>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	
+	d ..context.free($this)
+	
+	quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

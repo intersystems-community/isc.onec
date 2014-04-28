@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:16">
+<Class name="isc.onec.FileConnectionDescription">
+<Description><![CDATA[
+Строка соединения представляет собой набор параметров, каждый из которых является фрагментом вида: <Имя параметра=><Значение>, где Имя параметра — имя параметра, а Значение — его значение. Фрагменты отделяются друг от друга символами ';'. Если значение содержит пробельные символы, то оно должно быть заключено в двойные кавычки (").
+Для файлового варианта определен параметр: File — каталог информационной базы (файловый режим);
+Для клиент-серверного варианта определены параметры: Srvr — имя сервера 1С:Предприятия; Ref — имя информационной базы на сервере;
+Для всех вариантов определены параметры: Usr — имя пользователя; Pwd — пароль и UC<Код доступа> позволяет выполнить установку соединения с информационной базой, на которую установлена блокировка установки соединений. Если при установке блокировки задан непустой код доступа, то для установки соединения необходимо в параметре /UC указать этот код доступа.]]></Description>
+<Super>isc.onec.ConnectionDescription</Super>
+<TimeChanged>62209,50730.560459</TimeChanged>
+<TimeCreated>61942,60001.925688</TimeCreated>
+
+<Property name="file">
+</Property>
+
+<Method name="%OnNew">
+<FormalSpec>bridgeHost="",bridgePort="",file="",user="",password="",debug=0</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	   s ..bridgeHost = bridgeHost
+	   s ..bridgePort = bridgePort
+	   s ..file = file
+	   s ..user = user
+	   s ..password = password
+	   s ..debug = debug
+	   
+	   quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="URL">
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	  quit ..buildURL(..file,..user,..password)_..getVersionForURL()
+]]></Implementation>
+</Method>
+
+<Method name="buildURL">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>file,user,password</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s url =  "File="""_file_""";Usr="""_user_""";Pwd="""_password_""";"
+	quit url
+]]></Implementation>
+</Method>
+</Class>
+</Export>

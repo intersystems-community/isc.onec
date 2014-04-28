@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:16">
+<Class name="isc.onec.ConnectionDescription">
+<Abstract>1</Abstract>
+<Super>%RegisteredObject</Super>
+<TimeChanged>62209,50667.880553</TimeChanged>
+<TimeCreated>61932,53305.065149</TimeCreated>
+
+<Parameter name="V80">
+<Default>V80</Default>
+</Parameter>
+
+<Parameter name="V81">
+<Default>V81</Default>
+</Parameter>
+
+<Parameter name="V82">
+<Default>V82</Default>
+</Parameter>
+
+<Property name="bridgeHost">
+</Property>
+
+<Property name="bridgePort">
+</Property>
+
+<Property name="version">
+<Type>%String</Type>
+<InitialExpression>"V81"</InitialExpression>
+<Parameter name="VALUELIST" value=",V80,V81,V82"/>
+</Property>
+
+<Property name="user">
+</Property>
+
+<Property name="password">
+</Property>
+
+<Property name="debug">
+</Property>
+
+<Method name="URL">
+<Abstract>1</Abstract>
+<ReturnType>%String</ReturnType>
+</Method>
+
+<Method name="getVersionForURL">
+<Implementation><![CDATA[	quit "Version="""_..version_""";"
+]]></Implementation>
+</Method>
+</Class>
+</Export>

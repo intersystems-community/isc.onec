@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:16">
+<Class name="isc.onec.bridge.TcpClient">
+<Super>%RegisteredObject</Super>
+<TimeChanged>62227,77405.235452</TimeChanged>
+<TimeCreated>62207,50479.759939</TimeCreated>
+
+<Property name="host">
+</Property>
+
+<Property name="port">
+</Property>
+
+<Property name="debug">
+</Property>
+
+<Property name="keepalive">
+<InitialExpression>40</InitialExpression>
+</Property>
+
+<Property name="timeout">
+<InitialExpression>100</InitialExpression>
+</Property>
+
+<Property name="socket">
+<Type>ClientSocket</Type>
+</Property>
+
+<Method name="%OnNew">
+<FormalSpec>host,port,debug=0</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ 
+		s ..host = host
+		s ..port = port
+		s ..debug = debug
+
+		quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="connect">
+<Implementation><![CDATA[
+	 	s socket = ##class(ClientSocket).%New()
+	 	
+		s socket.KeepAliveInterval = ..keepalive
+		s socket.Host = ..host 
+		s socket.Port = ..port
+		/*s socket.TCPSendBuffer = 8192
+		s socket.TCPReceiveBuffer = 8192
+		s socket.OutputBufferSize = 8192
+		s socket.InputBufferSize = 8192*/
+		
+		s ret = socket.Open(,,..timeout,.sc)
+
+		throw:ret=0 ##class(isc.onec.NetworkError).get(##class(%Exception.StatusException).CreateFromStatus(sc),"on connect","host:"_..host_", port:"_..port)
+
+		s ..socket = socket
+]]></Implementation>
+</Method>
+
+<Method name="run">
+<Description>
+header = CMD TARGET OPERAND
+1 byte - cmd
+4 bytes - oid
+2 bytes - length of operand
+n bytes - operand
+1 byte - number of values
+m bytes - values
+value is in format:
+	  1 byte - type
+   2 bytes - length
+   n bytes - value</Description>
+<FormalSpec>cmd,target,operand,vlist:%ListOfDataTypes,tlist:%ListOfDataTypes</FormalSpec>
+<Implementation><![CDATA[
+		  w:..debug "sending:"_..toString(cmd, target, operand, tlist, vlist),!	
+		  try {
+			  s header = $c(cmd)_$NCONVERT(target,"S4")_$NCONVERT($length(operand),"S2")_$ZCVT(operand,"O","SAME")
+		  
+			  if ($isObject(vlist)) {
+					s values = $c(vlist.Count())
+
+					for i=1:1:vlist.Count() {
+					  s v = vlist.GetAt(i)
+			
+					  s values = values_$c(tlist.GetAt(i))_$NCONVERT($length(v),"U2")_$ZCVT(v,"O","SAME")
+					}
+			  } else {
+				    s values = $c(0)
+			  }
+			  s len = $length(header_values)
+		
+			  d ..socket.Write($NCONVERT(len,"U4")_header_values,1,.sc)
+			  
+		  
+		  	  throw:$system.Status.IsError(sc) ##class(%Exception.StatusException).CreateFromStatus(sc)
+		  	  d ..socket.Flush()
+		  }
+		  catch e {
+			  throw ##class(isc.onec.NetworkError).get(e,"on send",..toString(cmd, target, operand, tlist, vlist))
+		  }
+		  
+		  
+		  try {
+			  s len = $SCONVERT(..read(4),"U4")
+			  s type = $a(..read(2))
+			  s length = $SCONVERT(..read(2),"U2")
+		  
+			  s value = ""
+			  s:length>0 value = $ZCVT(..read(length),"I","UTF8")
+		  
+			  w:..debug "recieve:"_type_":"_value,!
+			  s reply = ##class(%ListOfDataTypes).%New()
+			  d reply.Insert(type)
+			  d reply.Insert(value)	  
+		  }
+		  catch e {
+			  throw ##class(isc.onec.NetworkError).get(e,"on recieve",..toString(cmd, target, operand, tlist, vlist))
+		  }
+
+		
+		  quit reply
+]]></Implementation>
+</Method>
+
+<Method name="read">
+<FormalSpec>bytes</FormalSpec>
+<Implementation><![CDATA[
+	s value = ..socket.Read(bytes,..timeout,.sc)
+
+	throw:$system.Status.IsError(sc) ##class(%Exception.StatusException).CreateFromStatus(sc)
+	
+	quit value
+]]></Implementation>
+</Method>
+
+<Method name="toString">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>cmd,target,operand,tlist:%ListOfDataTypes,vlist:%ListOfDataTypes</FormalSpec>
+<Implementation><![CDATA[
+	s values = "{" 
+	for i=1:1:tlist.Count() {
+		s values=values_tlist.GetAt(i)_":"_vlist.GetAt(i)_","
+	}
+	quit cmd_","_target_","_operand_".values:"_values_"}"
+]]></Implementation>
+</Method>
+
+<Method name="disconnect">
+<Implementation><![CDATA[
+	 if ($isObject(..socket)) {
+		 s ..socket = ""	 
+	 }
+]]></Implementation>
+</Method>
+
+<Method name="%OnClose">
+<Private>1</Private>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	d ..disconnect()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:16">
+<Class name="isc.onec.GatewayConnectionException">
+<Super>%Exception.AbstractException</Super>
+<TimeChanged>61932,61929.755598</TimeChanged>
+<TimeCreated>61932,61783.776967</TimeCreated>
+
+<Method name="new">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>innerException</FormalSpec>
+<ReturnType>isc.onec.GatewayConnectionException</ReturnType>
+<Implementation><![CDATA[
+		
+		s e = ..%New("Object Gateway is disconnected","<GTWYFAILED>")
+		s e.Data = "Connection to gateway is broken. Gateway is down or network access is broken."
+		s e.InnerException = innerException
+		
+		quit e
+]]></Implementation>
+</Method>
+</Class>
+</Export>

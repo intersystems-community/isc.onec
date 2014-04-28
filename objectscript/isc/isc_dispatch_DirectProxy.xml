@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:15">
+<Class name="isc.dispatch.DirectProxy">
+<Super>DispatchProxy,%RegisteredObject</Super>
+<TimeChanged>61485,79490.101542</TimeChanged>
+<TimeCreated>61434,60309.558556</TimeCreated>
+<Inheritance>right</Inheritance>
+
+<Property name="object">
+<Description>
+Object to be proxied</Description>
+<Type>%RegisteredObject</Type>
+</Property>
+
+<Method name="%OnNew">
+<FormalSpec>object:%RegisteredObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s ..object = object
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="insteadOfClassMethod">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>class:%String,method:%String,args...</FormalSpec>
+<Implementation><![CDATA[	quit $ZOBJCLASSMETHOD(class, method, args...)
+]]></Implementation>
+</Method>
+
+<Method name="insteadOf">
+<FormalSpec>method:%String,args...</FormalSpec>
+<Implementation><![CDATA[
+	
+	
+	if $isObject(..object) {
+		//@todo bad solution but there is no method overload in COS
+		//@todo introduce argument in method or two methods - returnInsteadOf
+		if $QUIT {
+		    q $ZOBJMETHOD(..object,method, args...)
+		}
+		else {
+			d $ZOBJMETHOD(..object,method, args...)
+		}
+	}
+	else {
+		quit 0
+	}
+]]></Implementation>
+</Method>
+</Class>
+</Export>

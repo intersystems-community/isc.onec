@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:16">
+<Class name="isc.onec.DebugContext">
+<Description>
+TODO rewrite with Request-Reply protocol that is processed by protocol implementation class
+TODO send as object reference Proxy object, not oid
+TODO Subclass of proxy?</Description>
+<Super>Context</Super>
+<TimeChanged>62229,61818.373439</TimeChanged>
+<TimeCreated>62176,66533.543653</TimeCreated>
+<Inheritance>right</Inheritance>
+
+<Property name="bridge">
+<Type>isc.onec.bridge.Bridge</Type>
+</Property>
+
+<Property name="debug">
+<InitialExpression>0</InitialExpression>
+</Property>
+
+<Property name="profiler">
+<Type>isc.dev.Profiler</Type>
+</Property>
+
+<Method name="%OnNew">
+<FormalSpec>bridge:isc.onec.bridge.Bridge,debug=0</FormalSpec>
+<Private>1</Private>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	s ..profiler = ##class(isc.dev.Profiler).get()
+	
+	s ..debug = debug
+	
+	Quit ##super(bridge)
+]]></Implementation>
+</Method>
+
+<Method name="get">
+<FormalSpec>proxy:Proxy,property</FormalSpec>
+<Implementation><![CDATA[
+	s operand = proxy.getPath()_".get"_property
+	w:..debug operand,!
+	
+	d ..profiler.before(operand)
+	s result = ##super(proxy,property)
+	d ..profiler.after(operand)
+	
+	quit result
+]]></Implementation>
+</Method>
+
+<Method name="set">
+<FormalSpec>proxy:Proxy,property,value</FormalSpec>
+<Implementation><![CDATA[
+	if ($isObject(value)) {
+		s val = value.getPath()
+	}
+	else {
+		s val = value
+	}
+	s operand = proxy.getPath()_".set"_property
+	w:..debug operand_"="_val,!
+	
+	d ..profiler.before(operand)
+	d ##super(proxy,property,value)
+	d ..profiler.after(operand)
+]]></Implementation>
+</Method>
+
+<Method name="invoke">
+<FormalSpec>proxy,method,args...</FormalSpec>
+<Implementation><![CDATA[
+	s operand = proxy.getPath()_"."_method_"()"
+	
+	w:..debug operand_..argsToString(args...),!
+	
+	d ..profiler.before(operand)
+	s result = ##super(proxy,method,args...)
+	d ..profiler.after(operand)
+	
+	quit result
+]]></Implementation>
+</Method>
+
+<Method name="connect">
+<FormalSpec>url</FormalSpec>
+<Implementation><![CDATA[
+	s reply = ..bridge.connect(url)
+	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply,"on connect to "_url)
+]]></Implementation>
+</Method>
+
+<Method name="free">
+<FormalSpec>proxy:Proxy</FormalSpec>
+<Implementation><![CDATA[	d ..bridge.free(proxy.getOID())
+]]></Implementation>
+</Method>
+
+<Method name="showStat">
+<Implementation><![CDATA[	d ..bridge.statistics()
+]]></Implementation>
+</Method>
+
+<Method name="disconnect">
+<Implementation><![CDATA[
+	quit:'$isObject(..bridge)
+	
+	s reply = ..bridge.disconnect()
+	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply)	
+	s ..bridge = $$$NULLOREF
+]]></Implementation>
+</Method>
+
+<Method name="%OnClose">
+<Private>1</Private>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+		try {
+			d ..disconnect()
+		}
+		catch e {
+		}
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="getOID">
+<Implementation><![CDATA[	quit ""
+]]></Implementation>
+</Method>
+
+<Method name="getPath">
+<Implementation><![CDATA[	quit ""
+]]></Implementation>
+</Method>
+
+<Method name="insteadOf">
+<FormalSpec>method:%String,args...</FormalSpec>
+<Implementation><![CDATA[	quit ..invoke($this,method,args...)
+]]></Implementation>
+</Method>
+
+<Method name="insteadOfSet">
+<FormalSpec>property:%String,value</FormalSpec>
+<Implementation><![CDATA[	d ..set($this,property,value)
+]]></Implementation>
+</Method>
+
+<Method name="insteadOfGet">
+<FormalSpec>property:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	quit ..get($this,property)
+]]></Implementation>
+</Method>
+
+<Method name="argsToString">
+<FormalSpec>args...</FormalSpec>
+<Implementation><![CDATA[
+	if ('$data(args)) {
+		quit ""
+	}
+	
+	s num = args
+	s list = ""
+	for i = 1:1:num {
+		if ($isObject(args(i))) {
+			s list = list_","_args(i).getPath()
+		} 
+		else {
+			s list = list_","_args(i)
+		}
+	}
+	
+	quit $reverse($p($reverse(list),",",2))
+]]></Implementation>
+</Method>
+</Class>
+</Export>

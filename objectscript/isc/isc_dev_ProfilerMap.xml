@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:15">
+<Class name="isc.dev.ProfilerMap">
+<Super>isc.collection.HashMap</Super>
+<TimeChanged>62140,41144.962365</TimeChanged>
+<TimeCreated>62140,37383.394061</TimeCreated>
+
+<Parameter name="GlobalName">
+<Default>^CacheTempProfiler</Default>
+</Parameter>
+
+<Method name="get">
+<Description>
+Получение значения по ключу</Description>
+<FormalSpec>key</FormalSpec>
+<ReturnType>isc.lang.Object</ReturnType>
+<Implementation><![CDATA[	  quit ^CacheTempProfiler(key)
+]]></Implementation>
+</Method>
+
+<Method name="put">
+<Description>
+Добавление элемента</Description>
+<FormalSpec>key,object</FormalSpec>
+<Implementation><![CDATA[	  s ^CacheTempProfiler(key) = object
+]]></Implementation>
+</Method>
+
+<Method name="iterator">
+<Description>
+Получение итератора</Description>
+<ReturnType>isc.collection.Iterator</ReturnType>
+<Implementation><![CDATA[	quit ##class(ProfilerMapIterator).%New($this)
+]]></Implementation>
+</Method>
+
+<Method name="exists">
+<Description>
+Проверка наличия элемента</Description>
+<FormalSpec>key</FormalSpec>
+<Implementation><![CDATA[	quit $data(^CacheTempProfiler(key))
+]]></Implementation>
+</Method>
+
+<Method name="empty">
+<Description>
+1, eсли hash map не содержит элементов</Description>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	quit '($data(^CacheTempProfiler)>1)
+]]></Implementation>
+</Method>
+
+<Method name="clear">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[	k ^CacheTempProfiler
+]]></Implementation>
+</Method>
+</Class>
+</Export>

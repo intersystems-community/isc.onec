@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:16">
+<Class name="isc.onec.bridge.ClientSocket">
+<Super>isc.onec.io.Socket</Super>
+<TimeChanged>62237,47769.720592</TimeChanged>
+<TimeCreated>62207,50045.918995</TimeCreated>
+
+<Method name="Open">
+<Description>
+Establish a TCP connection to the given host computer on the given port number, if possible within pTimeout.</Description>
+<FormalSpec><![CDATA[pHost:%String="",pPort:%String="",&pTimeout:%Numeric=-1,*pSC:%Status]]></FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	#; Must close before calling Open() again
+	If i%IsOpen Set pSC = $$$ERROR($$$FileAlreadyOpen,..Name_"/"_..Host_$S(..Host[":":"|",1:":")_..Port) Quit 0
+	Set:""=pHost pHost=..Host
+	Set:""=pPort pPort=..Port
+	
+	Set ..Name="|TCP|"_pPort_"|"_$P($Job,":")_$P($this,"@")
+
+	If ""=pHost||(""=pPort) Set pSC = $$$ERROR($$$FileCanNotOpen,..Name_"/"_pHost_$S(..Host[":":"|",1:":")_pPort) Quit 0
+
+	Set $ZT="Trap",pSC=$$$OK
+	
+	Open ..Name:(pHost:pPort:"SW-D"::..InputBufferSize:..OutputBufferSize:/TCPNOXY:/TCPSNDBUF=..TCPSendBuffer:/TCPRCVBUF=..TCPReceiveBuffer:/KEEPALIVE=..KeepAliveInterval):pTimeout Set tTimedOut='$Test
+			
+
+	If tTimedOut Set pSC=$$$ERROR($$$ErrIOOpenTimeout,..Name,pTimeout) Quit 0
+	
+	Do ..initDeviceTranslationTable()
+	Set i%IsOpen=1,i%AtEnd=0,..Host=pHost,..Port=pPort,pTimeout=0
+	Set tIO=$IO Use ..Name
+	Set tRemote=$zu(111,0), ps=$S($L(tRemote)>6:"|",1:":"), tRemote=$$$IPBinaryToText($E(tRemote,1,*-2))_ps_$ZWAscii($Reverse($E(tRemote,*-1,*)))
+	Set i%Remote=$ZDT($ZTS,3,,3)_"|"_tRemote
+	Use tIO
+	Quit 1
+Trap
+	Set $ZT="",tZE=$ZE, pSC=$$$ERROR($$$CacheError,$g(tZE))
+	Close ..Name
+	Quit 0
+]]></Implementation>
+</Method>
+</Class>
+</Export>
