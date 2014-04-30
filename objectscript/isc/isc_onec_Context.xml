@@ -21,7 +21,7 @@ TODO Subclass of proxy?</Description>
 <ReturnType>%Status</ReturnType>
 <ServerOnly>1</ServerOnly>
 <Implementation><![CDATA[
-	s ..bridge = bridge
+	set ..bridge = bridge
 	Quit $$$OK
 ]]></Implementation>
 </Method>
@@ -29,10 +29,10 @@ TODO Subclass of proxy?</Description>
 <Method name="get">
 <FormalSpec>proxy:Proxy,property</FormalSpec>
 <Implementation><![CDATA[
-	s path = proxy.getPath()_"."_property 
-	s oid = proxy.getOID()
+	set path = proxy.getPath()_"."_property 
+	set oid = proxy.getOID()
 	
-	s reply = ..bridge.get(oid,property)
+	set reply = ..bridge.get(oid,property)
 	
 	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply,proxy.getPath()_"."_property)
 	
@@ -47,17 +47,17 @@ TODO Subclass of proxy?</Description>
 <Method name="set">
 <FormalSpec>proxy:Proxy,property,value</FormalSpec>
 <Implementation><![CDATA[
-	s oid = proxy.getOID()
+	set oid = proxy.getOID()
 	
 	if ($isObject(value)) {
-		s type = ##class(isc.onec.bridge.Bridge).#OBJECTREQ
-		s value=value.getOID()
+		set type = ##class(isc.onec.bridge.Bridge).#OBJECTREQ
+		set value=value.getOID()
 	}
 	else {
-		s type = ##class(isc.onec.bridge.Bridge).#DATAREQ
+		set type = ##class(isc.onec.bridge.Bridge).#DATAREQ
 	}
 	
-	s reply = ..bridge.set(oid,property,value,type)
+	set reply = ..bridge.set(oid,property,value,type)
 	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply,proxy.getPath()_"."_property)
 ]]></Implementation>
 </Method>
@@ -65,40 +65,40 @@ TODO Subclass of proxy?</Description>
 <Method name="invoke">
 <FormalSpec>proxy,method,args...</FormalSpec>
 <Implementation><![CDATA[
-	s values = ##class(%ListOfDataTypes).%New()
-	s types = ##class(%ListOfDataTypes).%New()
+	set values = ##class(%ListOfDataTypes).%New()
+	set types = ##class(%ListOfDataTypes).%New()
 	
     if ($data(args)) {
-		s num = args
+		set num = args
 		//TODO  use unmarshall()
 		for i = 1:1:num {	
 			if ($isObject(args(i))) {
-				s v = args(i).getOID()
-				s t = ##class(isc.onec.bridge.Bridge).#OBJECTREQ
+				set v = args(i).getOID()
+				set t = ##class(isc.onec.bridge.Bridge).#OBJECTREQ
 			 }
 			 else {
-				 s v = args(i)
+				 set v = args(i)
 				 if (..isNumber(args(i))) {
-					s t = ##class(isc.onec.bridge.Bridge).#NUMBERREQ
+					set t = ##class(isc.onec.bridge.Bridge).#NUMBERREQ
 				 }
 				 else {
-				 	s t = ##class(isc.onec.bridge.Bridge).#DATAREQ
+				 	set t = ##class(isc.onec.bridge.Bridge).#DATAREQ
 				 }
 			 }
-			 d values.Insert(v)
-			 d types.Insert(t)
+			 do values.Insert(v)
+			 do types.Insert(t)
 		 } 
 	}
 	
-	s oid = proxy.getOID()
+	set oid = proxy.getOID()
 	
 	
-	s reply =  ..bridge.do(oid,method,values,types)
+	set reply =  ..bridge.do(oid,method,values,types)
 	
 	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply,proxy.getPath()_"."_method_"()")
 	
 	if (..bridge.isObject(reply)) { 
-		s path = proxy.getPath()_"."_method_"()"
+		set path = proxy.getPath()_"."_method_"()"
 		
 		quit ##class(Proxy).%New($this,reply.GetAt(2),path)
 	}
@@ -109,21 +109,21 @@ TODO Subclass of proxy?</Description>
 
 <UDLText name="T">
 <Content><![CDATA[
-//TODO check other numbers: 1, -1, 0.1, -0.1, etc
+// TODO check other numbers: 1, -1, 0.1, -0.1, etc
 
 ]]></Content>
 </UDLText>
 
 <UDLText name="T">
 <Content><![CDATA[
-//Currently I suppose that only signed and unsigned integers are marshalled to integers
+// Currently I suppose that only signed and unsigned integers are marshalled to integers
 
 ]]></Content>
 </UDLText>
 
 <UDLText name="T">
 <Content><![CDATA[
-//All other numbers are interpreted as strings
+// All other numbers are interpreted as strings
 
 ]]></Content>
 </UDLText>
@@ -132,7 +132,7 @@ TODO Subclass of proxy?</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>v</FormalSpec>
 <Implementation><![CDATA[
-	s t = $a($lb(v),2)
+	set t = $ascii($listbuild(v),2)
 	quit:t=4 1
 	quit:t=5 1
 	quit 0
@@ -142,19 +142,19 @@ TODO Subclass of proxy?</Description>
 <Method name="connect">
 <FormalSpec>url</FormalSpec>
 <Implementation><![CDATA[
-	s reply = ..bridge.connect(url)
+	set reply = ..bridge.connect(url)
 	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply,"on connect to "_url)
 ]]></Implementation>
 </Method>
 
 <Method name="free">
 <FormalSpec>proxy:Proxy</FormalSpec>
-<Implementation><![CDATA[	d:$isObject(..bridge) ..bridge.free(proxy.getOID())
+<Implementation><![CDATA[	do:$isObject(..bridge) ..bridge.free(proxy.getOID())
 ]]></Implementation>
 </Method>
 
 <Method name="showStat">
-<Implementation><![CDATA[	d ..bridge.statistics()
+<Implementation><![CDATA[	do ..bridge.statistics()
 ]]></Implementation>
 </Method>
 
@@ -162,9 +162,9 @@ TODO Subclass of proxy?</Description>
 <Implementation><![CDATA[
 	quit:'$isObject(..bridge)
 	
-	s reply = ..bridge.disconnect()
+	set reply = ..bridge.disconnect()
 	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply)	
-	s ..bridge = $$$NULLOREF
+	set ..bridge = $$$NULLOREF
 ]]></Implementation>
 </Method>
 
@@ -175,7 +175,7 @@ TODO Subclass of proxy?</Description>
 <ServerOnly>1</ServerOnly>
 <Implementation><![CDATA[
 		try {
-			d ..disconnect()
+			do ..disconnect()
 		}
 		catch e {
 		}
@@ -202,7 +202,7 @@ TODO Subclass of proxy?</Description>
 
 <Method name="insteadOfSet">
 <FormalSpec>property:%String,value</FormalSpec>
-<Implementation><![CDATA[	d ..set($this,property,value)
+<Implementation><![CDATA[	do ..set($this,property,value)
 ]]></Implementation>
 </Method>
 
