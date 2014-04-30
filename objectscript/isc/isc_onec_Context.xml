@@ -22,7 +22,7 @@ TODO Subclass of proxy?</Description>
 <ServerOnly>1</ServerOnly>
 <Implementation><![CDATA[
 	set ..bridge = bridge
-	Quit $$$OK
+	return $$$OK
 ]]></Implementation>
 </Method>
 
@@ -35,14 +35,12 @@ TODO Subclass of proxy?</Description>
 	#dim reply as %ListOfDataTypes = ..bridge.get(oid, property)
 	
 	if (..bridge.isException(reply)) {
-		throw ##class(Exception).%New(reply,proxy.getPath() _ "." _ property)
+		throw ##class(Exception).%New(reply, proxy.getPath() _ "." _ property)
+	} elseif (..bridge.isObject(reply)) { 
+		return ##class(Proxy).%New($this, reply.GetAt(2), path)
 	}
 
-	if (..bridge.isObject(reply)) { 
-		quit ##class(Proxy).%New($this, reply.GetAt(2), path)
-	}
-
-	quit reply.GetAt(2)
+	return reply.GetAt(2)
 ]]></Implementation>
 </Method>
 
@@ -103,15 +101,13 @@ TODO Subclass of proxy?</Description>
 
 	if (..bridge.isException(reply)) {
 		throw ##class(Exception).%New(reply, proxy.getPath() _ "." _ method _ "()")
-	}
-
-	if (..bridge.isObject(reply)) { 
+	} elseif (..bridge.isObject(reply)) { 
 		#dim path as %String = proxy.getPath() _ "." _ method _ "()"
 
-		quit ##class(Proxy).%New($this, reply.GetAt(2), path)
+		return ##class(Proxy).%New($this, reply.GetAt(2), path)
 	}
 	
-	quit reply.GetAt(2)
+	return reply.GetAt(2)
 ]]></Implementation>
 </Method>
 
@@ -141,9 +137,9 @@ TODO Subclass of proxy?</Description>
 <FormalSpec>v</FormalSpec>
 <Implementation><![CDATA[
 	#dim t as %Integer = $ascii($listbuild(v), 2)
-	quit:t=4 1
-	quit:t=5 1
-	quit 0
+	return:t=4 1
+	return:t=5 1
+	return 0
 ]]></Implementation>
 </Method>
 
@@ -174,7 +170,7 @@ TODO Subclass of proxy?</Description>
 <Method name="disconnect">
 <Implementation><![CDATA[
 	if ('$isObject(..bridge)) {
-		quit
+		return
 	}
 
 	#dim reply as %ListOfDataTypes = ..bridge.disconnect()
@@ -198,25 +194,25 @@ TODO Subclass of proxy?</Description>
 		// Ignore.
 	}
 
-	Quit $$$OK
+	return $$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="getOID">
 <ReturnType>%String</ReturnType>
-<Implementation><![CDATA[	quit ""
+<Implementation><![CDATA[	return ""
 ]]></Implementation>
 </Method>
 
 <Method name="getPath">
 <ReturnType>%String</ReturnType>
-<Implementation><![CDATA[	quit ""
+<Implementation><![CDATA[	return ""
 ]]></Implementation>
 </Method>
 
 <Method name="insteadOf">
 <FormalSpec>method:%String,args...</FormalSpec>
-<Implementation><![CDATA[	quit ..invoke($this, method, args...)
+<Implementation><![CDATA[	return ..invoke($this, method, args...)
 ]]></Implementation>
 </Method>
 
@@ -229,7 +225,7 @@ TODO Subclass of proxy?</Description>
 <Method name="insteadOfGet">
 <FormalSpec>property:%String</FormalSpec>
 <ReturnType>%String</ReturnType>
-<Implementation><![CDATA[	quit ..get($this, property)
+<Implementation><![CDATA[	return ..get($this, property)
 ]]></Implementation>
 </Method>
 </Class>
