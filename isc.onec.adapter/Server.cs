@@ -111,7 +111,7 @@ namespace isc.onec.bridge {
 				});
 			case Commands.CONNECT:
 				if (this.service != null) {
-					var client = types.Length > 0 ? (string) (new Request(types[0], vals[0])).value : null;
+					var client = types.Length > 0 ? (string) (new Request(types[0], vals[0])).Value : null;
 					return this.service.connect(operand, client);
 				}
 				return new Response(Response.Type.EXCEPTION, "Server#service is null");

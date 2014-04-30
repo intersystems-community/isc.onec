@@ -183,13 +183,13 @@ namespace isc.onec.bridge
 		//TODO throw exception if no type is found
 		private object marshall(Request value)
 		{
-			switch (value.type)
+			switch (value.RequestType)
 			{
 				case Request.Type.OBJECT: return find(value);//MarshalByRefObject
 
-				case Request.Type.DATA: return value.getValue();
+				case Request.Type.DATA: return value.Value;
 
-				case Request.Type.NUMBER: return value.getValue();
+				case Request.Type.NUMBER: return value.Value;
 
 				default: return null;
 			}
@@ -229,11 +229,11 @@ namespace isc.onec.bridge
 		}
 		private object find(Request obj)
 		{
-			if (obj.type == Request.Type.CONTEXT)
+			if (obj.RequestType == Request.Type.CONTEXT)
 			{
 				return this.context;
 			}
-			return repository.find(obj.value.ToString());
+			return repository.find(obj.Value.ToString());
 		}
 		private string add(object rcw)
 		{
@@ -241,9 +241,9 @@ namespace isc.onec.bridge
 		}
 		private void remove(Request obj)
 		{
-			if (obj.type != Request.Type.OBJECT) throw new Exception("Service: attempt to remove non-object");
+			if (obj.RequestType != Request.Type.OBJECT) throw new Exception("Service: attempt to remove non-object");
 
-			repository.remove(obj.value.ToString());
+			repository.remove(obj.Value.ToString());
 		}
 
 		

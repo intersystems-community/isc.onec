@@ -1,12 +1,18 @@
 ﻿using System;
+using System.Diagnostics;
+using isc.general;
 
 namespace isc.onec.bridge
 {
 	public class Request
 	{
 		public enum Type { DATA=1,OBJECT=2,CONTEXT=3,NUMBER=4 };
-		public Type type;
-		public object value;
+
+		private Type type;
+
+		private string value;
+
+		private static EventLog eventLog = EventLogFactory.Instance;
 
 		public Request(string oid)
 		{
@@ -20,27 +26,40 @@ namespace isc.onec.bridge
 			}
 			this.value=oid;
 		}
-		public Request(Type type, object value)
-		{
+
+		public Request(Type type, string value) {
+			if (type == Type.NUMBER) {
+				try {
+					Convert.ToInt64(value);
+				} catch (FormatException) {
+					eventLog.WriteEntry("Expected a number, received: \"" + value + "\" (length: " + value.Length + ")", EventLogEntryType.Error);
+					throw;
+				}
+			}
+
 			this.type = type;
 			this.value = value;
 		}
-		
-		public Request(int typeId, object value)
-		{
-			this.type = Request.numToEnum<Type>(typeId);
-			this.value = value;
+
+		public Request(int typeId, string value) :
+			this(Request.numToEnum<Type>(typeId), value) {
+			// empty
 		}
-		public string getOID()
-		{
-			return value.ToString();
+
+		public Type RequestType {
+			get {
+				return this.type;
+			}
 		}
-		public object getValue()
-		{
-			if (type == Type.NUMBER) return Convert.ToInt64(value);
-			return value.ToString();
+
+		public object Value {
+			get {
+				return this.type == Type.NUMBER
+					? Convert.ToInt64(this.value)
+					: (object) this.value;
+			}
 		}
-	  
+
 		public static T numToEnum<T>(int number)
 		{
 			return (T)Enum.ToObject(typeof(T), number);

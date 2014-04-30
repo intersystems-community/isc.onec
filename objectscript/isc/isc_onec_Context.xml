@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-28 15:49:16">
 <Class name="isc.onec.Context">
-<Description>
-TODO rewrite with Request-Reply protocol that is processed by protocol implementation class
-TODO send as object reference Proxy object, not oid
-TODO Subclass of proxy?</Description>
+<Description><![CDATA[
+<ul>
+<li>TODO rewrite with Request-Reply protocol that is processed by protocol implementation class</li>
+<li>TODO send as object reference Proxy object, not oid</li>
+<li>TODO Subclass of proxy?</li>
+</ul>
+<b>Author</b>: <a href = "mailto:oleg.olenin@intersystems.com">Oleg Olenin</a>]]></Description>
 <Import>isc.dispatch,isc.onec.bridge</Import>
 <Super>DispatchProxy,%RegisteredObject</Super>
 <TimeChanged>62229,58357.096153</TimeChanged>
@@ -84,11 +87,9 @@ TODO Subclass of proxy?</Description>
 				set t = ##class(Bridge).#OBJECTREQ
 			} else {
 				set v = args(i)
-				if (..isNumber(args(i))) {
-					set t = ##class(Bridge).#NUMBERREQ
-				} else {
-				 	set t = ##class(Bridge).#DATAREQ
-				}
+				set t = $case(##class(ContextUtilities).IsNumber(args(i)),
+					1: ##class(Bridge).#NUMBERREQ,
+					:##class(Bridge).#DATAREQ)
 			}
 			do values.Insert(v)
 			do types.Insert(t)

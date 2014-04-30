@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.2 (Build 240U)" ts="2014-04-30 23:41:45">
+<Class name="isc.onec.ContextUtilities">
+<Description><![CDATA[
+<b>Author</b>: <a href = "mailto:andrey.shcheglov@intersystems.com">Andrey Shcheglov</a>]]></Description>
+<Final>1</Final>
+<Abstract>1</Abstract>
+<TimeChanged>63307,85043.961865</TimeChanged>
+<TimeCreated>63307,83618.380737</TimeCreated>
+
+<Parameter name="DECIMAL">
+<Type>%String</Type>
+<Default>DECIMAL</Default>
+</Parameter>
+
+<Parameter name="DOUBLE">
+<Type>%String</Type>
+<Default>DOUBLE</Default>
+</Parameter>
+
+<Parameter name="STRING">
+<Type>%String</Type>
+<Default>STRING</Default>
+</Parameter>
+
+<Parameter name="LIST">
+<Type>%String</Type>
+<Default>LIST</Default>
+</Parameter>
+
+<Parameter name="OBJECT">
+<Type>%String</Type>
+<Default>OBJECT</Default>
+</Parameter>
+
+<Method name="IsNumber">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec>arg</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[(..GetType(arg) = ..#DECIMAL) || (..GetType(arg) = ..#DOUBLE)
+]]></Implementation>
+</Method>
+
+<Method name="GetType">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>arg</FormalSpec>
+<ReturnType>%String</ReturnType>
+<ReturnTypeParams>VALUELIST=",DECIMAL,DOUBLE,STRING,LIST,OBJECT"</ReturnTypeParams>
+<Implementation><![CDATA[
+	#dim typeCode as %Integer = ..GetTypeCode(arg)
+	return $select(
+		$isobject(arg):
+			..#OBJECT,
+		$length(arg) >= 254:
+			// For strings at least 254 chars long,
+			// typeCodes returned can range from 0 to 255,
+			// so they can't be reliebly used to determine a type.
+			// We're assuming numbers consisting of 254+ digits
+			// are extremely rare.
+			..#STRING,
+		typeCode = 1:
+			// Either a string, an object, or a list.
+			// We've already checked for an object earlier.
+			$case(..IsList(arg), 1 : ..#LIST, :..#STRING),
+		((typeCode = 4) || (typeCode = 5) || (typeCode = 6) || (typeCode = 7)):
+			..#DECIMAL,
+		typeCode = 8:
+			..#DOUBLE,
+		1:
+			"UNKNOWN (" _ typeCode _ ")")
+]]></Implementation>
+</Method>
+
+<Method name="GetTypeCode">
+<Description>
+Returns the 2nd byte of list constructed from the argument</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec>arg</FormalSpec>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[$ascii($listbuild(arg), 2)
+]]></Implementation>
+</Method>
+
+<Method name="IsList">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>arg</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	#dim e as %Exception.SystemException
+	try {
+		/*
+		 * $listlength("") returns 0.
+		 * For any $lb(), returned value is >= 1.
+		 */
+		return $listlength(arg) >= 1
+	} catch (e) {
+		if (e.Name = "<LIST>") {
+			return 0
+		} else {
+			throw e
+		}
+	}
+]]></Implementation>
+</Method>
+</Class>
+</Export>
