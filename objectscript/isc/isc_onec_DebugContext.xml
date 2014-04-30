@@ -130,11 +130,13 @@ TODO Subclass of proxy?</Description>
 </Method>
 
 <Method name="getOID">
+<ReturnType>%String</ReturnType>
 <Implementation><![CDATA[	quit ""
 ]]></Implementation>
 </Method>
 
 <Method name="getPath">
+<ReturnType>%String</ReturnType>
 <Implementation><![CDATA[	quit ""
 ]]></Implementation>
 </Method>

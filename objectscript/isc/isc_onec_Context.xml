@@ -29,17 +29,19 @@ TODO Subclass of proxy?</Description>
 <Method name="get">
 <FormalSpec>proxy:Proxy,property</FormalSpec>
 <Implementation><![CDATA[
-	set path = proxy.getPath()_"."_property 
-	set oid = proxy.getOID()
+	#dim path as %String = proxy.getPath() _ "." _ property 
+	#dim oid as %String = proxy.getOID()
 	
-	set reply = ..bridge.get(oid,property)
+	#dim reply as %ListOfDataTypes = ..bridge.get(oid, property)
 	
-	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply,proxy.getPath()_"."_property)
-	
-	if (..bridge.isObject(reply)) { 
-		quit ##class(Proxy).%New($this,reply.GetAt(2),path)
+	if (..bridge.isException(reply)) {
+		throw ##class(Exception).%New(reply,proxy.getPath() _ "." _ property)
 	}
-	
+
+	if (..bridge.isObject(reply)) { 
+		quit ##class(Proxy).%New($this, reply.GetAt(2), path)
+	}
+
 	quit reply.GetAt(2)
 ]]></Implementation>
 </Method>
@@ -47,60 +49,66 @@ TODO Subclass of proxy?</Description>
 <Method name="set">
 <FormalSpec>proxy:Proxy,property,value</FormalSpec>
 <Implementation><![CDATA[
-	set oid = proxy.getOID()
-	
+	#dim oid as %String = proxy.getOID()
+
+	#dim type as %Integer
+	#dim reply as %ListOfDataTypes
 	if ($isObject(value)) {
 		set type = ##class(isc.onec.bridge.Bridge).#OBJECTREQ
-		set value=value.getOID()
-	}
-	else {
+		set reply = ..bridge.set(oid, property, value.getOID(), type)
+	} else {
 		set type = ##class(isc.onec.bridge.Bridge).#DATAREQ
+		set reply = ..bridge.set(oid, property, value, type)
 	}
-	
-	set reply = ..bridge.set(oid,property,value,type)
-	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply,proxy.getPath()_"."_property)
+
+	if (..bridge.isException(reply)) {
+		throw ##class(Exception).%New(reply, proxy.getPath() _ "." _ property)
+	}
 ]]></Implementation>
 </Method>
 
 <Method name="invoke">
 <FormalSpec>proxy,method,args...</FormalSpec>
 <Implementation><![CDATA[
-	set values = ##class(%ListOfDataTypes).%New()
-	set types = ##class(%ListOfDataTypes).%New()
+	#dim values as %ListOfDataTypes = ##class(%ListOfDataTypes).%New()
+	#dim types as %ListOfDataTypes = ##class(%ListOfDataTypes).%New()
 	
-    if ($data(args)) {
-		set num = args
+	if ($data(args)) {
+		#dim num as %Integer = args
 		//TODO  use unmarshall()
-		for i = 1:1:num {	
+		#dim i as %Integer
+		for i = 1:1:num {
+			#dim t as %Integer
+			#dim v as %String
 			if ($isObject(args(i))) {
 				set v = args(i).getOID()
 				set t = ##class(isc.onec.bridge.Bridge).#OBJECTREQ
-			 }
-			 else {
-				 set v = args(i)
-				 if (..isNumber(args(i))) {
+			} else {
+				set v = args(i)
+				if (..isNumber(args(i))) {
 					set t = ##class(isc.onec.bridge.Bridge).#NUMBERREQ
-				 }
-				 else {
+				} else {
 				 	set t = ##class(isc.onec.bridge.Bridge).#DATAREQ
-				 }
-			 }
-			 do values.Insert(v)
-			 do types.Insert(t)
-		 } 
+				}
+			}
+			do values.Insert(v)
+			do types.Insert(t)
+		} 
 	}
-	
-	set oid = proxy.getOID()
-	
-	
-	set reply =  ..bridge.do(oid,method,values,types)
-	
-	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply,proxy.getPath()_"."_method_"()")
-	
+
+	#dim oid as %String = proxy.getOID()
+
+
+	#dim reply as %ListOfDataTypes =  ..bridge.do(oid, method, values, types)
+
+	if (..bridge.isException(reply)) {
+		throw ##class(Exception).%New(reply, proxy.getPath() _ "." _ method _ "()")
+	}
+
 	if (..bridge.isObject(reply)) { 
-		set path = proxy.getPath()_"."_method_"()"
-		
-		quit ##class(Proxy).%New($this,reply.GetAt(2),path)
+		#dim path as %String = proxy.getPath() _ "." _ method _ "()"
+
+		quit ##class(Proxy).%New($this, reply.GetAt(2), path)
 	}
 	
 	quit reply.GetAt(2)
@@ -132,7 +140,7 @@ TODO Subclass of proxy?</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>v</FormalSpec>
 <Implementation><![CDATA[
-	set t = $ascii($listbuild(v),2)
+	#dim t as %Integer = $ascii($listbuild(v), 2)
 	quit:t=4 1
 	quit:t=5 1
 	quit 0
@@ -142,14 +150,19 @@ TODO Subclass of proxy?</Description>
 <Method name="connect">
 <FormalSpec>url</FormalSpec>
 <Implementation><![CDATA[
-	set reply = ..bridge.connect(url)
-	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply,"on connect to "_url)
+	#dim reply as %ListOfDataTypes = ..bridge.connect(url)
+	if (..bridge.isException(reply)) {
+		throw ##class(Exception).%New(reply, "on connect to " _ url)
+	}
 ]]></Implementation>
 </Method>
 
 <Method name="free">
 <FormalSpec>proxy:Proxy</FormalSpec>
-<Implementation><![CDATA[	do:$isObject(..bridge) ..bridge.free(proxy.getOID())
+<Implementation><![CDATA[
+	if ($isObject(..bridge)) {
+		do ..bridge.free(proxy.getOID())
+	}
 ]]></Implementation>
 </Method>
 
@@ -160,10 +173,14 @@ TODO Subclass of proxy?</Description>
 
 <Method name="disconnect">
 <Implementation><![CDATA[
-	quit:'$isObject(..bridge)
-	
-	set reply = ..bridge.disconnect()
-	if (..bridge.isException(reply)) throw ##class(Exception).%New(reply)	
+	if ('$isObject(..bridge)) {
+		quit
+	}
+
+	#dim reply as %ListOfDataTypes = ..bridge.disconnect()
+	if (..bridge.isException(reply)) {
+		throw ##class(Exception).%New(reply)
+	}
 	set ..bridge = $$$NULLOREF
 ]]></Implementation>
 </Method>
@@ -174,42 +191,45 @@ TODO Subclass of proxy?</Description>
 <ReturnType>%Status</ReturnType>
 <ServerOnly>1</ServerOnly>
 <Implementation><![CDATA[
-		try {
-			do ..disconnect()
-		}
-		catch e {
-		}
-	
+	#dim e as Exception
+	try {
+		do ..disconnect()
+	} catch (e) {
+		// Ignore.
+	}
+
 	Quit $$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="getOID">
+<ReturnType>%String</ReturnType>
 <Implementation><![CDATA[	quit ""
 ]]></Implementation>
 </Method>
 
 <Method name="getPath">
+<ReturnType>%String</ReturnType>
 <Implementation><![CDATA[	quit ""
 ]]></Implementation>
 </Method>
 
 <Method name="insteadOf">
 <FormalSpec>method:%String,args...</FormalSpec>
-<Implementation><![CDATA[	quit ..invoke($this,method,args...)
+<Implementation><![CDATA[	quit ..invoke($this, method, args...)
 ]]></Implementation>
 </Method>
 
 <Method name="insteadOfSet">
 <FormalSpec>property:%String,value</FormalSpec>
-<Implementation><![CDATA[	do ..set($this,property,value)
+<Implementation><![CDATA[	do ..set($this, property, value)
 ]]></Implementation>
 </Method>
 
 <Method name="insteadOfGet">
 <FormalSpec>property:%String</FormalSpec>
 <ReturnType>%String</ReturnType>
-<Implementation><![CDATA[	quit ..get($this,property)
+<Implementation><![CDATA[	quit ..get($this, property)
 ]]></Implementation>
 </Method>
 </Class>
