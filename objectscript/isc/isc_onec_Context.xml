@@ -113,38 +113,6 @@
 ]]></Implementation>
 </Method>
 
-<UDLText name="T">
-<Content><![CDATA[
-// TODO check other numbers: 1, -1, 0.1, -0.1, etc
-
-]]></Content>
-</UDLText>
-
-<UDLText name="T">
-<Content><![CDATA[
-// Currently I suppose that only signed and unsigned integers are marshalled to integers
-
-]]></Content>
-</UDLText>
-
-<UDLText name="T">
-<Content><![CDATA[
-// All other numbers are interpreted as strings
-
-]]></Content>
-</UDLText>
-
-<Method name="isNumber">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>v</FormalSpec>
-<Implementation><![CDATA[
-	#dim t as %Integer = $ascii($listbuild(v), 2)
-	return:t=4 1
-	return:t=5 1
-	return 0
-]]></Implementation>
-</Method>
-
 <Method name="connect">
 <FormalSpec>url</FormalSpec>
 <Implementation><![CDATA[
