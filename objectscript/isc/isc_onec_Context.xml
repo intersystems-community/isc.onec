@@ -5,17 +5,18 @@
 TODO rewrite with Request-Reply protocol that is processed by protocol implementation class
 TODO send as object reference Proxy object, not oid
 TODO Subclass of proxy?</Description>
-<Super>isc.dispatch.DispatchProxy,%RegisteredObject</Super>
+<Import>isc.dispatch,isc.onec.bridge</Import>
+<Super>DispatchProxy,%RegisteredObject</Super>
 <TimeChanged>62229,58357.096153</TimeChanged>
 <TimeCreated>62176,66533.543653</TimeCreated>
 <Inheritance>right</Inheritance>
 
 <Property name="bridge">
-<Type>isc.onec.bridge.Bridge</Type>
+<Type>Bridge</Type>
 </Property>
 
 <Method name="%OnNew">
-<FormalSpec>bridge:isc.onec.bridge.Bridge</FormalSpec>
+<FormalSpec>bridge:Bridge</FormalSpec>
 <Private>1</Private>
 <ProcedureBlock>1</ProcedureBlock>
 <ReturnType>%Status</ReturnType>
@@ -52,10 +53,10 @@ TODO Subclass of proxy?</Description>
 	#dim type as %Integer
 	#dim reply as %ListOfDataTypes
 	if ($isObject(value)) {
-		set type = ##class(isc.onec.bridge.Bridge).#OBJECTREQ
+		set type = ##class(Bridge).#OBJECTREQ
 		set reply = ..bridge.set(oid, property, value.getOID(), type)
 	} else {
-		set type = ##class(isc.onec.bridge.Bridge).#DATAREQ
+		set type = ##class(Bridge).#DATAREQ
 		set reply = ..bridge.set(oid, property, value, type)
 	}
 
@@ -80,13 +81,13 @@ TODO Subclass of proxy?</Description>
 			#dim v as %String
 			if ($isObject(args(i))) {
 				set v = args(i).getOID()
-				set t = ##class(isc.onec.bridge.Bridge).#OBJECTREQ
+				set t = ##class(Bridge).#OBJECTREQ
 			} else {
 				set v = args(i)
 				if (..isNumber(args(i))) {
-					set t = ##class(isc.onec.bridge.Bridge).#NUMBERREQ
+					set t = ##class(Bridge).#NUMBERREQ
 				} else {
-				 	set t = ##class(isc.onec.bridge.Bridge).#DATAREQ
+				 	set t = ##class(Bridge).#DATAREQ
 				}
 			}
 			do values.Insert(v)
