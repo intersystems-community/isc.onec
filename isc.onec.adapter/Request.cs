@@ -14,17 +14,9 @@ namespace isc.onec.bridge
 
 		private static EventLog eventLog = EventLogFactory.Instance;
 
-		public Request(string oid)
-		{
-			if (oid == "")
-			{
-				this.type = Type.CONTEXT;
-			}
-			else
-			{
-				this.type = Type.OBJECT;
-			}
-			this.value=oid;
+		public Request(string oid) {
+			this.type = oid.Length == 0 ? Type.CONTEXT : Type.OBJECT;
+			this.value = oid;
 		}
 
 		public Request(Type type, string value) {
@@ -60,9 +52,8 @@ namespace isc.onec.bridge
 			}
 		}
 
-		public static T numToEnum<T>(int number)
-		{
-			return (T)Enum.ToObject(typeof(T), number);
+		public static T numToEnum<T>(int number) {
+			return (T) Enum.ToObject(typeof(T), number);
 		}
 	}
 }
