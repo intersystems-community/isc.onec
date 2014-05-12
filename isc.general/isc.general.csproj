@@ -70,6 +70,9 @@
     <CodeAnalysisRuleDirectories>;C:\Program_Files\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>intersystems.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="EventLogFactory.cs" />
     <Compile Include="ExceptionUtilities.cs" />
@@ -78,6 +81,9 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.ServiceProcess" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="intersystems.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

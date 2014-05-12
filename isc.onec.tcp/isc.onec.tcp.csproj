@@ -50,6 +50,9 @@
     <PlatformTarget>x86</PlatformTarget>
     <OutputPath>bin\x86\Release\</OutputPath>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>intersystems.ico</ApplicationIcon>
+  </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -79,5 +82,8 @@
       <Project>{8C6CFF56-9ECA-423C-AF0F-122E7B414EFF}</Project>
       <Name>isc.onec.adapter</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="intersystems.ico" />
   </ItemGroup>
 </Project>
