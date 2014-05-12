@@ -63,6 +63,8 @@ namespace isc.onec.tcp.thread
 		/// </summary>
 		/// <param name="data">Полученые данные</param>
 		/// <param name="totalbytes">Количество полученных данных</param>
+		/// <param name="client"></param>
+		/// <param name="server"></param>
 		public void AnalyzeTraffic(ref byte[] data, int totalbytes,TcpClient client,Server server)
 		{
 			Analyze(ref data, totalbytes,client,server);
