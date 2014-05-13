@@ -643,7 +643,7 @@ namespace isc.onec.tcp.async
 			bool incomingTcpMessageIsReady = false;
 			try
 			{
-				incomingTcpMessageIsReady = messageHandler.HandleMessage(receiveSendEventArgs, receiveSendToken, remainingBytesToProcess);
+				incomingTcpMessageIsReady = messageHandler.HandleMessage(receiveSendEventArgs.Buffer, receiveSendToken, remainingBytesToProcess);
 			}
 			catch (Exception e)
 			{

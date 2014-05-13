@@ -1,18 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Sockets;
-using System.Text;
+using isc.general;
 using NLog;
 
 namespace isc.onec.tcp.async {
 	class MessageHandler {
-		private static Logger logger = LogManager.GetCurrentClassLogger();
+		private static EventLog eventLog = EventLogFactory.Instance;
 
-		public bool HandleMessage(SocketAsyncEventArgs receiveSendEventArgs,
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="source"></param>
+		/// <param name="receiveSendToken"></param>
+		/// <param name="remainingBytesToProcess"></param>
+		/// <returns>whether incoming TCP message is ready</returns>
+		public bool HandleMessage(byte[] source,
 				DataHoldingUserToken receiveSendToken,
 				Int32 remainingBytesToProcess) {
-			bool incomingTcpMessageIsReady = false;
-			
 			//Create the array where we'll store the complete message, 
 			//if it has not been created on a previous receive op.
 			if (receiveSendToken.receivedMessageBytesDoneCount == 0) {
@@ -29,6 +34,25 @@ namespace isc.onec.tcp.async {
 			// receiveSendToken.receivedMessageBytesDoneCount variable, which
 			// helps us handle message data, whether it requires one receive
 			// operation or many.
+			try {
+				Buffer.BlockCopy(source,
+						receiveSendToken.receiveMessageOffset,
+						receiveSendToken.theDataHolder.dataMessageReceived,
+						receiveSendToken.receivedMessageBytesDoneCount,
+						remainingBytesToProcess);
+			} catch (ArgumentException ae) {
+				eventLog.WriteEntry(ae.ToStringWithIlOffsets(), EventLogEntryType.Error);
+				eventLog.WriteEntry("Exception context: client: " + receiveSendToken.server.Client
+					+ "; source: " + source.Length
+					+ " byte(s); source offset : " + receiveSendToken.receiveMessageOffset
+					+ "; destination: " + receiveSendToken.theDataHolder.dataMessageReceived.Length
+					+ " byte(s); destination offset: " + receiveSendToken.receivedMessageBytesDoneCount
+					+ "; count : " + remainingBytesToProcess
+					+ "; full message length: " + receiveSendToken.lengthOfCurrentIncomingMessage, EventLogEntryType.Error);
+
+				throw;
+			}
+
 			if (remainingBytesToProcess + receiveSendToken.receivedMessageBytesDoneCount == receiveSendToken.lengthOfCurrentIncomingMessage) {
 				// If we are inside this if-statement, then we got 
 				// the end of the message. In other words,
@@ -36,22 +60,8 @@ namespace isc.onec.tcp.async {
 				// message length value that we got from the prefix.
 				// Write/append the bytes received to the byte array in the 
 				// DataHolder object that we are using to store our data.
-				try {
-					Buffer.BlockCopy(receiveSendEventArgs.Buffer,
-							receiveSendToken.receiveMessageOffset,
-							receiveSendToken.theDataHolder.dataMessageReceived,
-							receiveSendToken.receivedMessageBytesDoneCount,
-							remainingBytesToProcess);
-				} catch (Exception e){
-					logger.ErrorException("on #" + receiveSendToken.server.Client + " HandleMessage():receiveSendToken.receiveMessageOffset=" + receiveSendToken.receiveMessageOffset +
-						", receiveSendToken.theDataHolder.dataMessageReceived=" + receiveSendToken.theDataHolder.dataMessageReceived +
-						", receiveSendToken.receivedMessageBytesDoneCount=" + receiveSendToken.receivedMessageBytesDoneCount +
-						", remainingBytesToProcess=" + remainingBytesToProcess
-						, e);
-					throw;
-				}
 
-				incomingTcpMessageIsReady = true;
+				return true;
 			} else {
 				// If we are inside this else-statement, then that means that we
 				// need another receive op. We still haven't got the whole message,
@@ -59,25 +69,10 @@ namespace isc.onec.tcp.async {
 				// Not a problem. In SocketListener.ProcessReceive we will just call
 				// StartReceive to do another receive op to receive more data.
 
-				try {
-					Buffer.BlockCopy(receiveSendEventArgs.Buffer,
-							receiveSendToken.receiveMessageOffset,
-							receiveSendToken.theDataHolder.dataMessageReceived,
-							receiveSendToken.receivedMessageBytesDoneCount,
-							remainingBytesToProcess);
-					receiveSendToken.receiveMessageOffset = receiveSendToken.receiveMessageOffset - receiveSendToken.recPrefixBytesDoneThisOp;
-					receiveSendToken.receivedMessageBytesDoneCount += remainingBytesToProcess;
-				} catch (Exception e) {
-					logger.ErrorException("on #" + receiveSendToken.server.Client + "  HandleMessage():receiveSendToken.receiveMessageOffset=" + receiveSendToken.receiveMessageOffset +
-						", receiveSendToken.theDataHolder.dataMessageReceived=" + receiveSendToken.theDataHolder.dataMessageReceived +
-						", receiveSendToken.receivedMessageBytesDoneCount=" + receiveSendToken.receivedMessageBytesDoneCount +
-						", remainingBytesToProcess=" + remainingBytesToProcess
-						, e);
-					throw;
-				}
+				receiveSendToken.receiveMessageOffset -= receiveSendToken.recPrefixBytesDoneThisOp;
+				receiveSendToken.receivedMessageBytesDoneCount += remainingBytesToProcess;
+				return false;
 			}
-
-			return incomingTcpMessageIsReady;
 		}
 	}
 }

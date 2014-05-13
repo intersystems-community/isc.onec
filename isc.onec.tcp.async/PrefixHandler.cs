@@ -90,7 +90,7 @@ namespace isc.onec.tcp.async
 			// less than the amount of data needed for prefix. 
 			if (remainingBytesToProcess == 0)
 			{   
-				receiveSendToken.receiveMessageOffset = receiveSendToken.receiveMessageOffset - receiveSendToken.recPrefixBytesDoneThisOp;
+				receiveSendToken.receiveMessageOffset -= receiveSendToken.recPrefixBytesDoneThisOp;
 				receiveSendToken.recPrefixBytesDoneThisOp = 0;
 			}
 			return remainingBytesToProcess;
