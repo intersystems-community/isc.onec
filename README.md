@@ -1,5 +1,10 @@
 ﻿# Caché 1C Bridge
 
+## License
+
+Caché 1C Bridge is distributed under the terms of
+[Mozilla Public License, version 2.0](http://www.mozilla.org/MPL/2.0/).
+
 ## Starting a Windows service with arguments
 
 Valid options are:
