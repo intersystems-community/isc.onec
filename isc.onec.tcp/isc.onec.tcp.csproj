@@ -41,7 +41,7 @@
     <OutputPath>bin\x86\Debug\</OutputPath>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <LangVersion>3</LangVersion>
+    <LangVersion>default</LangVersion>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <DebugType>full</DebugType>
     <DocumentationFile>bin\x86\Debug\isc.onec.tcp.xml</DocumentationFile>
