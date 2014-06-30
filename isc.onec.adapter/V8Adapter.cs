@@ -5,15 +5,14 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using NLog;
 
-namespace isc.onec.bridge
-{
+namespace isc.onec.bridge {
 	//TODO add try catch
 	//TODO add logging
 	//TODO make tests
 	//TODO test multithreading
-	public class V8Adapter
-	{
+	internal sealed class V8Adapter {
 		private string url;
+
 		private object connector;
 		//TODO check this
 		private static ReaderWriterLock connectorLock = new ReaderWriterLock();
@@ -21,7 +20,6 @@ namespace isc.onec.bridge
 		public bool isConnected = false;
 		public bool inDisconnectingMode = false;
 		public enum V8Version { V80, V81, V82 };
-		//private static readonly object syncHandle = new object();
 
 		private static Logger logger = LogManager.GetCurrentClassLogger();
 		public V8Adapter()
@@ -58,22 +56,16 @@ namespace isc.onec.bridge
 			}
 		}
 
-		public object invoke(object target, string method, object[] args)
-		{
-			object obj;
-			try
-			{
+		internal object invoke(object target, string method, object[] args) {
+			try {
 				//obj2 = target.comObject.GetType().InvokeMember(methodName, BindingFlags.InvokeMethod, null, target.comObject, methodParams, modifiers, null, null);
 				// | BindingFlags.Public
 				// TODO Modifiers
-				obj = target.GetType().InvokeMember(method, BindingFlags.InvokeMethod, null, target, args,null,null,null);
-			}
-			catch (TargetInvocationException exception)
-			{
+				return target.GetType().InvokeMember(method, BindingFlags.InvokeMethod, null, target, args,null,null,null);
+			} catch (TargetInvocationException exception) {
 				logger.DebugException("invoke", exception);
 				throw exception.InnerException;
 			}
-			return obj;
 		}
 
 		public object connect(string url)
@@ -84,7 +76,7 @@ namespace isc.onec.bridge
 				V8Version version = getVersion(url);
 				//TODO Check this
 				connectorLock.AcquireReaderLock(-1);
-				this.connector = createConnector(version);
+				this.connector = this.createConnector(version);
 				logger.Debug("New V8.ComConnector is created");
 				context = invoke(this.connector, "Connect", new object[] { url });
 
@@ -93,9 +85,9 @@ namespace isc.onec.bridge
 
 				logger.Debug("Connection is established");
 			}
-			catch (Exception)
-			{
-				free(this.connector);
+			catch (Exception) {
+				this.free(ref this.connector);
+
 				stimulateGC();
 				isConnected = false;
 				throw;
@@ -114,8 +106,9 @@ namespace isc.onec.bridge
 			{
 				throw new InvalidOperationException("Already in disconnecting mode.");
 			}
-		  
-			free(this.connector);
+
+			this.free(ref this.connector);
+
 			stimulateGC();
 			isConnected = false;
 
@@ -136,7 +129,7 @@ namespace isc.onec.bridge
 			{
 				try
 				{
-					createConnector(version);
+					this.createConnector(version);
 					list.Add(version);
 				}
 				catch
@@ -152,64 +145,51 @@ namespace isc.onec.bridge
 			//GC.Collect(GC.MaxGeneration);
 			GC.WaitForPendingFinalizers();
 		}
-		private object createConnector(V8Version version)
-		{
+
+		private object createConnector(V8Version version) {
 			string str;
-			switch (version)
-			{
-				case V8Version.V80:
-					str = "V8.ComConnector";
-					break;
-
-				case V8Version.V81:
-					str = "V81.ComConnector";
-					break;
-
-				case V8Version.V82:
-					str = "V82.ComConnector";
-					break;
-
-				default:
-					throw new NotImplementedException();
+			switch (version) {
+			case V8Version.V80:
+				str = "V8.ComConnector";
+				break;
+			case V8Version.V81:
+				str = "V81.ComConnector";
+				break;
+			case V8Version.V82:
+				str = "V82.ComConnector";
+				break;
+			default:
+				throw new NotImplementedException();
 			}
 			Type typeFromProgID = Type.GetTypeFromProgID(str, true);
-			//this.version = version;
 			return Activator.CreateInstance(typeFromProgID);
 		}
-		public void free(object rcw)
-		{
-			if (rcw != null)
-			{
 
+		public void free(ref object rcw) {
+			if (rcw != null) {
 				logger.Debug("Releasing object " + ((MarshalByRefObject)rcw).ToString());
 				Marshal.ReleaseComObject(rcw);
 				Marshal.FinalReleaseComObject(rcw);
-		   
+
 				rcw = null;
 			}
-			//
-			//this.Dispose(true);
-			//GC.SuppressFinalize(this);
 		}
-		public bool isObject(object val)
-		{
+
+		public bool isObject(object val) {
 			return (val is MarshalByRefObject);
 		}
-		private V8Version getVersion(string url)
-		{
+
+		private V8Version getVersion(string url) {
 			string version = "V81";
 			string[] parameters = url.Split(';');
-			for (int i = 0; i < parameters.Length; i++)
-			{
+			for (int i = 0; i < parameters.Length; i++) {
 				string[] parameter = parameters[i].Split('=');
-				if (parameter[0] == "Version")
-				{
+				if (parameter[0] == "Version") {
 					version = parameter[1].Trim('\"');
 				}
 			}
 
-			switch (version)
-			{
+			switch (version) {
 				case "V80":
 					return V8Version.V80;
 				case "V81":
@@ -220,6 +200,5 @@ namespace isc.onec.bridge
 					throw new NotImplementedException("this version of 1C is not supported");
 			}
 		}
-
 	}
 }

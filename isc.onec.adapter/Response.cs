@@ -1,34 +1,56 @@
 ﻿using System;
 using isc.general;
 
-namespace isc.onec.bridge
-{
-	public class Response
-	{
-		public enum Type { VOID=1, DATA=2, OBJECT=3, EXCEPTION=4 };
-		public Type type;
-		public object value;
+namespace isc.onec.bridge {
+	/// <summary>
+	/// Instances of <code>Response</code> are immutable.
+	/// </summary>
+	public class Response {
+		public enum Type {
+			VOID = 1,
+			DATA = 2,
+			OBJECT = 3,
+			EXCEPTION = 4,
+		};
 
-		public Response()
-		{
+		private readonly Type type;
+
+		private readonly object value;
+
+		internal Response() {
 			this.type = Type.VOID;
 			this.value = "";
 		}
-		public Response(Exception e)
-		{
+
+		internal Response(Exception e) {
 			this.type = Type.EXCEPTION;
 			this.value = e.ToStringWithIlOffsets();
 		}
-		public Response(bool value)
-		{
+
+		/// <summary>
+		/// Never used.
+		/// </summary>
+		/// <param name="value"></param>
+		private Response(bool value) {
 			this.type = Type.DATA;
-			if (value) this.value = "1";
-			else this.value = "0";
+			this.value = value ? "1" : "0";
 		}
-		public Response(Type type, object value)
-		{
+
+		internal Response(Type type, object value) {
 			this.type = type;
 			this.value = value;
+		}
+
+		internal Type ResponseType {
+			get {
+				return this.type;
+			}
+		}
+
+		internal object Value {
+			get {
+				return this.value;
+			}
 		}
 	}
 }

@@ -2,76 +2,86 @@
 using System.Collections.Generic;
 using NLog;
 
-namespace isc.onec.bridge
-{
-	public class Repository
-	{
+namespace isc.onec.bridge {
+	internal sealed class Repository {
 		public delegate void ObjectProcessor(object rcw);
-		private Dictionary<long,object> cache;
+
+		/// <summary>
+		/// XXX: Generic.Dictionary is not thread-safe!
+		/// Provide locks or replace with Concurrent.Dictionary
+		/// (see http://msdn.microsoft.com/en-us/library/dd997305%28v=vs.110%29.aspx).
+		/// </summary>
+		private readonly Dictionary<long, object> cache;
+
+		/// <summary>
+		/// XXX: non-synchronized variable access (use either volatile or Interlocked)
+		/// </summary>
 		private long counter;
+
 		private static Logger logger = LogManager.GetCurrentClassLogger();
-		public Repository()
-		{
+
+		internal Repository() {
 			this.cache = new Dictionary<long, object>();
 			this.counter = 0;
 		}
-		~Repository()
-		{
+
+		~Repository() {
 			logger.Debug("Repository destructor. Cache has " + cache.Count + " items.");
 		}
-		public object find(string oid)
-		{
+
+		internal object Find(string oid) {
 			object rcw;
 			long key = Convert.ToInt64(oid);
-		   
-			if(!cache.TryGetValue(key, out rcw)) throw new Exception("Repository: could not find object #"+key);
+
+			if (!cache.TryGetValue(key, out rcw)) {
+				throw new Exception("Repository: could not Find object #" + key);
+			}
    
 			return rcw;
 		}
-		public string add(object rcw)
-		{
-			long key = next();
+
+		internal string Add(object rcw) {
+			long key = Next();
 			cache.Add(key, rcw);
 			string oid = Convert.ToString(key);
 			return oid;
 		}
-		public void remove(string oid)
-		{
+	
+		internal void Remove(string oid) {
 			long key = Convert.ToInt64(oid);
 			cache.Remove(key);
 		}
-		public long countObjectsInCache()
-		{
+		
+		internal long CountObjectsInCache() {
 			return cache.Count;
 		}
 
-		public long getCurrentCounter()
-		{
-			return counter;
+		internal long CurrentCounter {
+			get {
+				return this.counter;
+			}
 		}
-		public void cleanAll(ObjectProcessor processor)
-		{	
-		   
-			if(processor!= null) {
+		
+		internal void CleanAll(ObjectProcessor processor) {	
+			if (processor != null) {
 				List<object> toBeRemoved = new List<object>();
-				foreach(KeyValuePair<long,object> pair in cache) {
+				foreach (KeyValuePair<long,object> pair in cache) {
 					toBeRemoved.Add(pair.Value);
 				}
-				foreach (object rcw in toBeRemoved)
-				{
+				foreach (object rcw in toBeRemoved) {
 					processor(rcw);
 				}
-				toBeRemoved.Clear();
+				toBeRemoved.Clear(); // XXX: local variable. WTF?
 			}
-			cache.Clear();   
+			this.cache.Clear();   
 		}
-		//TODO Make Offset.
-		private long next()
-		{
-			if (counter == Int64.MaxValue) throw new Exception("Repository: maximum number of objects reached");
-			counter += 1;
-			
-			return counter;
+
+		private long Next() {
+			if (this.counter == Int64.MaxValue) { // XXX: this is a real huge number. WTF?
+				throw new Exception("Repository: maximum number of objects reached");
+			}
+
+			return ++this.counter;
 		}
 	}
 }

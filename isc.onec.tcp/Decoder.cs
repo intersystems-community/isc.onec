@@ -2,21 +2,23 @@
 using System.Collections.Generic;
 using NLog;
 
-namespace isc.onec.tcp
-{
-	public class MessageDecoder
-	{
-		private byte[] data;
+namespace isc.onec.tcp {
+	/// <summary>
+	/// Used by <code>isc.onec.tcp.async.OutgoingDataPreparer</code>.
+	/// </summary>
+	public sealed class MessageDecoder {
+		private readonly byte[] data;
+
 		private int current;
+
 		private static Logger logger = LogManager.GetCurrentClassLogger();
-		public MessageDecoder(byte[] data)
-		{
+
+		public MessageDecoder(byte[] data) {
 			this.data = data;
-			//logger.Debug("size of data:" + data.Length);
 			this.current = 0;
 		}
-		public  RequestMessage decode()
-		{
+
+		public  RequestMessage decode() {
 			RequestMessage message = new RequestMessage();
 
 			message.command = getCommand(data);
@@ -28,46 +30,39 @@ namespace isc.onec.tcp
 			return message;
 		}
 
-		private void addValues(RequestMessage message)
-		{
+		private void addValues(RequestMessage message) {
 			int num = data[current];
 			current += 1;
 
 			message.types = new int[num];
 			message.vals = new string[num];
 
-			for (int i = 0; i < num; i++)
-			{
-				int type = getType();
-				string value = getValue();
-
-				message.types[i] = type;
-				message.vals[i] = value;
+			for (int i = 0; i < num; i++) {
+				message.types[i] = this.Type;
+				message.vals[i] = this.Value;
 			}
-			
 		}
 
-		private string getValue()
-		{
-			//2 bytes
-			int length = BitConverter.ToInt16(data, current);
-			current += 2;
+		private string Value {
+			get {
+				//2 bytes
+				int length = BitConverter.ToInt16(data, current);
+				current += 2;
 		   
-			string value = (new System.Text.UnicodeEncoding()).GetString(data, current, length*2);
-			current += length * 2;
+				string value = (new System.Text.UnicodeEncoding()).GetString(data, current, length*2);
+				current += length * 2;
 
-			//logger.Debug("value=" + value);
-
-			return value;
+				return value;
+			}
 		}
 
-		private int getType()
-		{
-			int type = data[current];
-			current++;
+		private int Type {
+			get {
+				int type = data[this.current];
+				this.current++;
 
-			return type;
-
+				return type;
+			}
 		}
 
 		private string getOperand(byte[] data)
@@ -94,7 +89,5 @@ namespace isc.onec.tcp
 			current++;
 			return data[0];
 		}
-
-
 	}
 }

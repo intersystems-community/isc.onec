@@ -4,8 +4,7 @@ using System.Net.Sockets;
 
 namespace isc.onec.tcp.async
 {   
-	class BufferManager
-	{
+	internal sealed class BufferManager {
 		// This class creates a single large buffer which can be divided up 
 		// and assigned to SocketAsyncEventArgs objects for use with each 
 		// socket I/O operation.  
@@ -15,7 +14,7 @@ namespace isc.onec.tcp.async
 		//This buffer is a byte array which the Windows TCP buffer can copy its data to.
 
 		// the total number of bytes controlled by the buffer pool
-		Int32 totalBytesInBufferBlock;
+		private readonly Int32 bufferBlockLength;
 
 		// Byte array maintained by the Buffer Manager.
 		byte[] bufferBlock;		 
@@ -23,9 +22,9 @@ namespace isc.onec.tcp.async
 		Int32 currentIndex;
 		Int32 bufferBytesAllocatedForEachSaea;
 		
-		public BufferManager(Int32 totalBytes, Int32 totalBufferBytesInEachSaeaObject)
+		internal BufferManager(Int32 bufferBlockLength, Int32 totalBufferBytesInEachSaeaObject)
 		{
-			totalBytesInBufferBlock = totalBytes;
+			this.bufferBlockLength = bufferBlockLength;
 			this.currentIndex = 0;
 			this.bufferBytesAllocatedForEachSaea = totalBufferBytesInEachSaeaObject;
 			this.freeIndexPool = new Stack<int>();
@@ -35,7 +34,7 @@ namespace isc.onec.tcp.async
 		internal void InitBuffer()
 		{
 			// Create one large buffer block.
-			this.bufferBlock = new byte[totalBytesInBufferBlock];
+			this.bufferBlock = new byte[bufferBlockLength];
 		}
 
 		// Divide that one large buffer block out to each SocketAsyncEventArg object.
@@ -58,7 +57,7 @@ namespace isc.onec.tcp.async
 				//Inside this else-statement is the code that is used to set the 
 				//buffer for each SAEA object when the pool of SAEA objects is built
 				//in the Init method.
-				if ((totalBytesInBufferBlock - this.bufferBytesAllocatedForEachSaea) < this.currentIndex)
+				if (this.bufferBlockLength - this.bufferBytesAllocatedForEachSaea < this.currentIndex)
 				{
 					return false;
 				}
@@ -67,18 +66,5 @@ namespace isc.onec.tcp.async
 			}
 			return true;
 		}
-
-		// Removes the buffer from a SocketAsyncEventArg object.   This frees the
-		// buffer back to the buffer pool. Try NOT to use the FreeBuffer method,
-		// unless you need to destroy the SAEA object, or maybe in the case
-		// of some exception handling. Instead, on the server
-		// keep the same buffer space assigned to one SAEA object for the duration of
-		// this app's running.
-		internal void FreeBuffer(SocketAsyncEventArgs args)
-		{
-			this.freeIndexPool.Push(args.Offset);
-			args.SetBuffer(null, 0, 0);
-		}
-
 	}
 }

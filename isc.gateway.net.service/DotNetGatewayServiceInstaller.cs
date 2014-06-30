@@ -7,11 +7,9 @@ using System.Text.RegularExpressions;
 using Microsoft.Win32;
 using NLog;
 
-namespace isc.gateway.net
-{
+namespace isc.gateway.net {
 	[RunInstaller(true)]
-	public class DotNetGatewayServiceInstaller : Installer
-	{
+	public sealed class DotNetGatewayServiceInstaller : Installer {
 		private const string DisplayName = "Caché One C Bridge";
 
 		private const string ParameterPort = "port";
@@ -22,8 +20,7 @@ namespace isc.gateway.net
 
 		private static Logger logger = LogManager.GetCurrentClassLogger();
 
-		public DotNetGatewayServiceInstaller()
-		{
+		public DotNetGatewayServiceInstaller() {
 			ServiceProcessInstaller serviceProcessInstaller = new ServiceProcessInstaller();
 			this.serviceInstaller = new ServiceInstaller();
 			this.serviceInstaller.StartType = ServiceStartMode.Automatic;

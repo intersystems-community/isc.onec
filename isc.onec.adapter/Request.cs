@@ -2,24 +2,30 @@
 using System.Diagnostics;
 using isc.general;
 
-namespace isc.onec.bridge
-{
-	public class Request
-	{
-		public enum Type { DATA=1,OBJECT=2,CONTEXT=3,NUMBER=4 };
+namespace isc.onec.bridge {
+	/// <summary>
+	/// Instances of <code>Request</code> are immutable.
+	/// </summary>
+	internal sealed class Request {
+		internal enum Type {
+			DATA = 1,
+			OBJECT = 2,
+			CONTEXT = 3,
+			NUMBER = 4,
+		};
 
-		private Type type;
+		private readonly Type type;
 
-		private string value;
+		private readonly string value;
 
 		private static EventLog eventLog = EventLogFactory.Instance;
 
-		public Request(string oid) {
+		internal Request(string oid) {
 			this.type = oid.Length == 0 ? Type.CONTEXT : Type.OBJECT;
 			this.value = oid;
 		}
 
-		public Request(Type type, string value) {
+		private Request(Type type, string value) {
 			if (type == Type.NUMBER) {
 				try {
 					Convert.ToInt64(value);
@@ -33,18 +39,18 @@ namespace isc.onec.bridge
 			this.value = value;
 		}
 
-		public Request(int typeId, string value) :
-			this(Request.numToEnum<Type>(typeId), value) {
+		internal Request(int typeId, string value) :
+			this(ValueOf(typeId), value) {
 			// empty
 		}
 
-		public Type RequestType {
+		internal Type RequestType {
 			get {
 				return this.type;
 			}
 		}
 
-		public object Value {
+		internal object Value {
 			get {
 				return this.type == Type.NUMBER
 					? Convert.ToInt64(this.value)
@@ -52,8 +58,8 @@ namespace isc.onec.bridge
 			}
 		}
 
-		public static T numToEnum<T>(int number) {
-			return (T) Enum.ToObject(typeof(T), number);
+		private static Type ValueOf(int number) {
+			return (Type) Enum.ToObject(typeof(Type), number);
 		}
 	}
 }

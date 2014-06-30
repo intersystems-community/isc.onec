@@ -3,45 +3,41 @@ using NLog;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace isc.onec.bridge
-{
-	public class V8Service
-	{
+namespace isc.onec.bridge {
+	public class V8Service {
 		private V8Adapter adapter;
-		//MarshalByRefObject System.__COMObject
+
+		/// <summary>
+		/// XXX: shared access w/o synchronization.
+		/// </summary>
 		private object context;
-		private Repository repository;
-		internal String client = null;
+
+		private readonly Repository repository;
+
+		/// <summary>
+		/// XXX: Not set back to null on disconnect; shared access.
+		/// </summary>
+		private String client = null;
+
+		internal String Client {
+			get {
+				return this.client;
+			}
+		}
 
 		private static Logger logger = LogManager.GetCurrentClassLogger();
-		public static Dictionary<string, string> journal = new Dictionary<string,string>();
 
-		public V8Service(V8Adapter adapter, Repository repository)
-		{
+		private static Dictionary<string, string> journal = new Dictionary<string,string>();
+
+		internal V8Service(V8Adapter adapter, Repository repository) {
 			logger.Debug("isc.onec.bridge.V8Service is created");
 			this.adapter = adapter;
 			this.repository = repository;
 		}
 
-	   /* ~V8Service()
-		{
-			logger.Debug("V8Service destructor is called for #"+client);
-			repository.cleanAll(delegate(object rcw) { adapter.free(rcw); });
-
-			adapter.free(context);
-			if (isConnected())
-			{
-				adapter.disconnect();
-			}
-
-			clearJournal();
-		}*/
-
-		private void clearJournal()
-		{
-			if (client != null)
-			{
-				journal.Remove(client);
+		private void clearJournal() {
+			if (this.client != null) {
+				journal.Remove(this.client);
 			}
 		}
 
@@ -85,9 +81,9 @@ namespace isc.onec.bridge
 
 
 	   
-		public Response set(Request target, string property, Request value)
+		internal Response set(Request target, string property, Request value)
 		{
-			object rcw = find(target);
+			object rcw = Find(target);
 			object argument;
 			argument = marshall(value);
 			adapter.set(rcw, property, argument);
@@ -96,31 +92,27 @@ namespace isc.onec.bridge
 
 			return response;
 		}
-		public Response get(Request target, string property)
+		internal Response get(Request target, string property)
 		{
-			object rcw = find(target);
+			object rcw = Find(target);
 			object value = adapter.get(rcw, property);
 
-			Response response = unmarshall(value);
-
-			return response;
+			return this.unmarshall(value);
 		}
-		public Response invoke(Request target, string method, Request[] args)
+		internal Response invoke(Request target, string method, Request[] args)
 		{
-			object rcw = find(target);
+			object rcw = Find(target);
 			object[] arguments = build(args);
 			object value = adapter.invoke(rcw, method, arguments);
 
-			Response response = unmarshall(value);
-
-			return response;
+			return this.unmarshall(value);
 		}
 
-		public Response free(Request request)
+		internal Response free(Request request)
 		{
-			object rcw = find(request);
+			object rcw = Find(request);
 			remove(request);
-			adapter.free(rcw);
+			adapter.free(ref rcw);
 
 			logger.Debug("Freeing object on request " + request.ToString());
 			
@@ -129,12 +121,14 @@ namespace isc.onec.bridge
 			return response;
 		}
 
-		public Response disconnect()
+		internal Response disconnect()
 		{
-			logger.Debug("disconnecting from #" + client +". Adapter is "+adapter.ToString());
-			repository.cleanAll(delegate(object rcw) { adapter.free(rcw); });
+			logger.Debug("disconnecting from #" + this.client +". Adapter is "+adapter.ToString());
+			repository.CleanAll(delegate(object rcw) {
+				adapter.free(ref rcw);
+			});
 
-			adapter.free(context);
+			adapter.free(ref context);
 			adapter.disconnect();
 
 			adapter = null;
@@ -172,78 +166,63 @@ namespace isc.onec.bridge
 		}
 		public Response getCounters()
 		{
-			long cacheSize = repository.countObjectsInCache();
-			long counter = repository.getCurrentCounter();
+			long cacheSize = repository.CountObjectsInCache();
+			long counter = repository.CurrentCounter;
 			string reply = cacheSize + "," + counter;
 			Response response = new Response(Response.Type.DATA, reply);
 
 			return response;
 		}
-		//TODO delegate marshalling to Request class
-		//TODO throw exception if no type is found
-		private object marshall(Request value)
-		{
-			switch (value.RequestType)
-			{
-				case Request.Type.OBJECT: return find(value);//MarshalByRefObject
 
-				case Request.Type.DATA: return value.Value;
-
-				case Request.Type.NUMBER: return value.Value;
-
-				default: return null;
+		private object marshall(Request value) {
+			switch (value.RequestType) {
+			case Request.Type.OBJECT:
+				return Find(value);
+			case Request.Type.DATA:
+			case Request.Type.NUMBER:
+				return value.Value;
+			default:
+				return null;
 			}
-
-		  
 		}
-		//TODO Add NULL type
-		private Response unmarshall(object value)
-		{
-			Response response;
-			if (adapter.isObject(value))
-			{
-				string oid = add(value);
-				response = new Response(Response.Type.OBJECT, oid);
-			}
-			else
-			{
-				//if(value!=null) Console.WriteLine("V:" + value + ":" + value.GetType());
-				if (value != null)
-				{
-					//bool is serialised to string as True/False
-					if (typeof(bool) == value.GetType()) value = (bool)value ? 1 : 0; 
-				}
-				response = new Response(Response.Type.DATA, value);
-			}
 
-			return response;
+		private Response unmarshall(object value) {
+			if (adapter.isObject(value)) {
+				string oid = add(value);
+				return new Response(Response.Type.OBJECT, oid);
+			} else {
+				if (value != null && value.GetType() == typeof(bool)) {
+					//bool is serialised to string as True/False
+					// XXX: parameter reassignment
+					value = (bool) value ? 1 : 0;
+				}
+				return new Response(Response.Type.DATA, value);
+			}
 		}
 		private object[] build(Request[] args)
 		{
 			object[] result = new object[args.Length];
-			for (int i = 0; i < args.Length; i++)
-			{
+			for (int i = 0; i < args.Length; i++) {
 				result[i] = marshall(args[i]);
 			}
 			return result;
 		}
-		private object find(Request obj)
-		{
-			if (obj.RequestType == Request.Type.CONTEXT)
-			{
-				return this.context;
-			}
-			return repository.find(obj.Value.ToString());
+
+		private object Find(Request obj) {
+			return obj.RequestType == Request.Type.CONTEXT
+				? this.context
+				: this.repository.Find(obj.Value.ToString());
 		}
+
 		private string add(object rcw)
 		{
-			return repository.add(rcw);
+			return repository.Add(rcw);
 		}
 		private void remove(Request obj)
 		{
-			if (obj.RequestType != Request.Type.OBJECT) throw new Exception("Service: attempt to remove non-object");
+			if (obj.RequestType != Request.Type.OBJECT) throw new Exception("Service: attempt to Remove non-object");
 
-			repository.remove(obj.Value.ToString());
+			repository.Remove(obj.Value.ToString());
 		}
 
 		

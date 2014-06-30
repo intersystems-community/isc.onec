@@ -5,7 +5,7 @@ using isc.general;
 using NLog;
 
 namespace isc.onec.tcp.async {
-	class MessageHandler {
+	internal sealed class MessageHandler {
 		private static EventLog eventLog = EventLogFactory.Instance;
 
 		/// <summary>

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using isc.onec.bridge;
 
-namespace isc.onec.tcp
-{
-	public class RequestMessage
-	{
+namespace isc.onec.tcp {
+	/// <summary>
+	/// Used by <code>isc.onec.tcp.async.OutgoingDataPreparer</code>.
+	/// </summary>
+	public sealed class RequestMessage {
 		public int command;
 		public string target;
 		public string operand;
@@ -28,7 +29,7 @@ namespace isc.onec.tcp
 		public static RequestMessage createDisconnectMessage()
 		{
 			RequestMessage message = new RequestMessage();
-			message.command = (int)Server.Commands.DISCONNET;
+			message.command = (int)Server.Commands.DISCONNECT;
 			message.target = "";
 			message.operand = "";
 			message.vals = new string[0];

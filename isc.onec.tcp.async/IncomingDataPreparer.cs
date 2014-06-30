@@ -7,8 +7,7 @@ using System.Threading;
 
 namespace isc.onec.tcp.async
 {
-	class IncomingDataPreparer
-	{
+	internal sealed class IncomingDataPreparer {
 		//object that will be used to lock the listOfDataHolders
 		private object lockerForList = new object();
 		private DataHolder theDataHolder;

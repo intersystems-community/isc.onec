@@ -5,10 +5,8 @@ using isc.general;
 using isc.onec.bridge;
 using NLog;
 
-namespace isc.onec.tcp.async
-{
-	class OutgoingDataPreparer
-	{
+namespace isc.onec.tcp.async{
+	internal sealed class OutgoingDataPreparer {
 		
 		private DataHolder theDataHolder;
 
@@ -62,7 +60,6 @@ namespace isc.onec.tcp.async
 			
 			//Now copy the 3 things to the theUserToken.dataToSend.
 			Buffer.BlockCopy(arrayOfBytesInPrefix, 0, theUserToken.dataToSend, 0, theUserToken.sendPrefixLength);
-			//Buffer.BlockCopy(idByteArray, 0, theUserToken.dataToSend, theUserToken.sendPrefixLength, idByteArray.Length);
 			//The message that the client sent is already in a byte array, in DataHolder.
 			Buffer.BlockCopy(reply, 0, theUserToken.dataToSend, theUserToken.sendPrefixLength , reply.Length);
 			

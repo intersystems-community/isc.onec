@@ -5,8 +5,7 @@ using System.Threading;
 
 namespace isc.onec.tcp.async
 {	
-	internal sealed class SocketAsyncEventArgsPool
-	{		
+	internal sealed class SocketAsyncEventArgsPool {		
 		//just for assigning an ID so we can watch our objects while testing.
 		private Int32 nextTokenId = 0;
 		

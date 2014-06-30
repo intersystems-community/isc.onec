@@ -4,13 +4,13 @@ using isc.general;
 using NLog;
 
 namespace isc.onec.bridge {
-	public class Server {
-		public enum Commands:int {
+	public sealed class Server {
+		public enum Commands : int {
 			GET = 1,
 			SET = 2,
 			INVOKE = 3,
 			CONNECT = 4,
-			DISCONNET = 5,
+			DISCONNECT = 5,
 			FREE = 6,
 			COUNT = 7,
 		};
@@ -28,10 +28,9 @@ namespace isc.onec.bridge {
 			this.service = new V8Service(adapter, repository);
 		}
 
-		//TODO Code smells - should have formalized protocol in commands not something general
 		public string[] run(int command, string target, string operand, string[] vals, int[] types) {
 			Response response;
-			var commandType = Request.numToEnum<Commands>(command);
+			var commandType = (Commands) Enum.ToObject(typeof(Commands), command);
 			//if target is "." it is context
 			try {
 				var targetObject = new Request(target == "." ? "" : target);
@@ -82,11 +81,11 @@ namespace isc.onec.bridge {
 
 		public string Client {
 			get {
-				return this.Connected ? this.service.client : "null";
+				return this.Connected ? this.service.Client : "null";
 			}
 		}
 
-		private Response doCommandIfConnected(Func<Response> f) {
+		private Response DoCommandIfConnected(Func<Response> f) {
 			if (this.Connected) {
 				return f();
 			}
@@ -96,16 +95,16 @@ namespace isc.onec.bridge {
 		private Response doCommand(Commands command,Request obj, string operand, string[] vals, int[] types) {
 			switch (command) {
 			case Commands.GET:
-				return this.doCommandIfConnected(() => {
+				return this.DoCommandIfConnected(() => {
 					return this.service.get(obj, operand);
 				});
 			case Commands.SET:
-				return this.doCommandIfConnected(() => {
+				return this.DoCommandIfConnected(() => {
 					Request value = new Request(types[0], vals[0]);
 					return this.service.set(obj, operand, value);
 				});
 			case Commands.INVOKE:
-				return this.doCommandIfConnected(() => {
+				return this.DoCommandIfConnected(() => {
 					Request[] args = buildRequestList(vals, types);
 					return this.service.invoke(obj, operand, args);
 				});
@@ -115,7 +114,7 @@ namespace isc.onec.bridge {
 					return this.service.connect(operand, client);
 				}
 				return new Response(Response.Type.EXCEPTION, "Server#service is null");
-			case Commands.DISCONNET:
+			case Commands.DISCONNECT:
 				return this.Disconnect();
 			case Commands.FREE:
 				/*
@@ -123,7 +122,7 @@ namespace isc.onec.bridge {
 				 */
 				return this.Connected ? this.service.free(obj) : new Response();
 			case Commands.COUNT:
-				return this.doCommandIfConnected(() => {
+				return this.DoCommandIfConnected(() => {
 					return this.service.getCounters();
 				});
 			default:
@@ -136,9 +135,11 @@ namespace isc.onec.bridge {
 
 		private string[] serialize(Response response) {
 			string[] reply = new string[2];
-			reply[0] = ((int)response.type).ToString();
-			if(response.value!=null) reply[1] = response.value.ToString();
-		   
+			reply[0] = ((int) response.ResponseType).ToString();
+			if (response.Value != null) {
+				reply[1] = response.Value.ToString();
+			}
+
 			return reply;
 		}
 		private Request[] buildRequestList(string[] values, int[] types)
@@ -156,12 +157,11 @@ namespace isc.onec.bridge {
 
 		public void sendDisconnect()
 		{
-			string[] result = run((int)Commands.DISCONNET, "", "", new string[0], new int[0]);
+			string[] result = run((int)Commands.DISCONNECT, "", "", new string[0], new int[0]);
 			if (Convert.ToInt32(result[0]) == (int)Response.Type.EXCEPTION)
 			{
 				throw new Exception("disconnection failed"+result[1]);
 			}
 		}
 	}
- 
 }

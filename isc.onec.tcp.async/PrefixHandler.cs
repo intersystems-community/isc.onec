@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
 
-namespace isc.onec.tcp.async
-{
-	class PrefixHandler
-	{
-		public Int32 HandlePrefix(SocketAsyncEventArgs e, DataHoldingUserToken receiveSendToken, Int32 remainingBytesToProcess)
-		{			
+namespace isc.onec.tcp.async {
+	internal sealed class PrefixHandler {
+		public Int32 HandlePrefix(SocketAsyncEventArgs e, DataHoldingUserToken receiveSendToken, Int32 remainingBytesToProcess) {			
 			//receivedPrefixBytesDoneCount tells us how many prefix bytes were
 			//processed during previous receive ops which contained data for 
 			//this message. Usually there will NOT have been any previous 
@@ -18,10 +15,6 @@ namespace isc.onec.tcp.async
 			//already done it in a previous loop.
 			if (receiveSendToken.receivedPrefixBytesDoneCount == 0)
 			{
-				/*if (Program.watchProgramFlow)   //for testing
-				{
-					Program.testWriter.WriteLine("PrefixHandler, create prefix array " + receiveSendToken.TokenId);
-				}*/
 				receiveSendToken.byteArrayForPrefix = new Byte[receiveSendToken.receivePrefixLength];
 			}
 
@@ -30,10 +23,6 @@ namespace isc.onec.tcp.async
 			// length of the message that we are working on.
 			if (remainingBytesToProcess >= receiveSendToken.receivePrefixLength - receiveSendToken.receivedPrefixBytesDoneCount)
 			{
-				/*if (Program.watchProgramFlow)   //for testing
-				{
-					Program.testWriter.WriteLine("PrefixHandler, enough for prefix " + receiveSendToken.TokenId + ". remainingBytesToProcess = " + remainingBytesToProcess);
-				}*/
 				//Now copy that many bytes to byteArrayForPrefix.
 				//We can use the variable receiveMessageOffset as our main
 				//index to show which index to get data from in the TCP
@@ -46,24 +35,7 @@ namespace isc.onec.tcp.async
 
 				receiveSendToken.receivedPrefixBytesDoneCount = receiveSendToken.receivePrefixLength;
 
-				receiveSendToken.lengthOfCurrentIncomingMessage = BitConverter.ToInt32(receiveSendToken.byteArrayForPrefix, 0);
-
-				
-
-				/*if (Program.watchData)
-				{
-					//Now see what integer the prefix bytes represent, for the length.
-					StringBuilder sb = new StringBuilder(receiveSendToken.byteArrayForPrefix.Length);
-					sb.Append(" Token id " + receiveSendToken.TokenId + ". " + receiveSendToken.receivePrefixLength + " bytes in prefix:");
-					foreach (byte theByte in receiveSendToken.byteArrayForPrefix)
-					{
-						sb.Append(" " + theByte.ToString());
-					}
-					sb.Append(". Message length: " + receiveSendToken.lengthOfCurrentIncomingMessage);
-
-					Program.testWriter.WriteLine(sb.ToString());
-				}*/
-				
+				receiveSendToken.lengthOfCurrentIncomingMessage = BitConverter.ToInt32(receiveSendToken.byteArrayForPrefix, 0);				
 			}
 
 			//This next else-statement deals with the situation 
@@ -71,10 +43,6 @@ namespace isc.onec.tcp.async
 			//of this prefix in this receive operation, but not all.
 			else
 			{
-			   /* if (Program.watchProgramFlow)   //for testing
-				{
-					Program.testWriter.WriteLine("PrefixHandler, NOT all of prefix " + receiveSendToken.TokenId + ". remainingBytesToProcess = " + remainingBytesToProcess);
-				}*/
 				//Write the bytes to the array where we are putting the
 				//prefix data, to save for the next loop.
 				Buffer.BlockCopy(e.Buffer, receiveSendToken.receiveMessageOffset - receiveSendToken.receivePrefixLength + receiveSendToken.receivedPrefixBytesDoneCount, receiveSendToken.byteArrayForPrefix, receiveSendToken.receivedPrefixBytesDoneCount, remainingBytesToProcess);

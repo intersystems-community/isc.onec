@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace isc.onec.tcp
-{
-	public class MessageEncoder
-	{
+namespace isc.onec.tcp {
+	/// <summary>
+	/// Used by <code>isc.onec.tcp.async.OutgoingDataPreparer</code>.
+	/// </summary>
+	public sealed class MessageEncoder {
 		private string[] reply;
 		public MessageEncoder(string[] reply)
 		{

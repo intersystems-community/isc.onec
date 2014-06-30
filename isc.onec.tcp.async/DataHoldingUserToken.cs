@@ -7,12 +7,9 @@ using isc.onec.bridge;
 
 namespace isc.onec.tcp.async
 {
-	class DataHoldingUserToken
-	{
+	internal sealed class DataHoldingUserToken {
 		internal Mediator theMediator;
 		internal DataHolder theDataHolder;
-
-//		internal Int32 socketHandleNumber;
 
 		internal readonly Int32 bufferOffsetReceive;
 		internal readonly Int32 permanentReceiveMessageOffset;
@@ -48,7 +45,6 @@ namespace isc.onec.tcp.async
 		//set up your app to allow it.
 		//private Int32 sessionId;				
 
-		//MODIFIED
 		public Server server;
 
 		private static Logger logger = LogManager.GetCurrentClassLogger();
@@ -83,24 +79,8 @@ namespace isc.onec.tcp.async
 
 		internal void CreateNewDataHolder()
 		{
-			//this.server = null;
 			theDataHolder = new DataHolder();
 		}
-				
-		//Used to create sessionId variable in DataHoldingUserToken.
-		//Called in ProcessAccept().
-		/*internal void CreateSessionId()
-		{
-			sessionId = Interlocked.Increment(ref TCPAsyncServer.mainSessionId);						
-		}*/
-
-		/*public Int32 SessionId
-		{
-			get
-			{
-				return this.sessionId;
-			}
-		}*/
 
 		public void Reset()
 		{
