@@ -5,8 +5,7 @@ using System.Threading;
 using NLog;
 using isc.onec.bridge;
 
-namespace isc.onec.tcp.async
-{
+namespace isc.onec.tcp.async {
 	internal sealed class DataHoldingUserToken {
 		internal Mediator theMediator;
 		internal DataHolder theDataHolder;
@@ -14,17 +13,17 @@ namespace isc.onec.tcp.async
 		internal readonly Int32 bufferOffsetReceive;
 		internal readonly Int32 permanentReceiveMessageOffset;
 		internal readonly Int32 bufferOffsetSend;
-		
-		private Int32 idOfThisObject; //for testing only		
-			   
+
+		private readonly Int32 tokenId; //for testing only		
+
 		internal Int32 lengthOfCurrentIncomingMessage;
-		
+
 		//receiveMessageOffset is used to mark the byte position where the message
 		//begins in the receive buffer. This value can sometimes be out of
 		//bounds for the data stream just received. But, if it is out of bounds, the 
 		//code will not access it.
-		internal Int32 receiveMessageOffset;		
-		internal Byte[] byteArrayForPrefix;		
+		internal Int32 receiveMessageOffset;
+		internal Byte[] byteArrayForPrefix;
 		internal readonly Int32 receivePrefixLength;
 		internal Int32 receivedPrefixBytesDoneCount = 0;
 		internal Int32 receivedMessageBytesDoneCount = 0;
@@ -49,10 +48,9 @@ namespace isc.onec.tcp.async
 
 		private static Logger logger = LogManager.GetCurrentClassLogger();
 
-		public DataHoldingUserToken(SocketAsyncEventArgs e, Int32 rOffset, Int32 sOffset, Int32 receivePrefixLength, Int32 sendPrefixLength, Int32 identifier)
-		{
-			this.idOfThisObject = identifier;
-		   
+		internal DataHoldingUserToken(SocketAsyncEventArgs e, Int32 rOffset, Int32 sOffset, Int32 receivePrefixLength, Int32 sendPrefixLength, Int32 tokenId) {
+			this.tokenId = tokenId;
+
 			//Create a Mediator that has a reference to the SAEA object.
 			this.theMediator = new Mediator(e);
 			this.bufferOffsetReceive = rOffset;
@@ -60,30 +58,25 @@ namespace isc.onec.tcp.async
 			this.receivePrefixLength = receivePrefixLength;
 			this.sendPrefixLength = sendPrefixLength;
 			this.receiveMessageOffset = rOffset + receivePrefixLength;
-			this.permanentReceiveMessageOffset = this.receiveMessageOffset;			
+			this.permanentReceiveMessageOffset = this.receiveMessageOffset;
 		}
-		~DataHoldingUserToken()
-		{
+		~DataHoldingUserToken() {
 			logger.Debug("DataHoldingUserToken destructor is called");
 			this.server = null;
 		}
 		//Let's use an ID for this object during testing, just so we can see what
 		//is happening better if we want to.
-		public Int32 TokenId
-		{
-			get
-			{
-				return this.idOfThisObject;
+		internal Int32 TokenId {
+			get {
+				return this.tokenId;
 			}
 		}
 
-		internal void CreateNewDataHolder()
-		{
+		internal void CreateNewDataHolder() {
 			theDataHolder = new DataHolder();
 		}
 
-		public void Reset()
-		{
+		public void Reset() {
 			this.receivedPrefixBytesDoneCount = 0;
 			this.receivedMessageBytesDoneCount = 0;
 			this.recPrefixBytesDoneThisOp = 0;
@@ -98,16 +91,14 @@ namespace isc.onec.tcp.async
 			}
 		}
 
-		public Server getServer()
-		{
+		public Server getServer() {
 			return this.server;
 		}
 
-		internal void StartSession()
-		{
+		internal void StartSession() {
 			logger.Debug("Creating new isc.onec.bridge.Server");
 			this.server = new Server();
-			
+
 		}
 	}
 }

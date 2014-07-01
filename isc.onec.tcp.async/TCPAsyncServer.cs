@@ -146,8 +146,6 @@ namespace isc.onec.tcp.async {
 
 
 
-			Int32 tokenId;
-
 			for (Int32 i = 0; i < this.socketListenerSettings.NumberOfSaeaForRecSend; i++) {
 				//Allocate the SocketAsyncEventArgs object for this loop,
 				//to go in its place in the stack which will be the pool
@@ -161,7 +159,7 @@ namespace isc.onec.tcp.async {
 					eventLog.WriteEntry("TCPAsyncServer.Init(): BufferManager.SetBuffer(...) failed.", EventLogEntryType.Error);
 				}
 
-				tokenId = poolOfRecSendEventArgs.AssignTokenId() + 1000000;
+				Int32 tokenId = poolOfRecSendEventArgs.AssignTokenId() + 1000000;
 
 				//Attach the SocketAsyncEventArgs object
 				//to its event handler. Since this SocketAsyncEventArgs object is
@@ -170,7 +168,12 @@ namespace isc.onec.tcp.async {
 				eventArgObjectForPool.Completed += new EventHandler<SocketAsyncEventArgs>(this.IO_Completed);
 
 				//We can store data in the UserToken property of SAEA object.
-				DataHoldingUserToken theTempReceiveSendUserToken = new DataHoldingUserToken(eventArgObjectForPool, eventArgObjectForPool.Offset, eventArgObjectForPool.Offset + this.socketListenerSettings.BufferSize, this.socketListenerSettings.ReceivePrefixLength, this.socketListenerSettings.SendPrefixLength, tokenId);
+				DataHoldingUserToken theTempReceiveSendUserToken = new DataHoldingUserToken(eventArgObjectForPool,
+					eventArgObjectForPool.Offset,
+					eventArgObjectForPool.Offset + this.socketListenerSettings.BufferSize,
+					this.socketListenerSettings.ReceivePrefixLength,
+					this.socketListenerSettings.SendPrefixLength,
+					tokenId);
 
 				//We'll have an object that we call DataHolder, that we can Remove from
 				//the UserToken when we are finished with it. So, we can hang on to the
