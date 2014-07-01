@@ -27,10 +27,10 @@ namespace isc.onec.tcp.async
 			get { return this.pool.Count; }
 		}
 
-		internal Int32 AssignTokenId()
-		{
-			Int32 tokenId = Interlocked.Increment(ref nextTokenId);			
-			return tokenId;
+		internal Int32 NextTokenId {
+			get {
+				return Interlocked.Increment(ref this.nextTokenId);
+			}
 		}
 
 		// Removes a SocketAsyncEventArgs instance from the pool.

@@ -156,7 +156,7 @@ namespace isc.onec.tcp.async {
 					eventLog.WriteEntry("TCPAsyncServer.Init(): BufferManager.SetBuffer(...) failed.", EventLogEntryType.Error);
 				}
 
-				Int32 tokenId = poolOfRecSendEventArgs.AssignTokenId() + 1000000;
+				Int32 tokenId = poolOfRecSendEventArgs.NextTokenId + 1000000;
 
 				//Attach the SocketAsyncEventArgs object
 				//to its event handler. Since this SocketAsyncEventArgs object is
@@ -205,7 +205,7 @@ namespace isc.onec.tcp.async {
 			//AcceptEventArg_Completed object when the accept op completes.
 			acceptEventArg.Completed += new EventHandler<SocketAsyncEventArgs>(this.AcceptEventArg_Completed);
 
-			acceptEventArg.UserToken = new AcceptOpUserToken(pool.AssignTokenId() + 10000);
+			acceptEventArg.UserToken = new AcceptOpUserToken(pool.NextTokenId + 10000);
 
 			return acceptEventArg;
 
