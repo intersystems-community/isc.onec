@@ -9,8 +9,8 @@ using NLog;
 
 
 
-namespace isc.onec.tcp.async
-{   //____________________________________________________________________________
+namespace isc.onec.tcp.async {
+	//____________________________________________________________________________
 	// Implements the logic for the socket server.
 
 	public sealed class TCPAsyncServer : IDisposable {
@@ -110,8 +110,7 @@ namespace isc.onec.tcp.async
 			this.StartListen();
 		}
 
-		~TCPAsyncServer()
-		{
+		~TCPAsyncServer() {
 			const string message = "AsyncTCPServer exits";
 			logger.Info(message);
 			eventLog.WriteEntry(message);
@@ -124,15 +123,13 @@ namespace isc.onec.tcp.async
 		//done this way to illustrate how the API can
 		// easily be used to create reusable objects to increase server performance.
 
-		private void Init()
-		{
+		private void Init() {
 
 			// Allocate one large byte buffer block, which all I/O operations will
 			//use a piece of. This gaurds against memory fragmentation.
 			this.theBufferManager.InitBuffer();
 			// preallocate pool of SocketAsyncEventArgs objects for accept operations
-			for (Int32 i = 0; i < this.socketListenerSettings.MaxAcceptOps; i++)
-			{
+			for (Int32 i = 0; i < this.socketListenerSettings.MaxAcceptOps; i++) {
 				// add SocketAsyncEventArg to the pool
 				this.poolOfAcceptEventArgs.Push(this.CreateNewSaeaForAccept(poolOfAcceptEventArgs));
 			}
@@ -151,8 +148,7 @@ namespace isc.onec.tcp.async
 
 			Int32 tokenId;
 
-			for (Int32 i = 0; i < this.socketListenerSettings.NumberOfSaeaForRecSend; i++)
-			{
+			for (Int32 i = 0; i < this.socketListenerSettings.NumberOfSaeaForRecSend; i++) {
 				//Allocate the SocketAsyncEventArgs object for this loop,
 				//to go in its place in the stack which will be the pool
 				//for receive/send operation context objects.
@@ -162,10 +158,7 @@ namespace isc.onec.tcp.async
 				//this particular SocketAsyncEventArg object
 				var success = this.theBufferManager.SetBuffer(eventArgObjectForPool);
 				if (!success) {
-					eventLog.WriteEntry("TCPAsyncServer.Init(): ");
-					// XXX
-					// TBD
-					// TODO
+					eventLog.WriteEntry("TCPAsyncServer.Init(): BufferManager.SetBuffer(...) failed.", EventLogEntryType.Error);
 				}
 
 				tokenId = poolOfRecSendEventArgs.AssignTokenId() + 1000000;
@@ -197,8 +190,7 @@ namespace isc.onec.tcp.async
 		//we can easily add more objects to the pool if we need to.
 		//You can do that if you do NOT use a buffer in the SAEA object that does
 		//the accept operations.
-		private SocketAsyncEventArgs CreateNewSaeaForAccept(SocketAsyncEventArgsPool pool)
-		{
+		private SocketAsyncEventArgs CreateNewSaeaForAccept(SocketAsyncEventArgsPool pool) {
 			//Allocate the SocketAsyncEventArgs object.
 			SocketAsyncEventArgs acceptEventArg = new SocketAsyncEventArgs();
 
@@ -226,8 +218,7 @@ namespace isc.onec.tcp.async
 		//____________________________________________________________________________
 		// This method starts the socket server such that it is listening for
 		// incoming connection requests.
-		private void StartListen()
-		{
+		private void StartListen() {
 
 
 			// create the socket which listens for incoming connections
@@ -258,30 +249,25 @@ namespace isc.onec.tcp.async
 
 		//____________________________________________________________________________
 		// Begins an operation to accept a connection request from the client
-		private void StartAccept()
-		{
+		private void StartAccept() {
 
 			SocketAsyncEventArgs acceptEventArg;
 
 			//Get a SocketAsyncEventArgs object to accept the connection.
 			//Get it from the pool if there is more than one in the pool.
 			//We could use zero as bottom, but one is a little safer.
-			if (this.poolOfAcceptEventArgs.Count > 1)
-			{
-				try
-				{
+			if (this.poolOfAcceptEventArgs.Count > 1) {
+				try {
 					acceptEventArg = this.poolOfAcceptEventArgs.Pop();
 				}
-				//or make a new one.
-				catch
-				{
+					//or make a new one.
+				catch {
 					logger.Debug("no objects in pool");
 					acceptEventArg = this.CreateNewSaeaForAccept(poolOfAcceptEventArgs);
 				}
 			}
-			//or make a new one.
-			else
-			{
+				//or make a new one.
+			else {
 				acceptEventArg = this.CreateNewSaeaForAccept(poolOfAcceptEventArgs);
 			}
 
@@ -304,7 +290,7 @@ namespace isc.onec.tcp.async
 			//before calling AcceptAsync and use the AcceptSocket property to get it,
 			//then a new Socket object will be created for you by .NET.
 			bool willRaiseEvent = listenSocket.AcceptAsync(acceptEventArg);
-			//Socket.AcceptAsync returns true if the I/O operation is pending, i.socketAsyncEventArgs. is
+			//Socket.AcceptAsync returns true if the I/O operation is pending, i.e. is
 			//working asynchronously. The
 			//SocketAsyncEventArgs.Completed event on the acceptEventArg parameter
 			//will be raised upon completion of accept op.
@@ -314,8 +300,7 @@ namespace isc.onec.tcp.async
 			//AcceptAsync returns false if the I/O operation completed synchronously.
 			//The SocketAsyncEventArgs.Completed event on the acceptEventArg
 			//parameter will NOT be raised when AcceptAsync returns false.
-			if (!willRaiseEvent)
-			{
+			if (!willRaiseEvent) {
 
 				//The code in this if (!willRaiseEvent) statement only runs
 				//when the operation was completed synchronously. It is needed because
@@ -335,8 +320,7 @@ namespace isc.onec.tcp.async
 		// This is only when a new connection is being accepted.
 		// Notice that Socket.AcceptAsync is returning a value of true, and
 		// raising the Completed event when the AcceptAsync method completes.
-		private void AcceptEventArg_Completed(object sender, SocketAsyncEventArgs e)
-		{
+		private void AcceptEventArg_Completed(object sender, SocketAsyncEventArgs e) {
 			//Any code that you put in this method will NOT be called if
 			//the operation completes synchronously, which will probably happen when
 			//there is some kind of socket error. It might be better to put the code
@@ -351,21 +335,19 @@ namespace isc.onec.tcp.async
 		//represents the SocketAsyncEventArgs object that did
 		//the accept operation. in this method we'll do the handoff from it to the
 		//SocketAsyncEventArgs object that will do receive/send.
-		private void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
-		{
+		private void ProcessAccept(SocketAsyncEventArgs acceptEventArgs) {
 			// This is when there was an error with the accept op. That should NOT
 			// be happening often. It could indicate that there is a problem with
 			// that socket. If there is a problem, then we would have an infinite
 			// loop here, if we tried to reuse that same socket.
-			if (acceptEventArgs.SocketError != SocketError.Success)
-			{
+			if (acceptEventArgs.SocketError != SocketError.Success) {
 				// Loop back to post another accept op. Notice that we are NOT
 				// passing the SAEA object here.
 				this.LoopToStartAccept();
 
 				AcceptOpUserToken theAcceptOpToken = (AcceptOpUserToken) acceptEventArgs.UserToken;
 
-				logger.Error("SocketError, accept tokenId " + theAcceptOpToken.TokenId);
+				logger.Error("SocketError, accept id " + theAcceptOpToken.TokenId);
 				//Let's destroy this socket, since it could be bad.
 				this.HandleBadAccept(acceptEventArgs);
 
@@ -376,8 +358,7 @@ namespace isc.onec.tcp.async
 			//TODO for tests
 			Int32 max = maxSimultaneousClientsThatWereConnected; // Reading a 32-bit value is atomic.
 			Int32 numberOfConnectedSockets = Interlocked.Increment(ref this.numberOfAcceptedSockets);
-			if (numberOfConnectedSockets > max)
-			{
+			if (numberOfConnectedSockets > max) {
 				Interlocked.Increment(ref maxSimultaneousClientsThatWereConnected);
 			}
 
@@ -393,7 +374,7 @@ namespace isc.onec.tcp.async
 			SocketAsyncEventArgs receiveSendEventArgs = this.poolOfRecSendEventArgs.Pop();
 			//Create sessionId in UserToken.
 			//((DataHoldingUserToken)receiveSendEventArgs.UserToken).CreateSessionId();
-			((DataHoldingUserToken)receiveSendEventArgs.UserToken).StartSession();
+			((DataHoldingUserToken) receiveSendEventArgs.UserToken).StartSession();
 
 			//A new socket was created by the AcceptAsync method. The
 			//SocketAsyncEventArgs object which did the accept operation has that
@@ -401,8 +382,7 @@ namespace isc.onec.tcp.async
 			//a reference for that socket to the SocketAsyncEventArgs
 			//object which will do receive/send.
 			receiveSendEventArgs.AcceptSocket = acceptEventArgs.AcceptSocket;
-			if (this.keepAlive)
-			{
+			if (this.keepAlive) {
 				SetDesiredKeepAlive(receiveSendEventArgs.AcceptSocket);
 				logger.Debug("KeepAlive is On");
 			}
@@ -426,8 +406,7 @@ namespace isc.onec.tcp.async
 		//accepting socket. We do NOT actually need this method. You could
 		//just call StartAccept() in ProcessAccept() where we called LoopToStartAccept().
 		//This method is just here to help you visualize the program flow.
-		private void LoopToStartAccept()
-		{
+		private void LoopToStartAccept() {
 
 			this.StartAccept();
 		}
@@ -435,10 +414,9 @@ namespace isc.onec.tcp.async
 
 		//____________________________________________________________________________
 		// Set the receive buffer and post a receive op.
-		private void StartReceive(SocketAsyncEventArgs receiveSendEventArgs)
-		{
+		private void StartReceive(SocketAsyncEventArgs receiveSendEventArgs) {
 
-			DataHoldingUserToken receiveSendToken = (DataHoldingUserToken)receiveSendEventArgs.UserToken;
+			DataHoldingUserToken receiveSendToken = (DataHoldingUserToken) receiveSendEventArgs.UserToken;
 
 
 			//Set the buffer for the receive operation.
@@ -449,19 +427,16 @@ namespace isc.onec.tcp.async
 			// Post async receive operation on the socket.
 			Socket socket = receiveSendEventArgs.AcceptSocket;
 			bool willRaiseEvent;
-			try
-			{
+			try {
 				willRaiseEvent = socket.ReceiveAsync(receiveSendEventArgs);
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				willRaiseEvent = false;
 				logger.ErrorException("socket.ReceiveAsync:", e);
 				eventLog.WriteEntry(e.ToStringWithIlOffsets(), EventLogEntryType.Error);
 			}
 
 			//Socket.ReceiveAsync returns true if the I/O operation is pending. The
-			//SocketAsyncEventArgs.Completed event on the socketAsyncEventArgs parameter will be raised
+			//SocketAsyncEventArgs.Completed event on the e parameter will be raised
 			//upon completion of the operation. So, true will cause the IO_Completed
 			//method to be called when the receive operation completes.
 			//That's because of the event handler we created when building
@@ -470,13 +445,12 @@ namespace isc.onec.tcp.async
 			//eventArgObjectForPool.Completed += new EventHandler<SocketAsyncEventArgs>(IO_Completed);
 
 			//Socket.ReceiveAsync returns false if I/O operation completed synchronously.
-			//In that case, the SocketAsyncEventArgs.Completed event on the socketAsyncEventArgs parameter
-			//will not be raised and the socketAsyncEventArgs object passed as a parameter may be
+			//In that case, the SocketAsyncEventArgs.Completed event on the e parameter
+			//will not be raised and the e object passed as a parameter may be
 			//examined immediately after the method call
 			//returns to retrieve the result of the operation.
 			// It may be false in the case of a socket error.
-			if (!willRaiseEvent)
-			{
+			if (!willRaiseEvent) {
 
 				//If the op completed synchronously, we need to call ProcessReceive
 				//method directly. This will probably be used rarely, as you will
@@ -488,38 +462,29 @@ namespace isc.onec.tcp.async
 
 		//____________________________________________________________________________
 		// This method is called whenever a receive or send operation completes.
-		// Here "socketAsyncEventArgs" represents the SocketAsyncEventArgs object associated
+		// Here "e" represents the SocketAsyncEventArgs object associated
 		//with the completed receive or send operation
-		private void IO_Completed(object sender, SocketAsyncEventArgs e)
-		{
+		private void IO_Completed(object sender, SocketAsyncEventArgs e) {
 			//Any code that you put in this method will NOT be called if
 			//the operation completes synchronously, which will probably happen when
 			//there is some kind of socket error.
 
-			DataHoldingUserToken receiveSendToken = (DataHoldingUserToken)e.UserToken;
+			DataHoldingUserToken receiveSendToken = (DataHoldingUserToken) e.UserToken;
 
 
 			// determine which type of operation just completed and call the associated handler
-			switch (e.LastOperation)
-			{
-				case SocketAsyncOperation.Receive:
-					//logger.Debug("IO_Completed method in Receive, receiveSendToken tokenId " + receiveSendToken.TokenId);
-
-					this.ProcessReceive(e);
-					break;
-
-				case SocketAsyncOperation.Send:
-					//logger.Debug("IO_Completed method in Send, tokenId " + receiveSendToken.TokenId);
-
-
-					this.ProcessSend(e);
-					break;
-
-				default:
-					//This exception will occur if you code the Completed event of some
-					//operation to come to this method, by mistake.
-					logger.Error("IO_Completed(): The last operation completed on the socket was not a receive or send");
-					throw new ArgumentException("The last operation completed on the socket was not a receive or send");
+			switch (e.LastOperation) {
+			case SocketAsyncOperation.Receive:
+				this.ProcessReceive(e);
+				break;
+			case SocketAsyncOperation.Send:
+				this.ProcessSend(e);
+				break;
+			default:
+				//This exception will occur if you code the Completed event of some
+				//operation to come to this method, by mistake.
+				logger.Error("IO_Completed(): The last operation completed on the socket was not a receive or send");
+				throw new ArgumentException("The last operation completed on the socket was not a receive or send");
 			}
 		}
 
@@ -531,16 +496,14 @@ namespace isc.onec.tcp.async
 		// Otherwise, we process the received data. And if a complete message was
 		// received, then we do some additional processing, to
 		// respond to the client.
-		private void ProcessReceive(SocketAsyncEventArgs receiveSendEventArgs)
-		{
-			DataHoldingUserToken receiveSendToken = (DataHoldingUserToken)receiveSendEventArgs.UserToken;
+		private void ProcessReceive(SocketAsyncEventArgs receiveSendEventArgs) {
+			DataHoldingUserToken receiveSendToken = (DataHoldingUserToken) receiveSendEventArgs.UserToken;
 			// If there was a socket error, close the connection. This is NOT a normal
 			// situation, if you get an error here.
 			// In the Microsoft example code they had this error situation handled
 			// at the end of ProcessReceive. Putting it here improves readability
 			// by reducing nesting some.
-			if (receiveSendEventArgs.SocketError != SocketError.Success)
-			{
+			if (receiveSendEventArgs.SocketError != SocketError.Success) {
 
 
 				receiveSendToken.Reset();
@@ -552,8 +515,7 @@ namespace isc.onec.tcp.async
 
 			// If no data was received, close the connection. This is a NORMAL
 			// situation that shows when the client has finished sending data.
-			if (receiveSendEventArgs.BytesTransferred == 0)
-			{
+			if (receiveSendEventArgs.BytesTransferred == 0) {
 
 				receiveSendToken.Reset();
 				this.CloseClientSocket(receiveSendEventArgs);
@@ -568,14 +530,12 @@ namespace isc.onec.tcp.async
 
 			//If we have not got all of the prefix already,
 			//then we need to work on it here.
-			if (receiveSendToken.receivedPrefixBytesDoneCount < this.socketListenerSettings.ReceivePrefixLength)
-			{
+			if (receiveSendToken.receivedPrefixBytesDoneCount < this.socketListenerSettings.ReceivePrefixLength) {
 				remainingBytesToProcess = prefixHandler.HandlePrefix(receiveSendEventArgs, receiveSendToken, remainingBytesToProcess);
 
 
 
-				if (remainingBytesToProcess == 0)
-				{
+				if (remainingBytesToProcess == 0) {
 					// We need to do another receive op, since we do not have
 					// the message yet, but remainingBytesToProcess == 0.
 					this.StartReceive(receiveSendEventArgs);
@@ -588,14 +548,10 @@ namespace isc.onec.tcp.async
 			// We'll arrive here when we have received enough bytes to read
 			// the first byte after the prefix.
 			bool incomingTcpMessageIsReady = false;
-			try
-			{
+			try {
 				incomingTcpMessageIsReady = messageHandler.HandleMessage(receiveSendEventArgs.Buffer, receiveSendToken, remainingBytesToProcess);
-			}
-			catch (Exception e)
-			{
-				try
-				{
+			} catch (Exception e) {
+				try {
 					logger.ErrorException("Weird error:", e);
 					eventLog.WriteEntry(e.ToStringWithIlOffsets(), EventLogEntryType.Error);
 					receiveSendToken.theDataHolder.isError = true;
@@ -605,10 +561,8 @@ namespace isc.onec.tcp.async
 
 					receiveSendToken.theMediator.PrepareOutgoingData();
 					this.StartSend(receiveSendToken.theMediator.SocketAsyncEventArgs);
-				}
-				catch (Exception ex)
-				{
-					logger.ErrorException("on recovery from error:",ex);
+				} catch (Exception ex) {
+					logger.ErrorException("on recovery from error:", ex);
 					eventLog.WriteEntry(ex.ToStringWithIlOffsets(), EventLogEntryType.Error);
 				}
 
@@ -621,8 +575,7 @@ namespace isc.onec.tcp.async
 			}
 
 
-			if (incomingTcpMessageIsReady)
-			{
+			if (incomingTcpMessageIsReady) {
 
 
 				// Pass the DataHolder object to the Mediator here. The data in
@@ -640,9 +593,7 @@ namespace isc.onec.tcp.async
 
 				receiveSendToken.theMediator.PrepareOutgoingData();
 				this.StartSend(receiveSendToken.theMediator.SocketAsyncEventArgs);
-			}
-			else
-			{
+			} else {
 				// Since we have NOT gotten enough bytes for the whole message,
 				// we need to do another receive op. Reset some variables first.
 
@@ -661,9 +612,8 @@ namespace isc.onec.tcp.async
 
 		//____________________________________________________________________________
 		//Post a send.
-		private void StartSend(SocketAsyncEventArgs receiveSendEventArgs)
-		{
-			DataHoldingUserToken receiveSendToken = (DataHoldingUserToken)receiveSendEventArgs.UserToken;
+		private void StartSend(SocketAsyncEventArgs receiveSendEventArgs) {
+			DataHoldingUserToken receiveSendToken = (DataHoldingUserToken) receiveSendEventArgs.UserToken;
 
 
 
@@ -684,14 +634,11 @@ namespace isc.onec.tcp.async
 			//the buffer or not. If it is larger than the buffer, then we will have
 			//to post more than one send operation. If it is less than or equal to the
 			//size of the send buffer, then we can accomplish it in one send op.
-			if (receiveSendToken.sendBytesRemainingCount <= this.socketListenerSettings.BufferSize)
-			{
+			if (receiveSendToken.sendBytesRemainingCount <= this.socketListenerSettings.BufferSize) {
 				receiveSendEventArgs.SetBuffer(receiveSendToken.bufferOffsetSend, receiveSendToken.sendBytesRemainingCount);
 				//Copy the bytes to the buffer associated with this SAEA object.
 				Buffer.BlockCopy(receiveSendToken.dataToSend, receiveSendToken.bytesSentAlreadyCount, receiveSendEventArgs.Buffer, receiveSendToken.bufferOffsetSend, receiveSendToken.sendBytesRemainingCount);
-			}
-			else
-			{
+			} else {
 				//We cannot try to set the buffer any larger than its size.
 				//So since receiveSendToken.sendBytesRemainingCount > BufferSize, we just
 				//set it to the maximum size, to send the most data possible.
@@ -706,8 +653,7 @@ namespace isc.onec.tcp.async
 			//post asynchronous send operation
 			bool willRaiseEvent = receiveSendEventArgs.AcceptSocket.SendAsync(receiveSendEventArgs);
 
-			if (!willRaiseEvent)
-			{
+			if (!willRaiseEvent) {
 
 
 				this.ProcessSend(receiveSendEventArgs);
@@ -720,25 +666,20 @@ namespace isc.onec.tcp.async
 		//to start another receive op on the socket to read any additional
 		// data sent from the client. If all of the data has NOT been sent, then it
 		//calls StartSend to send more data.
-		private void ProcessSend(SocketAsyncEventArgs receiveSendEventArgs)
-		{
-			DataHoldingUserToken receiveSendToken = (DataHoldingUserToken)receiveSendEventArgs.UserToken;
+		private void ProcessSend(SocketAsyncEventArgs receiveSendEventArgs) {
+			DataHoldingUserToken receiveSendToken = (DataHoldingUserToken) receiveSendEventArgs.UserToken;
 
 
-			if (receiveSendEventArgs.SocketError == SocketError.Success)
-			{
+			if (receiveSendEventArgs.SocketError == SocketError.Success) {
 
 
 				receiveSendToken.sendBytesRemainingCount = receiveSendToken.sendBytesRemainingCount - receiveSendEventArgs.BytesTransferred;
 
-				if (receiveSendToken.sendBytesRemainingCount == 0)
-				{
+				if (receiveSendToken.sendBytesRemainingCount == 0) {
 					// If we are within this if-statement, then all the bytes in
 					// the message have been sent.
 					this.StartReceive(receiveSendEventArgs);
-				}
-				else
-				{
+				} else {
 					// If some of the bytes in the message have NOT been sent,
 					// then we will need to post another send operation, after we store
 					// a count of how many bytes that we sent in this send op.
@@ -746,9 +687,7 @@ namespace isc.onec.tcp.async
 					// So let's loop back to StartSend().
 					this.StartSend(receiveSendEventArgs);
 				}
-			}
-			else
-			{
+			} else {
 				//If we are in this else-statement, there was a socket error.
 
 				// We'll just close the socket if there was a
@@ -762,22 +701,19 @@ namespace isc.onec.tcp.async
 		//____________________________________________________________________________
 		// Does the normal destroying of sockets after
 		// we finish receiving and sending on a connection.
-		private void CloseClientSocket(SocketAsyncEventArgs e)
-		{
+		private void CloseClientSocket(SocketAsyncEventArgs e) {
 			logger.Debug("CloseClientSocket.");
 			var receiveSendToken = (e.UserToken as DataHoldingUserToken);
 
 
 
 			// do a shutdown before you close the socket
-			try
-			{
+			try {
 
 				e.AcceptSocket.Shutdown(SocketShutdown.Both);
 			}
-			// throws if socket was already closed
-			catch (Exception ex)
-			{
+				// throws if socket was already closed
+			catch (Exception ex) {
 				logger.ErrorException("CloseClientSocket():", ex);
 				eventLog.WriteEntry(ex.ToStringWithIlOffsets(), EventLogEntryType.Error);
 			}
@@ -788,8 +724,7 @@ namespace isc.onec.tcp.async
 
 			//Make sure the new DataHolder has been created for the next connection.
 			//If it has, then dataMessageReceived should be null.
-			if (receiveSendToken.theDataHolder.dataMessageReceived != null)
-			{
+			if (receiveSendToken.theDataHolder.dataMessageReceived != null) {
 				receiveSendToken.CreateNewDataHolder();
 			}
 
@@ -814,10 +749,9 @@ namespace isc.onec.tcp.async
 		}
 
 		//____________________________________________________________________________
-		private void HandleBadAccept(SocketAsyncEventArgs acceptEventArgs)
-		{
+		private void HandleBadAccept(SocketAsyncEventArgs acceptEventArgs) {
 			var acceptOpToken = (acceptEventArgs.UserToken as AcceptOpUserToken);
-			logger.Debug("HandleBadAccept(): Closing socket of accept tokenId " + acceptOpToken.TokenId);
+			logger.Debug("HandleBadAccept(): Closing socket of accept id " + acceptOpToken.TokenId);
 			//This method closes the socket and releases all resources, both
 			//managed and unmanaged. It internally calls Dispose.
 			acceptEventArgs.AcceptSocket.Close();
@@ -826,15 +760,13 @@ namespace isc.onec.tcp.async
 			poolOfAcceptEventArgs.Push(acceptEventArgs);
 		}
 
-		private static void SetDesiredKeepAlive(Socket socket)
-		{
+		private static void SetDesiredKeepAlive(Socket socket) {
 			socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
 			const uint time = 2000;
 			const uint interval = 1000;
 			SetKeepAlive(socket, true, time, interval);
 		}
-		private static void SetKeepAlive(Socket s, bool on, uint time, uint interval)
-		{
+		private static void SetKeepAlive(Socket s, bool on, uint time, uint interval) {
 			/* the native structure
 			struct tcp_keepalive {
 			ULONG onoff;
@@ -846,9 +778,9 @@ namespace isc.onec.tcp.async
 			// marshal the equivalent of the native structure into a byte array
 			uint dummy = 0;
 			var inOptionValues = new byte[Marshal.SizeOf(dummy) * 3];
-			BitConverter.GetBytes((uint)(on ? 1 : 0)).CopyTo(inOptionValues, 0);
-			BitConverter.GetBytes((uint)time).CopyTo(inOptionValues, Marshal.SizeOf(dummy));
-			BitConverter.GetBytes((uint)interval).CopyTo(inOptionValues, Marshal.SizeOf(dummy) * 2);
+			BitConverter.GetBytes((uint) (on ? 1 : 0)).CopyTo(inOptionValues, 0);
+			BitConverter.GetBytes((uint) time).CopyTo(inOptionValues, Marshal.SizeOf(dummy));
+			BitConverter.GetBytes((uint) interval).CopyTo(inOptionValues, Marshal.SizeOf(dummy) * 2);
 
 			// call WSAIoctl via IOControl
 			int ignore = s.IOControl(IOControlCode.KeepAliveValues, inOptionValues, null);

@@ -5,7 +5,7 @@ using System.Text;
 namespace isc.onec.tcp.async
 {
 	internal sealed class AcceptOpUserToken {
-		//The only reason to use this UserToken in our app is to give it an tokenId,
+		//The only reason to use this UserToken in our app is to give it an identifier,
 		//so that you can see it in the program flow. Otherwise, you would not need it.
 
 		
