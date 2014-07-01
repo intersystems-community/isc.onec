@@ -147,11 +147,11 @@ namespace isc.onec.tcp.async {
 				//Allocate the SocketAsyncEventArgs object for this loop,
 				//to go in its place in the stack which will be the pool
 				//for receive/send operation context objects.
-				SocketAsyncEventArgs socketAsyncEventArgs = new SocketAsyncEventArgs();
+				SocketAsyncEventArgs sendReceiveArgs = new SocketAsyncEventArgs();
 
 				// assign a byte buffer from the buffer block to
 				//this particular SocketAsyncEventArg object
-				var success = this.theBufferManager.SetBuffer(socketAsyncEventArgs);
+				var success = this.theBufferManager.SetBuffer(sendReceiveArgs);
 				if (!success) {
 					eventLog.WriteEntry("TCPAsyncServer.Init(): BufferManager.SetBuffer(...) failed.", EventLogEntryType.Error);
 				}
@@ -162,12 +162,12 @@ namespace isc.onec.tcp.async {
 				//to its event handler. Since this SocketAsyncEventArgs object is
 				//used for both receive and send operations, whenever either of those
 				//completes, the IO_Completed method will be called.
-				socketAsyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(this.IO_Completed);
+				sendReceiveArgs.Completed += new EventHandler<SocketAsyncEventArgs>(this.IO_Completed);
 
 				//We can store data in the UserToken property of SAEA object.
-				DataHoldingUserToken theTempReceiveSendUserToken = new DataHoldingUserToken(socketAsyncEventArgs,
-					socketAsyncEventArgs.Offset,
-					socketAsyncEventArgs.Offset + this.socketListenerSettings.BufferSize,
+				DataHoldingUserToken theTempReceiveSendUserToken = new DataHoldingUserToken(sendReceiveArgs,
+					sendReceiveArgs.Offset,
+					sendReceiveArgs.Offset + this.socketListenerSettings.BufferSize,
 					this.socketListenerSettings.ReceivePrefixLength,
 					this.socketListenerSettings.SendPrefixLength,
 					tokenId);
@@ -177,10 +177,10 @@ namespace isc.onec.tcp.async {
 				//DataHolder, pass it to an app, serialize it, or whatever.
 				theTempReceiveSendUserToken.CreateNewDataHolder();
 
-				socketAsyncEventArgs.UserToken = theTempReceiveSendUserToken;
+				sendReceiveArgs.UserToken = theTempReceiveSendUserToken;
 
 				// add this SocketAsyncEventArg object to the pool.
-				this.sendReceivePool.Push(socketAsyncEventArgs);
+				this.sendReceivePool.Push(sendReceiveArgs);
 			}
 		}
 
