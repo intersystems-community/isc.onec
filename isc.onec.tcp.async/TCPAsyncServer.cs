@@ -131,7 +131,7 @@ namespace isc.onec.tcp.async {
 			// preallocate pool of SocketAsyncEventArgs objects for accept operations
 			for (Int32 i = 0; i < this.socketListenerSettings.MaxAcceptOps; i++) {
 				// add SocketAsyncEventArg to the pool
-				this.acceptPool.Push(this.CreateNewSaeaForAccept(this.acceptPool));
+				this.acceptPool.Push(this.CreateNewSaeaForAccept());
 			}
 
 			for (Int32 i = 0; i < this.socketListenerSettings.NumberOfSaeaForRecSend; i++) {
@@ -190,7 +190,7 @@ namespace isc.onec.tcp.async {
 		//we can easily add more objects to the pool if we need to.
 		//You can do that if you do NOT use a buffer in the SAEA object that does
 		//the accept operations.
-		private SocketAsyncEventArgs CreateNewSaeaForAccept(SocketAsyncEventArgsPool socketAsyncEventArgsPool) {
+		private SocketAsyncEventArgs CreateNewSaeaForAccept() {
 			//Allocate the SocketAsyncEventArgs object.
 			SocketAsyncEventArgs acceptEventArg = new SocketAsyncEventArgs();
 
@@ -205,7 +205,7 @@ namespace isc.onec.tcp.async {
 			//AcceptEventArg_Completed object when the accept op completes.
 			acceptEventArg.Completed += new EventHandler<SocketAsyncEventArgs>(this.AcceptEventArg_Completed);
 
-			acceptEventArg.UserToken = new AcceptOpUserToken(socketAsyncEventArgsPool.NextTokenId + 10000);
+			acceptEventArg.UserToken = new AcceptOpUserToken(this.acceptPool.NextTokenId + 10000);
 
 			return acceptEventArg;
 
@@ -263,12 +263,12 @@ namespace isc.onec.tcp.async {
 					//or make a new one.
 				catch {
 					logger.Debug("no objects in pool");
-					acceptEventArg = this.CreateNewSaeaForAccept(this.acceptPool);
+					acceptEventArg = this.CreateNewSaeaForAccept();
 				}
 			}
 				//or make a new one.
 			else {
-				acceptEventArg = this.CreateNewSaeaForAccept(this.acceptPool);
+				acceptEventArg = this.CreateNewSaeaForAccept();
 			}
 
 
