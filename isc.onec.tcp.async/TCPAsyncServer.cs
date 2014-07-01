@@ -134,27 +134,24 @@ namespace isc.onec.tcp.async {
 				this.poolOfAcceptEventArgs.Push(this.CreateNewSaeaForAccept(poolOfAcceptEventArgs));
 			}
 
-			//The pool that we built ABOVE is for SocketAsyncEventArgs objects that do
-			// accept operations.
-			//Now we will build a separate pool for SAEAs objects
-			//that do receive/send operations. One reason to separate them is that accept
-			//operations do NOT need a buffer, but receive/send operations do.
-			//ReceiveAsync and SendAsync require
-			//a parameter for buffer size in SocketAsyncEventArgs.Buffer.
-			// So, create pool of SAEA objects for receive/send operations.
-			SocketAsyncEventArgs eventArgObjectForPool;
-
-
-
 			for (Int32 i = 0; i < this.socketListenerSettings.NumberOfSaeaForRecSend; i++) {
+				//The pool that we built ABOVE is for SocketAsyncEventArgs objects that do
+				// accept operations.
+				//Now we will build a separate pool for SAEAs objects
+				//that do receive/send operations. One reason to separate them is that accept
+				//operations do NOT need a buffer, but receive/send operations do.
+				//ReceiveAsync and SendAsync require
+				//a parameter for buffer size in SocketAsyncEventArgs.Buffer.
+				// So, create pool of SAEA objects for receive/send operations.
+
 				//Allocate the SocketAsyncEventArgs object for this loop,
 				//to go in its place in the stack which will be the pool
 				//for receive/send operation context objects.
-				eventArgObjectForPool = new SocketAsyncEventArgs();
+				SocketAsyncEventArgs socketAsyncEventArgs = new SocketAsyncEventArgs();
 
 				// assign a byte buffer from the buffer block to
 				//this particular SocketAsyncEventArg object
-				var success = this.theBufferManager.SetBuffer(eventArgObjectForPool);
+				var success = this.theBufferManager.SetBuffer(socketAsyncEventArgs);
 				if (!success) {
 					eventLog.WriteEntry("TCPAsyncServer.Init(): BufferManager.SetBuffer(...) failed.", EventLogEntryType.Error);
 				}
@@ -165,12 +162,12 @@ namespace isc.onec.tcp.async {
 				//to its event handler. Since this SocketAsyncEventArgs object is
 				//used for both receive and send operations, whenever either of those
 				//completes, the IO_Completed method will be called.
-				eventArgObjectForPool.Completed += new EventHandler<SocketAsyncEventArgs>(this.IO_Completed);
+				socketAsyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(this.IO_Completed);
 
 				//We can store data in the UserToken property of SAEA object.
-				DataHoldingUserToken theTempReceiveSendUserToken = new DataHoldingUserToken(eventArgObjectForPool,
-					eventArgObjectForPool.Offset,
-					eventArgObjectForPool.Offset + this.socketListenerSettings.BufferSize,
+				DataHoldingUserToken theTempReceiveSendUserToken = new DataHoldingUserToken(socketAsyncEventArgs,
+					socketAsyncEventArgs.Offset,
+					socketAsyncEventArgs.Offset + this.socketListenerSettings.BufferSize,
 					this.socketListenerSettings.ReceivePrefixLength,
 					this.socketListenerSettings.SendPrefixLength,
 					tokenId);
@@ -180,10 +177,10 @@ namespace isc.onec.tcp.async {
 				//DataHolder, pass it to an app, serialize it, or whatever.
 				theTempReceiveSendUserToken.CreateNewDataHolder();
 
-				eventArgObjectForPool.UserToken = theTempReceiveSendUserToken;
+				socketAsyncEventArgs.UserToken = theTempReceiveSendUserToken;
 
 				// add this SocketAsyncEventArg object to the pool.
-				this.poolOfRecSendEventArgs.Push(eventArgObjectForPool);
+				this.poolOfRecSendEventArgs.Push(socketAsyncEventArgs);
 			}
 		}
 
@@ -445,7 +442,7 @@ namespace isc.onec.tcp.async {
 			//That's because of the event handler we created when building
 			//the pool of SocketAsyncEventArgs objects that perform receive/send.
 			//It was the line that said
-			//eventArgObjectForPool.Completed += new EventHandler<SocketAsyncEventArgs>(IO_Completed);
+			//socketAsyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(IO_Completed);
 
 			//Socket.ReceiveAsync returns false if I/O operation completed synchronously.
 			//In that case, the SocketAsyncEventArgs.Completed event on the e parameter
