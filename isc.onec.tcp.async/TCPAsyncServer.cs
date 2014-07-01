@@ -357,7 +357,8 @@ namespace isc.onec.tcp.async {
 			}
 
 			//TODO for tests
-			Int32 max = maxSimultaneousClientsThatWereConnected; // Reading a 32-bit value is atomic.
+			// WTF? Reading a 32-bit value is atomic (i. e. we won't read any garbage). Still, we may fail to read the most up-to-date value.
+			Int32 max = maxSimultaneousClientsThatWereConnected;
 			Int32 numberOfConnectedSockets = Interlocked.Increment(ref this.numberOfAcceptedSockets);
 			if (numberOfConnectedSockets > max) {
 				Interlocked.Increment(ref maxSimultaneousClientsThatWereConnected);

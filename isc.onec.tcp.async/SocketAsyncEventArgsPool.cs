@@ -9,7 +9,8 @@ namespace isc.onec.tcp.async
 		//just for assigning an ID so we can watch our objects while testing.
 		private Int32 nextTokenId = 0;
 		
-		// Pool of reusable SocketAsyncEventArgs objects.		
+		// Pool of reusable SocketAsyncEventArgs objects.
+		// WTF? Consider using a concurrent collection *instead* of ths entire class.
 		Stack<SocketAsyncEventArgs> pool;
 		
 		// initializes the object pool to the specified size.
@@ -21,7 +22,8 @@ namespace isc.onec.tcp.async
 			this.pool = new Stack<SocketAsyncEventArgs>(capacity);
 		}
 
-		// The number of SocketAsyncEventArgs instances in the pool.		 
+		// The number of SocketAsyncEventArgs instances in the pool.
+		// WTF? This may fail to return the most current value. 
 		internal Int32 Count
 		{
 			get { return this.pool.Count; }
