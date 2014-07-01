@@ -44,7 +44,7 @@ namespace isc.onec.tcp.async {
 		//set up your app to allow it.
 		//private Int32 sessionId;				
 
-		public Server server;
+		private Server server;
 
 		private static Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -91,8 +91,10 @@ namespace isc.onec.tcp.async {
 			}
 		}
 
-		public Server getServer() {
-			return this.server;
+		internal Server Server {
+			get {
+				return this.server;
+			}
 		}
 
 		internal void StartSession() {

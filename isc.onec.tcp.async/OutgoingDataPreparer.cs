@@ -44,11 +44,11 @@ namespace isc.onec.tcp.async{
 			Byte[] reply;
 			if (theDataHolder.isError)
 			{
-				reply = sendError(theUserToken.getServer());
+				reply = sendError(theUserToken.Server);
 			}
 			else
 			{
-				reply = process(theUserToken.getServer(), theDataHolder.dataMessageReceived);
+				reply = process(theUserToken.Server, theDataHolder.dataMessageReceived);
 			}
 			Int32 lengthOfCurrentOutgoingMessage = reply.Length;
 

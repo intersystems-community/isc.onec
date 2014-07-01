@@ -42,7 +42,7 @@ namespace isc.onec.tcp.async {
 						remainingBytesToProcess);
 			} catch (ArgumentException ae) {
 				eventLog.WriteEntry(ae.ToStringWithIlOffsets(), EventLogEntryType.Error);
-				eventLog.WriteEntry("Exception context: client: " + receiveSendToken.server.Client
+				eventLog.WriteEntry("Exception context: client: " + receiveSendToken.Server.Client
 					+ "; source: " + source.Length
 					+ " byte(s); source offset : " + receiveSendToken.receiveMessageOffset
 					+ "; destination: " + receiveSendToken.theDataHolder.dataMessageReceived.Length
