@@ -58,7 +58,6 @@ namespace isc.onec.tcp.async {
 
 		private static EventLog eventLog = EventLogFactory.Instance;
 
-		//TODO bad code - refactor
 		private static SocketListenerSettings getSettings(int port) {
 			try {
 				// Get endpoint for the listener.
@@ -356,7 +355,6 @@ namespace isc.onec.tcp.async {
 				return;
 			}
 
-			//TODO for tests
 			// WTF? Reading a 32-bit value is atomic (i. e. we won't read any garbage). Still, we may fail to read the most up-to-date value.
 			Int32 max = maxSimultaneousClientsThatWereConnected;
 			Int32 numberOfConnectedSockets = Interlocked.Increment(ref this.numberOfAcceptedSockets);
@@ -568,7 +566,6 @@ namespace isc.onec.tcp.async {
 					eventLog.WriteEntry(ex.ToStringWithIlOffsets(), EventLogEntryType.Error);
 				}
 
-				//TODO Close socket
 				receiveSendToken.CleanUp();
 				receiveSendToken.Reset();
 				//CloseClientSocket(receiveSendEventArgs);

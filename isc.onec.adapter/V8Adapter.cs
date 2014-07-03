@@ -6,15 +6,11 @@ using System.Threading;
 using NLog;
 
 namespace isc.onec.bridge {
-	//TODO add try catch
-	//TODO add logging
-	//TODO make tests
-	//TODO test multithreading
 	internal sealed class V8Adapter {
 		private string url;
 
 		private object connector;
-		//TODO check this
+
 		private static ReaderWriterLock connectorLock = new ReaderWriterLock();
 
 		public bool isConnected = false;
@@ -60,7 +56,6 @@ namespace isc.onec.bridge {
 			try {
 				//obj2 = target.comObject.GetType().InvokeMember(methodName, BindingFlags.InvokeMethod, null, target.comObject, methodParams, modifiers, null, null);
 				// | BindingFlags.Public
-				// TODO Modifiers
 				return target.GetType().InvokeMember(method, BindingFlags.InvokeMethod, null, target, args,null,null,null);
 			} catch (TargetInvocationException exception) {
 				logger.DebugException("invoke", exception);
@@ -74,7 +69,6 @@ namespace isc.onec.bridge {
 			try
 			{
 				V8Version version = getVersion(url);
-				//TODO Check this
 				connectorLock.AcquireReaderLock(-1);
 				this.connector = this.createConnector(version);
 				logger.Debug("New V8.ComConnector is created");
@@ -93,7 +87,6 @@ namespace isc.onec.bridge {
 				throw;
 			}
 			finally {
-				//TODO Check this
 				 connectorLock.ReleaseReaderLock();
 			}
 

@@ -92,7 +92,6 @@ namespace isc.onec.tcp.async{
 			try {
 				RequestMessage request = (new MessageDecoder(data)).decode();
 
-				//TODO Debug why?
 				if (server == null) {
 					/*
 					 * Most probably, this doesn't ever happen,

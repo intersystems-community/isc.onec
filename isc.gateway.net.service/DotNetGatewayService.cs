@@ -112,7 +112,6 @@ namespace isc.gateway.net {
 			((BridgeStarter) (e.Argument)).ProcessConnections();
 		}
 
-		//TODO add parameter whether exit or not on unhandled exception
 		private void unhandledExceptionHandler(object sender, UnhandledExceptionEventArgs ue) {
 			Exception e = (Exception)ue.ExceptionObject;
 			this.EventLog.WriteEntry(e.ToStringWithIlOffsets(), EventLogEntryType.Error);
@@ -121,7 +120,6 @@ namespace isc.gateway.net {
 			this.Stop();
 		}
 
-		//TODO Close sockets and wait for threads
 		protected override void OnStop() {
 			//Of course it would be better to close all sockets immedie
 			this.RequestAdditionalTime(120000);

@@ -21,7 +21,6 @@ namespace isc.onec.tcp.async {
 			//Create the array where we'll store the complete message, 
 			//if it has not been created on a previous receive op.
 			if (receiveSendToken.receivedMessageBytesDoneCount == 0) {
-				//TODO make maximum length to be configurable
 				if (receiveSendToken.lengthOfCurrentIncomingMessage > 500000) {
 					throw new Exception("receiveSendToken.lengthOfCurrentIncomingMessage:" + receiveSendToken.lengthOfCurrentIncomingMessage);
 				}
