@@ -19,12 +19,6 @@ namespace isc.onec.tcp.async
 			this.theSaeaObject = e;
 		}
 				
-		/*private Int32 ReceivedTransMissionIdGetter()
-		{
-			Int32 receivedTransMissionId = Interlocked.Increment(ref TCPAsyncServer.mainTransMissionId);
-			return receivedTransMissionId;
-		}*/
-
 		private EndPoint GetRemoteEndpoint()
 		{   
 			return this.theSaeaObject.AcceptSocket.RemoteEndPoint;
@@ -35,8 +29,6 @@ namespace isc.onec.tcp.async
 			DataHoldingUserToken receiveToken = (DataHoldingUserToken)theSaeaObject.UserToken;
 			
 			theDataHolder = incomingDataHolder;
-			//theDataHolder.sessionId = receiveToken.SessionId;
-			//theDataHolder.receivedTransMissionId = this.ReceivedTransMissionIdGetter();			
 			theDataHolder.remoteEndpoint = this.GetRemoteEndpoint();
 			
 			
