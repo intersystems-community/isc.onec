@@ -22,7 +22,6 @@ namespace isc.onec.bridge {
 
 		internal Repository() {
 			this.cache = new Dictionary<long, object>();
-			this.counter = 0;
 		}
 
 		~Repository() {
