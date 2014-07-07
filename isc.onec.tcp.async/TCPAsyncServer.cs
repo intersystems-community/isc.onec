@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Threading; //for Semaphore and Interlocked
+using System.Threading;
 using isc.general;
 using NLog;
 
@@ -14,13 +14,13 @@ namespace isc.onec.tcp.async {
 	// Implements the logic for the socket server.
 
 	public sealed class TCPAsyncServer : IDisposable {
-		private Int32 numberOfAcceptedSockets;
+		private volatile Int32 numberOfAcceptedSockets;
 
 		// To keep a record of maximum number of simultaneous connections
 		// that occur while the server is running. This can be limited by operating
 		// system and hardware. It will not be higher than the value that you set
 		// for _MaxConnections.
-		private static Int32 maxSimultaneousClientsThatWereConnected = 0;
+		private static volatile Int32 maxSimultaneousClientsThatWereConnected = 0;
 
 		//Buffers for sockets are unmanaged by .NET.
 		//So memory used for buffers gets "pinned", which makes the
@@ -355,11 +355,14 @@ namespace isc.onec.tcp.async {
 				return;
 			}
 
-			// WTF? Reading a 32-bit value is atomic (i. e. we won't read any garbage). Still, we may fail to read the most up-to-date value.
 			Int32 max = maxSimultaneousClientsThatWereConnected;
+			#pragma warning disable 420
 			Int32 numberOfConnectedSockets = Interlocked.Increment(ref this.numberOfAcceptedSockets);
+			#pragma warning restore 420
 			if (numberOfConnectedSockets > max) {
+				#pragma warning disable 420
 				Interlocked.Increment(ref maxSimultaneousClientsThatWereConnected);
+				#pragma warning restore 420
 			}
 
 
@@ -733,7 +736,9 @@ namespace isc.onec.tcp.async {
 
 			// decrement the counter keeping track of the total number of clients
 			//connected to the server, for testing
+			#pragma warning disable 420
 			Interlocked.Decrement(ref this.numberOfAcceptedSockets);
+			#pragma warning restore 420
 
 			logger.Debug("Cleaning data holder");
 			receiveSendToken.CleanUp();
