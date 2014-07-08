@@ -37,6 +37,9 @@ namespace isc.onec.bridge {
 		}
 
 		internal Response(Type type, object value) {
+			if (type == Type.OBJECT && (value == null || value.GetType() != typeof(long))) {
+				throw new ArgumentException("Expected value: an OID of type long; actual value: " + value);
+			}
 			this.type = type;
 			this.value = value;
 		}

@@ -97,7 +97,7 @@ namespace isc.onec.bridge {
 			object rcw = Find(target);
 			object value = adapter.get(rcw, property);
 
-			return this.unmarshall(value);
+			return this.Unmarshal(value);
 		}
 		internal Response invoke(Request target, string method, Request[] args)
 		{
@@ -105,13 +105,13 @@ namespace isc.onec.bridge {
 			object[] arguments = build(args);
 			object value = adapter.invoke(rcw, method, arguments);
 
-			return this.unmarshall(value);
+			return this.Unmarshal(value);
 		}
 
 		internal Response free(Request request)
 		{
-			object rcw = Find(request);
-			remove(request);
+			object rcw = this.Find(request);
+			this.Remove(request);
 			adapter.free(ref rcw);
 
 			logger.Debug("Freeing object on request " + request.ToString());
@@ -125,7 +125,7 @@ namespace isc.onec.bridge {
 		{
 			logger.Debug("disconnecting from #" + this.client +". Adapter is "+adapter.ToString());
 			repository.CleanAll(delegate(object rcw) {
-				adapter.free(ref rcw);
+				this.adapter.free(ref rcw);
 			});
 
 			adapter.free(ref context);
@@ -164,20 +164,16 @@ namespace isc.onec.bridge {
 		{
 			return adapter.isAlive(url);
 		}
-		public Response getCounters()
-		{
-			long cacheSize = repository.CountObjectsInCache();
-			long counter = repository.CurrentCounter;
-			string reply = cacheSize + "," + counter;
-			Response response = new Response(Response.Type.DATA, reply);
 
-			return response;
+		public Response getCounters() {
+			string reply = repository.CachedCount + "," + repository.AddedCount;
+			return new Response(Response.Type.DATA, reply);
 		}
 
 		private object marshall(Request value) {
 			switch (value.RequestType) {
 			case Request.Type.OBJECT:
-				return Find(value);
+				return this.Find(value);
 			case Request.Type.DATA:
 			case Request.Type.NUMBER:
 				return value.Value;
@@ -186,19 +182,17 @@ namespace isc.onec.bridge {
 			}
 		}
 
-		private Response unmarshall(object value) {
+		private Response Unmarshal(object value) {
 			if (adapter.isObject(value)) {
-				string oid = add(value);
+				long oid = this.Add(value);
 				return new Response(Response.Type.OBJECT, oid);
-			} else {
-				if (value != null && value.GetType() == typeof(bool)) {
-					//bool is serialised to string as True/False
-					// XXX: parameter reassignment
-					value = (bool) value ? 1 : 0;
-				}
-				return new Response(Response.Type.DATA, value);
+			} else if (value != null && value.GetType() == typeof(bool)) {
+				//bool is serialised to string as True/False
+				return new Response(Response.Type.DATA, ((bool) value) ? 1 : 0);
 			}
+			return new Response(Response.Type.DATA, value);
 		}
+
 		private object[] build(Request[] args)
 		{
 			object[] result = new object[args.Length];
@@ -208,21 +202,27 @@ namespace isc.onec.bridge {
 			return result;
 		}
 
-		private object Find(Request obj) {
-			return obj.RequestType == Request.Type.CONTEXT
+		private object Find(Request request) {
+			if (request.RequestType == Request.Type.DATA || request.RequestType == Request.Type.NUMBER) {
+				throw new ArgumentException("Expecting either an OBJECT or a CONTEXT request: " + request);
+			}
+			return request.RequestType == Request.Type.CONTEXT
 				? this.context
-				: this.repository.Find(obj.Value.ToString());
+				: this.repository.Find((long) request.Value);
 		}
 
-		private string add(object rcw)
-		{
-			return repository.Add(rcw);
+		private long Add(object rcw) {
+			return this.repository.Add(rcw);
 		}
-		private void remove(Request obj)
-		{
-			if (obj.RequestType != Request.Type.OBJECT) throw new Exception("Service: attempt to Remove non-object");
 
-			repository.Remove(obj.Value.ToString());
+		private void Remove(Request obj) {
+			if (obj.RequestType != Request.Type.OBJECT) {
+				throw new ArgumentException("V8Service: attempt to Remove non-object");
+			} else if (obj.Value == null || obj.Value.GetType() != typeof(long)) {
+				throw new InvalidOperationException("V8Service: expected an OID of type long; actual: " + obj.Value);
+			}
+
+			this.repository.Remove((long) obj.Value);
 		}
 
 		

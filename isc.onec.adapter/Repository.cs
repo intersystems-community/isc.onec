@@ -4,7 +4,7 @@ using NLog;
 
 namespace isc.onec.bridge {
 	internal sealed class Repository {
-		public delegate void ObjectProcessor(object rcw);
+		internal delegate void ObjectProcessor(object rcw);
 
 		/// <summary>
 		/// XXX: Generic.Dictionary is not thread-safe!
@@ -16,7 +16,7 @@ namespace isc.onec.bridge {
 		/// <summary>
 		/// XXX: non-synchronized variable access (use either volatile or Interlocked)
 		/// </summary>
-		private long counter;
+		private long addedCount;
 
 		private static Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -28,59 +28,45 @@ namespace isc.onec.bridge {
 			logger.Debug("Repository destructor. Cache has " + cache.Count + " items.");
 		}
 
-		internal object Find(string oid) {
+		internal object Find(long oid) {
 			object rcw;
-			long key = Convert.ToInt64(oid);
 
-			if (!cache.TryGetValue(key, out rcw)) {
-				throw new Exception("Repository: could not Find object #" + key);
+			if (!this.cache.TryGetValue(oid, out rcw)) {
+				throw new Exception("Repository: could not Find object #" + oid);
 			}
    
 			return rcw;
 		}
 
-		internal string Add(object rcw) {
-			long key = Next();
-			cache.Add(key, rcw);
-			string oid = Convert.ToString(key);
+		internal long Add(object rcw) {
+			long oid = ++this.addedCount;
+			this.cache.Add(oid, rcw);
 			return oid;
 		}
-	
-		internal void Remove(string oid) {
-			long key = Convert.ToInt64(oid);
-			cache.Remove(key);
+
+		internal void Remove(long oid) {
+			this.cache.Remove(oid);
 		}
 		
-		internal long CountObjectsInCache() {
-			return cache.Count;
+		internal long CachedCount {
+			get {
+				return this.cache.Count;
+			}
 		}
 
-		internal long CurrentCounter {
+		internal long AddedCount {
 			get {
-				return this.counter;
+				return this.addedCount;
 			}
 		}
 		
 		internal void CleanAll(ObjectProcessor processor) {	
 			if (processor != null) {
-				List<object> toBeRemoved = new List<object>();
-				foreach (KeyValuePair<long,object> pair in cache) {
-					toBeRemoved.Add(pair.Value);
+				foreach (KeyValuePair<long, object> pair in this.cache) {
+					processor(pair.Value);
 				}
-				foreach (object rcw in toBeRemoved) {
-					processor(rcw);
-				}
-				toBeRemoved.Clear(); // XXX: local variable. WTF?
 			}
 			this.cache.Clear();   
-		}
-
-		private long Next() {
-			if (this.counter == Int64.MaxValue) { // XXX: this is a real huge number. WTF?
-				throw new Exception("Repository: maximum number of objects reached");
-			}
-
-			return ++this.counter;
 		}
 	}
 }

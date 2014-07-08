@@ -16,22 +16,29 @@ namespace isc.onec.bridge {
 
 		private readonly Type type;
 
+		/// <summary>
+		/// DATA:	???
+		/// OBJECT:	OID (long)
+		/// CONTEXT:	OID (empty string)
+		/// NUMBER:	long
+		/// </summary>
 		private readonly string value;
 
 		private static EventLog eventLog = EventLogFactory.Instance;
 
-		internal Request(string oid) {
-			this.type = oid.Length == 0 ? Type.CONTEXT : Type.OBJECT;
-			this.value = oid;
+		internal Request(string oid) :
+			this(oid.Length == 0 ? Type.CONTEXT : Type.OBJECT, oid) {
+			// empty
 		}
 
 		private Request(Type type, string value) {
-			if (type == Type.NUMBER) {
+			if (type == Type.NUMBER || type == Type.OBJECT) {
 				try {
 					Convert.ToInt64(value);
-				} catch (FormatException) {
-					eventLog.WriteEntry("Expected a number, received: \"" + value + "\" (length: " + value.Length + ")", EventLogEntryType.Error);
-					throw;
+				} catch (FormatException fe) {
+					string message = "Expected a number, received: \"" + value + "\" (length: " + value.Length + ")";
+					eventLog.WriteEntry(message, EventLogEntryType.Error);
+					throw new ArgumentException(message, fe);
 				}
 			}
 
@@ -52,7 +59,7 @@ namespace isc.onec.bridge {
 
 		internal object Value {
 			get {
-				return this.type == Type.NUMBER
+				return this.type == Type.NUMBER || this.type == Type.OBJECT
 					? Convert.ToInt64(this.value)
 					: (object) this.value;
 			}
