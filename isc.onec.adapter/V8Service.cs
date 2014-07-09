@@ -29,10 +29,10 @@ namespace isc.onec.bridge {
 
 		private static Dictionary<string, string> journal = new Dictionary<string,string>();
 
-		internal V8Service(V8Adapter adapter, Repository repository) {
+		internal V8Service() {
 			logger.Debug("isc.onec.bridge.V8Service is created");
-			this.adapter = adapter;
-			this.repository = repository;
+			this.adapter = new V8Adapter();
+			this.repository = new Repository();
 		}
 
 		private void clearJournal() {
@@ -131,7 +131,7 @@ namespace isc.onec.bridge {
 			adapter.free(ref context);
 			adapter.disconnect();
 
-			adapter = null;
+			this.adapter = null; // XXX: adapter is only initialized in constructor. This object can't be reused after disconnect.
 			clearJournal();
 
 			Response response = new Response();

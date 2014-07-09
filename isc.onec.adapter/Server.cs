@@ -22,10 +22,7 @@ namespace isc.onec.bridge {
 		private static EventLog eventLog = EventLogFactory.Instance;
 
 		public Server() {
-			V8Adapter adapter = new V8Adapter();
-			Repository repository = new Repository();
-
-			this.service = new V8Service(adapter, repository);
+			this.service = new V8Service();
 		}
 
 		public string[] run(int command, string target, string operand, string[] vals, int[] types) {
@@ -69,7 +66,7 @@ namespace isc.onec.bridge {
 				 */
 				return new Response();
 			} finally {
-				this.service = null;
+				this.service = null; // XXX: The object can't be reused upon disconnect. 
 			}
 		}
 
