@@ -5,7 +5,7 @@ using NLog;
 
 namespace isc.onec.bridge {
 	public sealed class Server {
-		public enum Commands : int {
+		public enum Commands {
 			GET = 1,
 			SET = 2,
 			INVOKE = 3,
