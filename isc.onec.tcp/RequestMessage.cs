@@ -29,7 +29,7 @@ namespace isc.onec.tcp {
 		public static RequestMessage createDisconnectMessage()
 		{
 			RequestMessage message = new RequestMessage();
-			message.command = (int)Server.Commands.DISCONNECT;
+			message.command = (int) Convert.ChangeType(Server.Commands.DISCONNECT, Server.Commands.DISCONNECT.GetTypeCode());
 			message.target = "";
 			message.operand = "";
 			message.vals = new string[0];

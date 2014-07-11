@@ -60,7 +60,7 @@ namespace isc.onec.bridge {
 
 		internal string[] Serialize() {
 			return new string[] {
-				((int) this.type).ToString(),
+				Convert.ChangeType(this.type, this.type.GetTypeCode()).ToString(),
 				this.value == null ? null : this.value.ToString(),
 			};
 		}

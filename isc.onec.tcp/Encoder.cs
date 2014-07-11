@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace isc.onec.tcp {
 	/// <summary>
 	/// Used by <code>isc.onec.tcp.async.OutgoingDataPreparer</code>.
+	/// XXX: create an (int, string) constructor.
 	/// </summary>
 	public sealed class MessageEncoder {
 		private string[] reply;

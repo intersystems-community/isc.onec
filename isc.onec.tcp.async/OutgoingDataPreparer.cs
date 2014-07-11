@@ -44,7 +44,7 @@ namespace isc.onec.tcp.async{
 			Byte[] reply;
 			if (theDataHolder.isError)
 			{
-				reply = sendError(theUserToken.Server);
+				reply = SendError(theUserToken.Server);
 			}
 			else
 			{
@@ -67,23 +67,22 @@ namespace isc.onec.tcp.async{
 			theUserToken.bytesSentAlreadyCount = 0;
 		}
 
-		private byte[] sendError(Server server)
-		{
-			string[] reply;
-			try
-			{
+		private static byte[] SendError(Server server) {
+			string message;
+			try {
 				RequestMessage request = RequestMessage.createDisconnectMessage();
 				server.run(request.command, request.target, request.operand, request.vals, request.types);
 				logger.Error("OutgoingDataPreparer.sendError(): error was sent");
-
-				reply = new string[] { ((int)Response.Type.EXCEPTION).ToString(), "Bridge: Fatal network error" };
-			}
-			catch (Exception e)
-			{
-				reply = new string[] { ((int)Response.Type.EXCEPTION).ToString(), "Bridge: Fatal network error. Unprocessed exception." };
+				message = "Bridge: Fatal network error";
+			} catch (Exception e) {
 				logger.ErrorException("Unprocessed exception:",e);
+				message = "Bridge: Fatal network error. Unprocessed exception.";
 			}
 
+			string[] reply = new string[] {
+					Convert.ChangeType(Response.Type.EXCEPTION, Response.Type.EXCEPTION.GetTypeCode()).ToString(),
+					message,
+				};
 			return new MessageEncoder(reply).encode();
 		}
 
