@@ -5,7 +5,7 @@ namespace isc.onec.bridge {
 	/// <summary>
 	/// Instances of <code>Response</code> are immutable.
 	/// </summary>
-	public class Response {
+	public sealed class Response {
 		public enum Type {
 			VOID = 1,
 			DATA = 2,
@@ -44,16 +44,11 @@ namespace isc.onec.bridge {
 			this.value = value;
 		}
 
-		internal Type ResponseType {
-			get {
-				return this.type;
-			}
-		}
-
-		internal object Value {
-			get {
-				return this.value;
-			}
+		internal string[] Serialize() {
+			return new string[] {
+				((int) this.type).ToString(),
+				this.value == null ? null : this.value.ToString(),
+			};
 		}
 	}
 }

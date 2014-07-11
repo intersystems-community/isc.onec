@@ -45,9 +45,7 @@ namespace isc.onec.bridge {
 				response = new Response(e);
 			}
 
-			string[] reply = this.serialize(response);
-
-			return reply;
+			return response.Serialize();
 		}
 
 		public Response Disconnect() {
@@ -130,15 +128,6 @@ namespace isc.onec.bridge {
 			}
 		}
 
-		private string[] serialize(Response response) {
-			string[] reply = new string[2];
-			reply[0] = ((int) response.ResponseType).ToString();
-			if (response.Value != null) {
-				reply[1] = response.Value.ToString();
-			}
-
-			return reply;
-		}
 		private Request[] buildRequestList(string[] values, int[] types)
 		{
 			if (values.Length != types.Length) throw new Exception("Server: protocol error. Not all values have types.");
