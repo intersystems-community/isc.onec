@@ -77,7 +77,7 @@ namespace isc.onec.bridge {
 			return response.Serialize();
 		}
 
-		public Response Disconnect() {
+		public void Disconnect() {
 			try {
 				if (this.Connected) {
 					var journalReport = this.service.getJournalReport();
@@ -86,12 +86,8 @@ namespace isc.onec.bridge {
 						eventLog.WriteEntry(journalReport, EventLogEntryType.Information);
 					}
 
-					return this.service.disconnect();
+					this.service.Disconnect();
 				}
-				/*
-				 * DISCONNECT allows an empty response.
-				 */
-				return Response.VOID;
 			} finally {
 				this.service = null; // XXX: The object can't be reused upon disconnect. 
 			}
@@ -116,6 +112,15 @@ namespace isc.onec.bridge {
 			return new Response(Response.Type.EXCEPTION, "Not connected");
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="command"></param>
+		/// <param name="obj"></param>
+		/// <param name="operand">an URL, or a method or property name.</param>
+		/// <param name="vals"></param>
+		/// <param name="types"></param>
+		/// <returns></returns>
 		private Response doCommand(Commands command,Request obj, string operand, string[] vals, int[] types) {
 			switch (command) {
 			case Commands.GET:
@@ -125,7 +130,8 @@ namespace isc.onec.bridge {
 			case Commands.SET:
 				return this.DoCommandIfConnected(() => {
 					Request value = new Request(types[0], vals[0]);
-					return this.service.set(obj, operand, value);
+					this.service.Set(obj, operand, value);
+					return Response.VOID;
 				});
 			case Commands.INVOKE:
 				return this.DoCommandIfConnected(() => {
@@ -135,16 +141,18 @@ namespace isc.onec.bridge {
 			case Commands.CONNECT:
 				if (this.service != null) {
 					var client = types.Length > 0 ? (string) (new Request(types[0], vals[0])).Value : null;
-					return this.service.Connect(operand, client);
+					this.service.Connect(operand, client);
+					return Response.VOID;
 				}
 				return new Response(Response.Type.EXCEPTION, "Server#service is null");
 			case Commands.DISCONNECT:
-				return this.Disconnect();
+				this.Disconnect();
+				return Response.VOID;
 			case Commands.FREE:
-				/*
-				 * FREE allows an empty response.
-				 */
-				return this.Connected ? this.service.free(obj) : Response.VOID;
+				if (this.Connected) {
+					this.service.Free(obj);
+				}
+				return Response.VOID;
 			case Commands.COUNT:
 				return this.DoCommandIfConnected(() => {
 					return this.service.getCounters();

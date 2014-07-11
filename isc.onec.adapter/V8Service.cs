@@ -40,60 +40,54 @@ namespace isc.onec.bridge {
 			this.repository = new Repository();
 		}
 
-		private void clearJournal() {
-			if (this.client != null) {
-				journal.Remove(this.client);
+		private static void RemoveFromJournal(string client) {
+			if (client != null) {
+				journal.Remove(client);
 			}
 		}
 
-		private void addToJournal(string client, string url) {
+		private static void AddToJournal(string client, string url) {
 			if (client != null) {
 				journal.Add(client, url);
 			}
 		}
 
 		/// <summary>
-		/// Connects to the <code>url</code> and returns a <code>void</code> response.
+		/// Connects to the <code>url</code>.
 		/// XXX: Should be entered by a single thread, and only once.
 		/// </summary>
 		/// <param name="url"></param>
 		/// <param name="client">can be <code>null</code></param>
-		/// <returns>a <code>void</code> response</returns>
-		public Response Connect(string url, string client) {
+		public void Connect(string url, string client) {
 			this.client = client;
 			logger.Debug("connect from session with #" + client);
-			if (clientExistsInJournal(client))
-			{
+			if (ExistsInJournal(client)) {
 				Thread.Sleep(1000);
-				if (clientExistsInJournal(client))
+				if (ExistsInJournal(client))
 				{
 					throw new InvalidOperationException("Attempt to create more than one connection to 1C from the same job. Client #" + client);
 				}
 			}
 			this.context = this.adapter.connect(url);
 
-			addToJournal(client, url);
-
-			return Response.VOID;
+			AddToJournal(client, url);
 		}
 
 
 
 	   
-		internal Response set(Request target, string property, Request value)
-		{
+		internal void Set(Request target, string property, Request value) {
 			object rcw = this.Find(target);
 			object argument = this.Marshal(value);
-			this.adapter.set(rcw, property, argument);
-
-			return Response.VOID;
+			this.adapter.Set(rcw, property, argument);
 		}
+
 		internal Response get(Request target, string property)
 		{
 			object rcw = Find(target);
-			object value = adapter.get(rcw, property);
+			object returnValue = adapter.get(rcw, property);
 
-			return this.Unmarshal(value);
+			return this.Unmarshal(returnValue);
 		}
 
 		internal Response invoke(Request target, string method, Request[] args) {
@@ -107,32 +101,27 @@ namespace isc.onec.bridge {
 			return this.Unmarshal(returnValue);
 		}
 
-		internal Response free(Request request)
-		{
+		internal void Free(Request request) {
 			object rcw = this.Find(request);
 			this.Remove(request);
-			adapter.free(ref rcw);
+			this.adapter.Free(ref rcw);
 
 			logger.Debug("Freeing object on request " + request.ToString());
-			
-			return Response.VOID;
 		}
 
-		internal Response disconnect()
-		{
+		internal void Disconnect() {
 			logger.Debug("disconnecting from #" + this.client +". Adapter is "+adapter.ToString());
-			repository.CleanAll(delegate(object rcw) {
-				this.adapter.free(ref rcw);
+			this.repository.CleanAll(delegate(object rcw) {
+				this.adapter.Free(ref rcw);
 			});
 
-			adapter.free(ref context);
-			adapter.disconnect();
+			this.adapter.Free(ref context);
+			this.adapter.disconnect();
 
 			this.adapter = null; // XXX: adapter is only initialized in constructor. This object can't be reused after disconnect.
-			clearJournal();
-
-			return Response.VOID;
+			RemoveFromJournal(this.client);
 		}
+
 		internal string getJournalReport() {
 			var report = "";
 
@@ -144,10 +133,8 @@ namespace isc.onec.bridge {
 			return report;
 		}
 
-		private bool clientExistsInJournal(string key)
-		{
-			if (key == null) return false;
-			return journal.ContainsKey(key);
+		private static bool ExistsInJournal(string client) {
+			return client == null ? false : journal.ContainsKey(client);
 		}
 
 		public bool Connected {

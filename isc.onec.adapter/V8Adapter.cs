@@ -36,14 +36,14 @@ namespace isc.onec.bridge {
 			}
 			return result;
 		}
-		public void set(object target, string name, object value)
-		{
+
+		public void Set(object target, string property, object value) {
 			/*
 			 *  target.comObject.GetType().InvokeMember(propertyName, BindingFlags.PutDispProperty | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly, null, target.comObject, new object[] { propertyValue });
 			 */
 			try
 			{
-				target.GetType().InvokeMember(name, BindingFlags.SetProperty | BindingFlags.Public, null, target, new object[] { value });
+				target.GetType().InvokeMember(property, BindingFlags.SetProperty | BindingFlags.Public, null, target, new object[] { value });
 			}
 			catch (TargetInvocationException exception)
 			{
@@ -80,7 +80,7 @@ namespace isc.onec.bridge {
 				logger.Debug("Connection is established");
 			}
 			catch (Exception) {
-				this.free(ref this.connector);
+				this.Free(ref this.connector);
 
 				stimulateGC();
 				isConnected = false;
@@ -100,7 +100,7 @@ namespace isc.onec.bridge {
 				throw new InvalidOperationException("Already in disconnecting mode.");
 			}
 
-			this.free(ref this.connector);
+			this.Free(ref this.connector);
 
 			stimulateGC();
 			isConnected = false;
@@ -158,7 +158,7 @@ namespace isc.onec.bridge {
 			return Activator.CreateInstance(typeFromProgID);
 		}
 
-		public void free(ref object rcw) {
+		public void Free(ref object rcw) {
 			if (rcw != null) {
 				logger.Debug("Releasing object " + ((MarshalByRefObject)rcw).ToString());
 				Marshal.ReleaseComObject(rcw);
