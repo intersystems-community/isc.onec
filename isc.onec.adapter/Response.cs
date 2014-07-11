@@ -13,11 +13,13 @@ namespace isc.onec.bridge {
 			EXCEPTION = 4,
 		};
 
+		internal static readonly Response VOID = new Response();
+
 		private readonly Type type;
 
 		private readonly object value;
 
-		internal Response() {
+		private Response() {
 			this.type = Type.VOID;
 			this.value = "";
 		}

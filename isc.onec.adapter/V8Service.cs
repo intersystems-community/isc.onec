@@ -15,9 +15,11 @@ namespace isc.onec.bridge {
 		private readonly Repository repository;
 
 		/// <summary>
-		/// XXX: Not set back to null on disconnect; shared access.
+		/// XXX: Not set back to null on disconnect.
+		/// XXX: Shared access.
+		/// XXX: This actually looks like a *last connected client*, as the value gets rewritten upon connect.
 		/// </summary>
-		private String client = null;
+		private String client;
 
 		internal String Client {
 			get {
@@ -25,9 +27,12 @@ namespace isc.onec.bridge {
 			}
 		}
 
-		private static Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-		private static Dictionary<string, string> journal = new Dictionary<string,string>();
+		/// <summary>
+		/// A shared map of clients to their URL's.
+		/// </summary>
+		private static readonly Dictionary<string, string> journal = new Dictionary<string, string>();
 
 		internal V8Service() {
 			logger.Debug("isc.onec.bridge.V8Service is created");
@@ -41,26 +46,20 @@ namespace isc.onec.bridge {
 			}
 		}
 
-		private void addToJournal(string client, string operand)
-		{
-			if (client != null) { journal.Add(client, operand); }
+		private void addToJournal(string client, string url) {
+			if (client != null) {
+				journal.Add(client, url);
+			}
 		}
 
-		public Response connect(string url)
-		{
-		   
-			this.context = adapter.connect(url);
-
-			Response response = new Response();
-
-		   
-
-			return response;
-		}
-
-		public Response connect(string operand, String client)
-		{
-			
+		/// <summary>
+		/// Connects to the <code>url</code> and returns a <code>void</code> response.
+		/// XXX: Should be entered by a single thread, and only once.
+		/// </summary>
+		/// <param name="url"></param>
+		/// <param name="client">can be <code>null</code></param>
+		/// <returns>a <code>void</code> response</returns>
+		public Response Connect(string url, string client) {
 			this.client = client;
 			logger.Debug("connect from session with #" + client);
 			if (clientExistsInJournal(client))
@@ -71,11 +70,11 @@ namespace isc.onec.bridge {
 					throw new InvalidOperationException("Attempt to create more than one connection to 1C from the same job. Client #" + client);
 				}
 			}
-			Response response = connect(operand);
+			this.context = this.adapter.connect(url);
 
-			addToJournal(client, operand);
+			addToJournal(client, url);
 
-			return response;
+			return Response.VOID;
 		}
 
 
@@ -87,7 +86,7 @@ namespace isc.onec.bridge {
 			object argument = this.Marshal(value);
 			this.adapter.set(rcw, property, argument);
 
-			return new Response();
+			return Response.VOID;
 		}
 		internal Response get(Request target, string property)
 		{
@@ -116,9 +115,7 @@ namespace isc.onec.bridge {
 
 			logger.Debug("Freeing object on request " + request.ToString());
 			
-			Response response = new Response();
-
-			return response;
+			return Response.VOID;
 		}
 
 		internal Response disconnect()
@@ -134,9 +131,7 @@ namespace isc.onec.bridge {
 			this.adapter = null; // XXX: adapter is only initialized in constructor. This object can't be reused after disconnect.
 			clearJournal();
 
-			Response response = new Response();
-
-			return response;
+			return Response.VOID;
 		}
 		internal string getJournalReport() {
 			var report = "";

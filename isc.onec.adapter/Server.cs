@@ -4,14 +4,43 @@ using isc.general;
 using NLog;
 
 namespace isc.onec.bridge {
+	/// <summary>
+	/// A "server" serving a single client. 
+	/// Relationship diagram:
+	/// Server -> V8Service -> {V8Adapter, Repository, Client}.
+	/// </summary>
 	public sealed class Server {
+		/// <summary>
+		/// Command types sent externally to this server.
+		/// </summary>
 		public enum Commands {
+			/// <summary>
+			/// Get an object's property.
+			/// </summary>
 			GET = 1,
+			/// <summary>
+			/// Set an object's property.
+			/// </summary>
 			SET = 2,
+			/// <summary>
+			/// Invoke an instance method on an object.
+			/// </summary>
 			INVOKE = 3,
+			/// <summary>
+			/// Connect a client to an URL.
+			/// </summary>
 			CONNECT = 4,
+			/// <summary>
+			/// Disconnect.
+			/// </summary>
 			DISCONNECT = 5,
+			/// <summary>
+			/// Remove an object from local cache as well as release the corresponding COM object.
+			/// </summary>
 			FREE = 6,
+			/// <summary>
+			/// Return the amount of objects allocated as well as object currently live (cached).
+			/// </summary>
 			COUNT = 7,
 		};
 
@@ -62,7 +91,7 @@ namespace isc.onec.bridge {
 				/*
 				 * DISCONNECT allows an empty response.
 				 */
-				return new Response();
+				return Response.VOID;
 			} finally {
 				this.service = null; // XXX: The object can't be reused upon disconnect. 
 			}
@@ -106,7 +135,7 @@ namespace isc.onec.bridge {
 			case Commands.CONNECT:
 				if (this.service != null) {
 					var client = types.Length > 0 ? (string) (new Request(types[0], vals[0])).Value : null;
-					return this.service.connect(operand, client);
+					return this.service.Connect(operand, client);
 				}
 				return new Response(Response.Type.EXCEPTION, "Server#service is null");
 			case Commands.DISCONNECT:
@@ -115,7 +144,7 @@ namespace isc.onec.bridge {
 				/*
 				 * FREE allows an empty response.
 				 */
-				return this.Connected ? this.service.free(obj) : new Response();
+				return this.Connected ? this.service.free(obj) : Response.VOID;
 			case Commands.COUNT:
 				return this.DoCommandIfConnected(() => {
 					return this.service.getCounters();
