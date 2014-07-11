@@ -83,14 +83,11 @@ namespace isc.onec.bridge {
 	   
 		internal Response set(Request target, string property, Request value)
 		{
-			object rcw = Find(target);
-			object argument;
-			argument = marshall(value);
-			adapter.set(rcw, property, argument);
+			object rcw = this.Find(target);
+			object argument = this.Marshal(value);
+			this.adapter.set(rcw, property, argument);
 
-			Response response = new Response();
-
-			return response;
+			return new Response();
 		}
 		internal Response get(Request target, string property)
 		{
@@ -99,13 +96,16 @@ namespace isc.onec.bridge {
 
 			return this.Unmarshal(value);
 		}
-		internal Response invoke(Request target, string method, Request[] args)
-		{
-			object rcw = Find(target);
-			object[] arguments = build(args);
-			object value = adapter.invoke(rcw, method, arguments);
 
-			return this.Unmarshal(value);
+		internal Response invoke(Request target, string method, Request[] args) {
+			object rcw = this.Find(target);
+			object[] arguments = new object[args.Length];
+			for (int i = 0; i < args.Length; i++) {
+				arguments[i] = this.Marshal(args[i]);
+			}
+			object returnValue = this.adapter.invoke(rcw, method, arguments);
+
+			return this.Unmarshal(returnValue);
 		}
 
 		internal Response free(Request request)
@@ -170,7 +170,7 @@ namespace isc.onec.bridge {
 			return new Response(Response.Type.DATA, reply);
 		}
 
-		private object marshall(Request value) {
+		private object Marshal(Request value) {
 			switch (value.RequestType) {
 			case Request.Type.OBJECT:
 				return this.Find(value);
@@ -178,6 +178,9 @@ namespace isc.onec.bridge {
 			case Request.Type.NUMBER:
 				return value.Value;
 			default:
+				/*
+				 * CONTEXT
+				 */
 				return null;
 			}
 		}
@@ -191,15 +194,6 @@ namespace isc.onec.bridge {
 				return new Response(Response.Type.DATA, ((bool) value) ? 1 : 0);
 			}
 			return new Response(Response.Type.DATA, value);
-		}
-
-		private object[] build(Request[] args)
-		{
-			object[] result = new object[args.Length];
-			for (int i = 0; i < args.Length; i++) {
-				result[i] = marshall(args[i]);
-			}
-			return result;
 		}
 
 		private object Find(Request request) {
