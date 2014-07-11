@@ -174,16 +174,5 @@ namespace isc.onec.bridge {
 			}
 			return list;
 		}
-
-		/// <summary>
-		/// XXX: never used.
-		/// </summary>
-		public void SendDisconnect() {
-			string[] result = this.Run((int)Commands.DISCONNECT, "", "", new string[0], new int[0]);
-			if (Convert.ToInt32(result[0]) == (int)Response.Type.EXCEPTION)
-			{
-				throw new Exception("disconnection failed"+result[1]);
-			}
-		}
 	}
 }
