@@ -54,13 +54,12 @@ namespace isc.onec.bridge {
 			this.service = new V8Service();
 		}
 
-		public string[] run(int command, string target, string operand, string[] vals, int[] types) {
-			Response response;
+		public string[] Run(int command, string target, string operand, string[] vals, int[] types) {
 			var commandType = (Commands) Enum.ToObject(typeof(Commands), command);
 			//if target is "." it is context
 			try {
 				var targetObject = new Request(target == "." ? "" : target);
-				response = this.doCommand(commandType, targetObject, operand, vals, types);
+				return this.DoCommand(commandType, targetObject, operand, vals, types).Serialize();
 			} catch (Exception e) {
 				var message = e.Source + ":" + this.Client + ":";
 				message += commandType.ToString() + ":";
@@ -71,10 +70,8 @@ namespace isc.onec.bridge {
 
 				this.Disconnect();
 
-				response = new Response(e);
+				return new Response(e).Serialize();
 			}
-
-			return response.Serialize();
 		}
 
 		public void Disconnect() {
@@ -121,7 +118,7 @@ namespace isc.onec.bridge {
 		/// <param name="vals"></param>
 		/// <param name="types"></param>
 		/// <returns></returns>
-		private Response doCommand(Commands command,Request obj, string operand, string[] vals, int[] types) {
+		private Response DoCommand(Commands command,Request obj, string operand, string[] vals, int[] types) {
 			switch (command) {
 			case Commands.GET:
 				return this.DoCommandIfConnected(() => {
@@ -182,7 +179,7 @@ namespace isc.onec.bridge {
 		/// XXX: never used.
 		/// </summary>
 		public void SendDisconnect() {
-			string[] result = this.run((int)Commands.DISCONNECT, "", "", new string[0], new int[0]);
+			string[] result = this.Run((int)Commands.DISCONNECT, "", "", new string[0], new int[0]);
 			if (Convert.ToInt32(result[0]) == (int)Response.Type.EXCEPTION)
 			{
 				throw new Exception("disconnection failed"+result[1]);
