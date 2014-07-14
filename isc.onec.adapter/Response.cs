@@ -42,7 +42,7 @@ namespace isc.onec.bridge {
 		}
 
 		/// <summary>
-		/// Never used.
+		/// XXX: Never used.
 		/// </summary>
 		/// <param name="value"></param>
 		private Response(bool value) {
