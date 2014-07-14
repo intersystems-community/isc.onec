@@ -1,4 +1,5 @@
 /.project
+apidocs
 *.suo
 *.swp
 isc.gateway.net.service/InstallUtil.exe
