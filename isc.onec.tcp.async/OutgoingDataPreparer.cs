@@ -71,6 +71,9 @@ namespace isc.onec.tcp.async{
 			string message;
 			try {
 				RequestMessage request = RequestMessage.createDisconnectMessage();
+				/*
+				 * Return value ignored.
+				 */
 				server.Run(request.command, request.target, request.operand, request.vals, request.types);
 				logger.Error("OutgoingDataPreparer.sendError(): error was sent");
 				message = "Bridge: Fatal network error";
@@ -99,8 +102,7 @@ namespace isc.onec.tcp.async{
 					reply = Response.NewException(message).Serialize();
 
 				} else {
-					reply = server.Run(request.command, request.target, request.operand, request.vals, request.types);
-					//logger.Debug("reply:" + reply[0] + "," + reply[1]);
+					reply = server.Run(request.command, request.target, request.operand, request.vals, request.types).Serialize();
 				}
 			} catch (Exception e) {
 				var message = e.ToStringWithIlOffsets();

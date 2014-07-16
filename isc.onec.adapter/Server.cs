@@ -20,15 +20,15 @@ namespace isc.onec.bridge {
 			this.service = new V8Service();
 		}
 
-		public string[] Run(int command, string target, string operand, string[] vals, int[] types) {
-			var commandType = (Command) Enum.ToObject(typeof(Command), command);
+		public Response Run(int commandType, string target, string operand, string[] vals, int[] types) {
+			var command = (Command) Enum.ToObject(typeof(Command), commandType);
 			//if target is "." it is context
 			try {
-				var targetObject = new Request(target == "." ? "" : target);
-				return this.DoCommand(commandType, targetObject, operand, vals, types).Serialize();
+				var obj = new Request(target == "." ? "" : target);
+				return this.DoCommand(command, obj, operand, vals, types);
 			} catch (Exception e) {
 				var message = e.Source + ":" + this.Client + ":";
-				message += commandType.ToString() + ":";
+				message += command.ToString() + ":";
 				message += target + ":" + operand + ":" + vals.ToString() + ":" + types.ToString();
 				logger.ErrorException(message, e);
 				eventLog.WriteEntry(e.ToStringWithIlOffsets(), EventLogEntryType.Warning);
@@ -36,7 +36,7 @@ namespace isc.onec.bridge {
 
 				this.Disconnect();
 
-				return new Response(e).Serialize();
+				return new Response(e);
 			}
 		}
 
@@ -81,7 +81,7 @@ namespace isc.onec.bridge {
 		/// <param name="vals"></param>
 		/// <param name="types"></param>
 		/// <returns></returns>
-		private Response DoCommand(Command command,Request obj, string operand, string[] vals, int[] types) {
+		private Response DoCommand(Command command, Request obj, string operand, string[] vals, int[] types) {
 			switch (command) {
 			case Command.GET:
 				return this.DoCommandIfConnected(() => {
@@ -95,7 +95,7 @@ namespace isc.onec.bridge {
 				});
 			case Command.INVOKE:
 				return this.DoCommandIfConnected(() => {
-					Request[] args = buildRequestList(vals, types);
+					Request[] args = BuildRequestList(vals, types);
 					return this.service.invoke(obj, operand, args);
 				});
 			case Command.CONNECT:
@@ -121,21 +121,20 @@ namespace isc.onec.bridge {
 				/*
 				 * Never.
 				 */
-				throw new Exception("Command not supported");
+				throw new ArgumentException("Command not supported");
 			}
 		}
 
-		private Request[] buildRequestList(string[] values, int[] types)
-		{
-			if (values.Length != types.Length) throw new Exception("Server: protocol error. Not all values have types.");
-
-			Request[] list = new Request[values.Length];
-
-			for (int i = 0; i < values.Length; i++)
-			{
-				list[i] = new Request(types[i],values[i]);
+		private static Request[] BuildRequestList(string[] values, int[] types) {
+			if (values == null || types == null || values.Length != types.Length) {
+				throw new ArgumentException("Server: protocol error. Not all values have types.");
 			}
-			return list;
+
+			Request[] requests = new Request[values.Length];
+			for (int i = 0; i < values.Length; i++) {
+				requests[i] = new Request(types[i], values[i]);
+			}
+			return requests;
 		}
 	}
 }
