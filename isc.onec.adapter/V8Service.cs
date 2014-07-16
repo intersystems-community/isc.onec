@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace isc.onec.bridge {
 	public class V8Service {
-		private V8Adapter adapter;
+		private readonly V8Adapter adapter;
 
 		/// <summary>
 		/// XXX: shared access w/o synchronization.
@@ -68,7 +68,7 @@ namespace isc.onec.bridge {
 					throw new InvalidOperationException("Attempt to create more than one connection to 1C from the same job. Client #" + client);
 				}
 			}
-			this.context = this.adapter.connect(url);
+			this.context = this.adapter.Connect(url);
 
 			AddToJournal(client, url);
 		}
@@ -82,7 +82,7 @@ namespace isc.onec.bridge {
 			this.adapter.Set(rcw, property, argument);
 		}
 
-		internal Response get(Request target, string property)
+		internal Response Get(Request target, string property)
 		{
 			object rcw = Find(target);
 			object returnValue = adapter.get(rcw, property);
@@ -90,7 +90,7 @@ namespace isc.onec.bridge {
 			return this.Unmarshal(returnValue);
 		}
 
-		internal Response invoke(Request target, string method, Request[] args) {
+		internal Response Invoke(Request target, string method, Request[] args) {
 			object rcw = this.Find(target);
 			object[] arguments = new object[args.Length];
 			for (int i = 0; i < args.Length; i++) {
@@ -116,9 +116,8 @@ namespace isc.onec.bridge {
 			});
 
 			this.adapter.Free(ref context);
-			this.adapter.disconnect();
+			this.adapter.Disconnect();
 
-			this.adapter = null; // XXX: adapter is only initialized in constructor. This object can't be reused after disconnect.
 			RemoveFromJournal(this.client);
 		}
 
@@ -137,9 +136,9 @@ namespace isc.onec.bridge {
 			return client == null ? false : journal.ContainsKey(client);
 		}
 
-		public bool Connected {
+		internal bool Connected {
 			get {
-				return this.adapter == null ? false : this.adapter.isConnected;
+				return this.adapter.Connected;
 			}
 		}
 

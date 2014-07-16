@@ -11,7 +11,7 @@ namespace isc.onec.tcp {
 
 		private int current;
 
-		private static Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
 		public MessageDecoder(byte[] data) {
 			this.data = data;

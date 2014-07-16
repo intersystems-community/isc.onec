@@ -54,9 +54,9 @@ namespace isc.onec.tcp.async {
 
 		private bool keepAlive;
 
-		private static Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-		private static EventLog eventLog = EventLogFactory.Instance;
+		private static readonly EventLog eventLog = EventLogFactory.Instance;
 
 		private static SocketListenerSettings getSettings(int port) {
 			try {

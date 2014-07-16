@@ -13,11 +13,12 @@ namespace isc.onec.bridge {
 
 		private static ReaderWriterLock connectorLock = new ReaderWriterLock();
 
-		public bool isConnected = false;
+		private bool connected;
 
 		public enum V8Version { V80, V81, V82 };
 
-		private static Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
 		public V8Adapter()
 		{
 			logger.Debug("V8Adapter is created");
@@ -63,42 +64,40 @@ namespace isc.onec.bridge {
 			}
 		}
 
-		public object connect(string url)
-		{
+		/// <summary>
+		/// XXX: Accesses mutable state w/o synchronization
+		/// </summary>
+		public object Connect(string url) {
 			object context;
-			try
-			{
+			try {
 				V8Version version = getVersion(url);
 				connectorLock.AcquireReaderLock(-1);
 				this.connector = this.createConnector(version);
 				logger.Debug("New V8.ComConnector is created");
 				context = invoke(this.connector, "Connect", new object[] { url });
 
-				isConnected = true;
+				this.connected = true;
 				this.url = url;
 
 				logger.Debug("Connection is established");
-			}
-			catch (Exception) {
-				this.Free(ref this.connector);
-
-				stimulateGC();
-				isConnected = false;
+			} catch (Exception) {
+				this.Disconnect();
 				throw;
-			}
-			finally {
+			} finally {
 				 connectorLock.ReleaseReaderLock();
 			}
 
 			return context;
 		}
 
-		public void disconnect()
-		{
+		/// <summary>
+		/// XXX: Accesses mutable state w/o synchronization
+		/// </summary>
+		public void Disconnect() {
 			this.Free(ref this.connector);
 
 			stimulateGC();
-			isConnected = false;
+			this.connected = false;
 
 			logger.Debug("Disconnection is done.");
 			
@@ -181,6 +180,15 @@ namespace isc.onec.bridge {
 					return V8Version.V82;
 				default:
 					throw new NotImplementedException("this version of 1C is not supported");
+			}
+		}
+
+		/// <summary>
+		/// XXX: Accesses mutable state w/o synchronization
+		/// </summary>
+		internal bool Connected {
+			get {
+				return this.connected;
 			}
 		}
 	}

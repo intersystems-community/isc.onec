@@ -10,11 +10,11 @@ namespace isc.onec.bridge {
 	/// Server -> V8Service -> {V8Adapter, Repository, Client}.
 	/// </summary>
 	public sealed class Server {
-		private V8Service service;
+		private readonly V8Service service;
 
-		private static Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-		private static EventLog eventLog = EventLogFactory.Instance;
+		private static readonly EventLog eventLog = EventLogFactory.Instance;
 
 		public Server() {
 			this.service = new V8Service();
@@ -41,35 +41,25 @@ namespace isc.onec.bridge {
 		}
 
 		public void Disconnect() {
-			try {
-				if (this.Connected) {
-					var journalReport = this.service.getJournalReport();
-					if (journalReport != null && journalReport.Length != 0) {
-						logger.Debug(journalReport);
-						eventLog.WriteEntry(journalReport, EventLogEntryType.Information);
-					}
-
-					this.service.Disconnect();
+			if (this.service.Connected) {
+				var journalReport = this.service.getJournalReport();
+				if (journalReport != null && journalReport.Length != 0) {
+					logger.Debug(journalReport);
+					eventLog.WriteEntry(journalReport, EventLogEntryType.Information);
 				}
-			} finally {
-				this.service = null; // XXX: The object can't be reused upon disconnect. 
-			}
-		}
 
-		public bool Connected {
-			get {
-				return this.service == null ? false : this.service.Connected;
+				this.service.Disconnect();
 			}
 		}
 
 		public string Client {
 			get {
-				return this.Connected ? this.service.Client : "null";
+				return this.service.Connected ? this.service.Client : "null";
 			}
 		}
 
 		private Response DoCommandIfConnected(Func<Response> f) {
-			return this.Connected ? f() : Response.NewException("Not connected");
+			return this.service.Connected ? f() : Response.NewException("Not connected");
 		}
 
 		/// <summary>
@@ -85,7 +75,7 @@ namespace isc.onec.bridge {
 			switch (command) {
 			case Command.GET:
 				return this.DoCommandIfConnected(() => {
-					return this.service.get(obj, operand);
+					return this.service.Get(obj, operand);
 				});
 			case Command.SET:
 				return this.DoCommandIfConnected(() => {
@@ -96,20 +86,17 @@ namespace isc.onec.bridge {
 			case Command.INVOKE:
 				return this.DoCommandIfConnected(() => {
 					Request[] args = BuildRequestList(vals, types);
-					return this.service.invoke(obj, operand, args);
+					return this.service.Invoke(obj, operand, args);
 				});
 			case Command.CONNECT:
-				if (this.service != null) {
-					var client = types.Length > 0 ? (string) (new Request(types[0], vals[0])).Value : null;
-					this.service.Connect(operand, client);
-					return Response.VOID;
-				}
-				return Response.NewException("Server#service is null");
+				var client = types.Length > 0 ? (string) (new Request(types[0], vals[0])).Value : null;
+				this.service.Connect(operand, client);
+				return Response.VOID;
 			case Command.DISCONNECT:
 				this.Disconnect();
 				return Response.VOID;
 			case Command.FREE:
-				if (this.Connected) {
+				if (this.service.Connected) {
 					this.service.Free(obj);
 				}
 				return Response.VOID;

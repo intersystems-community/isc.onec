@@ -18,7 +18,7 @@ namespace isc.onec.bridge {
 		/// </summary>
 		private long addedCount;
 
-		private static Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
 		internal Repository() {
 			this.cache = new Dictionary<long, object>();

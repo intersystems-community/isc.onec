@@ -6,9 +6,9 @@ using NLog;
 
 namespace isc.gateway.net {
 	public sealed class BridgeStarter : IDisposable {
-		private static Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-		private static EventLog eventLog = EventLogFactory.Instance;
+		private static readonly EventLog eventLog = EventLogFactory.Instance;
 
 		private readonly int port;
 

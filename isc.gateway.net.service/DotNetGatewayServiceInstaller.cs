@@ -18,7 +18,7 @@ namespace isc.gateway.net {
 
 		private readonly ServiceInstaller serviceInstaller;
 
-		private static Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
 		public DotNetGatewayServiceInstaller() {
 			ServiceProcessInstaller serviceProcessInstaller = new ServiceProcessInstaller();

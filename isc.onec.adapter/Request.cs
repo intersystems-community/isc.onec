@@ -17,7 +17,7 @@ namespace isc.onec.bridge {
 		/// </summary>
 		private readonly string value;
 
-		private static EventLog eventLog = EventLogFactory.Instance;
+		private static readonly EventLog eventLog = EventLogFactory.Instance;
 
 		internal Request(string oid) :
 			this(oid.Length == 0 ? RequestType.CONTEXT : RequestType.OBJECT, oid) {

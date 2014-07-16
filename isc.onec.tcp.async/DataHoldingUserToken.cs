@@ -46,7 +46,7 @@ namespace isc.onec.tcp.async {
 
 		private Server server;
 
-		private static Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
 		internal DataHoldingUserToken(SocketAsyncEventArgs e, Int32 rOffset, Int32 sOffset, Int32 receivePrefixLength, Int32 sendPrefixLength, Int32 tokenId) {
 			this.tokenId = tokenId;
