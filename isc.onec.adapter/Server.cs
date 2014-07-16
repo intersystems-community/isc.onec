@@ -13,7 +13,7 @@ namespace isc.onec.bridge {
 		/// <summary>
 		/// Command types sent externally to this server.
 		/// </summary>
-		public enum Commands {
+		public enum Command {
 			/// <summary>
 			/// Get an object's property.
 			/// </summary>
@@ -55,7 +55,7 @@ namespace isc.onec.bridge {
 		}
 
 		public string[] Run(int command, string target, string operand, string[] vals, int[] types) {
-			var commandType = (Commands) Enum.ToObject(typeof(Commands), command);
+			var commandType = (Command) Enum.ToObject(typeof(Command), command);
 			//if target is "." it is context
 			try {
 				var targetObject = new Request(target == "." ? "" : target);
@@ -118,39 +118,39 @@ namespace isc.onec.bridge {
 		/// <param name="vals"></param>
 		/// <param name="types"></param>
 		/// <returns></returns>
-		private Response DoCommand(Commands command,Request obj, string operand, string[] vals, int[] types) {
+		private Response DoCommand(Command command,Request obj, string operand, string[] vals, int[] types) {
 			switch (command) {
-			case Commands.GET:
+			case Command.GET:
 				return this.DoCommandIfConnected(() => {
 					return this.service.get(obj, operand);
 				});
-			case Commands.SET:
+			case Command.SET:
 				return this.DoCommandIfConnected(() => {
 					Request value = new Request(types[0], vals[0]);
 					this.service.Set(obj, operand, value);
 					return Response.VOID;
 				});
-			case Commands.INVOKE:
+			case Command.INVOKE:
 				return this.DoCommandIfConnected(() => {
 					Request[] args = buildRequestList(vals, types);
 					return this.service.invoke(obj, operand, args);
 				});
-			case Commands.CONNECT:
+			case Command.CONNECT:
 				if (this.service != null) {
 					var client = types.Length > 0 ? (string) (new Request(types[0], vals[0])).Value : null;
 					this.service.Connect(operand, client);
 					return Response.VOID;
 				}
 				return new Response(Response.Type.EXCEPTION, "Server#service is null");
-			case Commands.DISCONNECT:
+			case Command.DISCONNECT:
 				this.Disconnect();
 				return Response.VOID;
-			case Commands.FREE:
+			case Command.FREE:
 				if (this.Connected) {
 					this.service.Free(obj);
 				}
 				return Response.VOID;
-			case Commands.COUNT:
+			case Command.COUNT:
 				return this.DoCommandIfConnected(() => {
 					return this.service.getCounters();
 				});
