@@ -142,10 +142,6 @@ namespace isc.onec.bridge {
 				return this.adapter == null ? false : this.adapter.isConnected;
 			}
 		}
-		public bool isAlive(string url)
-		{
-			return adapter.isAlive(url);
-		}
 
 		public Response getCounters() {
 			string value = repository.CachedCount + "," + repository.AddedCount;

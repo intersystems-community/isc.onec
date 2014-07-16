@@ -14,7 +14,7 @@ namespace isc.onec.bridge {
 		private static ReaderWriterLock connectorLock = new ReaderWriterLock();
 
 		public bool isConnected = false;
-		public bool inDisconnectingMode = false;
+
 		public enum V8Version { V80, V81, V82 };
 
 		private static Logger logger = LogManager.GetCurrentClassLogger();
@@ -95,11 +95,6 @@ namespace isc.onec.bridge {
 
 		public void disconnect()
 		{
-			if (inDisconnectingMode)
-			{
-				throw new InvalidOperationException("Already in disconnecting mode.");
-			}
-
 			this.Free(ref this.connector);
 
 			stimulateGC();
@@ -109,11 +104,6 @@ namespace isc.onec.bridge {
 			
 		}
 
-		public bool isAlive(string url)
-		{
-			throw new NotImplementedException();
-		}
-		
 		public V8Version[] getInstalledVersions()
 		{
 			V8Version[] values = (V8Version[])Enum.GetValues(typeof(V8Version));
