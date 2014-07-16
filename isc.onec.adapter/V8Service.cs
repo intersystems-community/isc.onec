@@ -148,8 +148,8 @@ namespace isc.onec.bridge {
 		}
 
 		public Response getCounters() {
-			string reply = repository.CachedCount + "," + repository.AddedCount;
-			return new Response(ResponseType.DATA, reply);
+			string value = repository.CachedCount + "," + repository.AddedCount;
+			return new Response(ResponseType.DATA, value);
 		}
 
 		private object Marshal(Request value) {
