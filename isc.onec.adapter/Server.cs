@@ -72,7 +72,7 @@ namespace isc.onec.bridge {
 			if (this.Connected) {
 				return f();
 			}
-			return new Response(Response.Type.EXCEPTION, "Not connected");
+			return new Response(ResponseType.EXCEPTION, "Not connected");
 		}
 
 		/// <summary>
@@ -107,7 +107,7 @@ namespace isc.onec.bridge {
 					this.service.Connect(operand, client);
 					return Response.VOID;
 				}
-				return new Response(Response.Type.EXCEPTION, "Server#service is null");
+				return new Response(ResponseType.EXCEPTION, "Server#service is null");
 			case Command.DISCONNECT:
 				this.Disconnect();
 				return Response.VOID;

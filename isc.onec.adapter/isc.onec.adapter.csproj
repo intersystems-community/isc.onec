@@ -68,6 +68,7 @@
     <Compile Include="Request.cs" />
     <Compile Include="RequestType.cs" />
     <Compile Include="Response.cs" />
+    <Compile Include="ResponseType.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="V8Adapter.cs" />
     <Compile Include="V8Service.cs" />

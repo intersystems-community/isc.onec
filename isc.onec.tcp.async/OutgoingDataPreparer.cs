@@ -80,9 +80,9 @@ namespace isc.onec.tcp.async{
 			}
 
 			string[] reply = new string[] {
-					Convert.ChangeType(Response.Type.EXCEPTION, Response.Type.EXCEPTION.GetTypeCode()).ToString(),
-					message,
-				};
+				ResponseType.EXCEPTION.GetPrimitiveType().ToString(),
+				message,
+			};
 			return new MessageEncoder(reply).encode();
 		}
 
@@ -100,7 +100,7 @@ namespace isc.onec.tcp.async{
 					logger.Error(message);
 					eventLog.WriteEntry(message, EventLogEntryType.Error);
 					reply = new string[] {
-						Convert.ToInt32(Response.Type.EXCEPTION).ToString(),
+						ResponseType.EXCEPTION.GetPrimitiveType().ToString(),
 						message
 					};
 
@@ -112,7 +112,7 @@ namespace isc.onec.tcp.async{
 				var message = e.ToStringWithIlOffsets();
 				eventLog.WriteEntry(message, EventLogEntryType.Error);
 				reply = new string[] {
-					Convert.ToInt32(Response.Type.EXCEPTION).ToString(),
+					ResponseType.EXCEPTION.GetPrimitiveType().ToString(),
 					message
 				};
 			}

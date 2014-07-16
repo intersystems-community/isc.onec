@@ -149,7 +149,7 @@ namespace isc.onec.bridge {
 
 		public Response getCounters() {
 			string reply = repository.CachedCount + "," + repository.AddedCount;
-			return new Response(Response.Type.DATA, reply);
+			return new Response(ResponseType.DATA, reply);
 		}
 
 		private object Marshal(Request value) {
@@ -170,12 +170,11 @@ namespace isc.onec.bridge {
 		private Response Unmarshal(object value) {
 			if (adapter.isObject(value)) {
 				long oid = this.Add(value);
-				return new Response(Response.Type.OBJECT, oid);
+				return new Response(ResponseType.OBJECT, oid);
 			} else if (value != null && value.GetType() == typeof(bool)) {
-				//bool is serialised to string as True/False
-				return new Response(Response.Type.DATA, ((bool) value) ? 1 : 0);
+				return new Response(((bool) value));
 			}
-			return new Response(Response.Type.DATA, value);
+			return new Response(ResponseType.DATA, value);
 		}
 
 		private object Find(Request request) {
