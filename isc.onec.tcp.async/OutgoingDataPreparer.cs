@@ -79,10 +79,7 @@ namespace isc.onec.tcp.async{
 				message = "Bridge: Fatal network error. Unprocessed exception.";
 			}
 
-			string[] reply = new string[] {
-				ResponseType.EXCEPTION.GetPrimitiveType().ToString(),
-				message,
-			};
+			string[] reply = Response.NewException(message).Serialize();
 			return new MessageEncoder(reply).encode();
 		}
 
@@ -99,10 +96,7 @@ namespace isc.onec.tcp.async{
 					const string message = "OutgoingDataPreparer.process(): no server object.";
 					logger.Error(message);
 					eventLog.WriteEntry(message, EventLogEntryType.Error);
-					reply = new string[] {
-						ResponseType.EXCEPTION.GetPrimitiveType().ToString(),
-						message
-					};
+					reply = Response.NewException(message).Serialize();
 
 				} else {
 					reply = server.Run(request.command, request.target, request.operand, request.vals, request.types);
@@ -111,10 +105,7 @@ namespace isc.onec.tcp.async{
 			} catch (Exception e) {
 				var message = e.ToStringWithIlOffsets();
 				eventLog.WriteEntry(message, EventLogEntryType.Error);
-				reply = new string[] {
-					ResponseType.EXCEPTION.GetPrimitiveType().ToString(),
-					message
-				};
+				reply = Response.NewException(message).Serialize();
 			}
 			return new MessageEncoder(reply).encode();
 		}

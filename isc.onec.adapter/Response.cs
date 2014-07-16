@@ -5,7 +5,7 @@ namespace isc.onec.bridge {
 	/// <summary>
 	/// Instances of <code>Response</code> are immutable.
 	/// </summary>
-	internal sealed class Response {
+	public sealed class Response {
 		internal static readonly Response VOID = new Response();
 
 		private readonly ResponseType type;
@@ -39,11 +39,24 @@ namespace isc.onec.bridge {
 			this.value = value;
 		}
 
-		internal string[] Serialize() {
+		/// <summary>
+		/// Converts this response into a string array.
+		/// </summary>
+		/// <returns></returns>
+		public string[] Serialize() {
 			return new string[] {
-				Convert.ChangeType(this.type, this.type.GetTypeCode()).ToString(),
+				this.type.GetPrimitiveType().ToString(),
 				this.value == null ? null : this.value.ToString(),
 			};
+		}
+
+		/// <summary>
+		/// Constructs a new response of type <code>EXCEPTION</code>. 
+		/// </summary>
+		/// <param name="message"></param>
+		/// <returns></returns>
+		public static Response NewException(string message) {
+			return new Response(ResponseType.EXCEPTION, message);
 		}
 	}
 }

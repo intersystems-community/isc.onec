@@ -69,10 +69,7 @@ namespace isc.onec.bridge {
 		}
 
 		private Response DoCommandIfConnected(Func<Response> f) {
-			if (this.Connected) {
-				return f();
-			}
-			return new Response(ResponseType.EXCEPTION, "Not connected");
+			return this.Connected ? f() : Response.NewException("Not connected");
 		}
 
 		/// <summary>
@@ -107,7 +104,7 @@ namespace isc.onec.bridge {
 					this.service.Connect(operand, client);
 					return Response.VOID;
 				}
-				return new Response(ResponseType.EXCEPTION, "Server#service is null");
+				return Response.NewException("Server#service is null");
 			case Command.DISCONNECT:
 				this.Disconnect();
 				return Response.VOID;

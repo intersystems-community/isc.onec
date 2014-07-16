@@ -4,7 +4,7 @@ namespace isc.onec.bridge {
 	/// <summary>
 	/// Response type.
 	/// </summary>
-	public enum ResponseType {
+	internal enum ResponseType {
 		/// <summary>
 		/// SET/CONNECT/DISCONNECT/FREE
 		/// </summary>
@@ -20,8 +20,8 @@ namespace isc.onec.bridge {
 		EXCEPTION = 4,
 	}
 
-	public static class ResponseTypeExtensions {
-		public static object GetPrimitiveType(this ResponseType responseType) {
+	internal static class ResponseTypeExtensions {
+		internal static object GetPrimitiveType(this ResponseType responseType) {
 			return Convert.ChangeType(responseType, responseType.GetTypeCode());
 		}
 	}
