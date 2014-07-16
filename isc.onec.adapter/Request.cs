@@ -7,14 +7,7 @@ namespace isc.onec.bridge {
 	/// Instances of <code>Request</code> are immutable.
 	/// </summary>
 	internal sealed class Request {
-		internal enum Type {
-			DATA = 1,
-			OBJECT = 2,
-			CONTEXT = 3,
-			NUMBER = 4,
-		};
-
-		private readonly Type type;
+		private readonly RequestType type;
 
 		/// <summary>
 		/// DATA:	???
@@ -27,12 +20,12 @@ namespace isc.onec.bridge {
 		private static EventLog eventLog = EventLogFactory.Instance;
 
 		internal Request(string oid) :
-			this(oid.Length == 0 ? Type.CONTEXT : Type.OBJECT, oid) {
+			this(oid.Length == 0 ? RequestType.CONTEXT : RequestType.OBJECT, oid) {
 			// empty
 		}
 
-		private Request(Type type, string value) {
-			if (type == Type.NUMBER || type == Type.OBJECT) {
+		private Request(RequestType type, string value) {
+			if (type == RequestType.NUMBER || type == RequestType.OBJECT) {
 				try {
 					Convert.ToInt64(value);
 				} catch (FormatException fe) {
@@ -51,7 +44,7 @@ namespace isc.onec.bridge {
 			// empty
 		}
 
-		internal Type RequestType {
+		internal RequestType Type {
 			get {
 				return this.type;
 			}
@@ -59,14 +52,14 @@ namespace isc.onec.bridge {
 
 		internal object Value {
 			get {
-				return this.type == Type.NUMBER || this.type == Type.OBJECT
+				return this.type == RequestType.NUMBER || this.type == RequestType.OBJECT
 					? Convert.ToInt64(this.value)
 					: (object) this.value;
 			}
 		}
 
-		private static Type ValueOf(int number) {
-			return (Type) Enum.ToObject(typeof(Type), number);
+		private static RequestType ValueOf(int number) {
+			return (RequestType) Enum.ToObject(typeof(RequestType), number);
 		}
 	}
 }

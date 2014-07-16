@@ -153,11 +153,11 @@ namespace isc.onec.bridge {
 		}
 
 		private object Marshal(Request value) {
-			switch (value.RequestType) {
-			case Request.Type.OBJECT:
+			switch (value.Type) {
+			case RequestType.OBJECT:
 				return this.Find(value);
-			case Request.Type.DATA:
-			case Request.Type.NUMBER:
+			case RequestType.DATA:
+			case RequestType.NUMBER:
 				return value.Value;
 			default:
 				/*
@@ -179,10 +179,10 @@ namespace isc.onec.bridge {
 		}
 
 		private object Find(Request request) {
-			if (request.RequestType == Request.Type.DATA || request.RequestType == Request.Type.NUMBER) {
+			if (request.Type == RequestType.DATA || request.Type == RequestType.NUMBER) {
 				throw new ArgumentException("Expecting either an OBJECT or a CONTEXT request: " + request);
 			}
-			return request.RequestType == Request.Type.CONTEXT
+			return request.Type == RequestType.CONTEXT
 				? this.context
 				: this.repository.Find((long) request.Value);
 		}
@@ -192,7 +192,7 @@ namespace isc.onec.bridge {
 		}
 
 		private void Remove(Request obj) {
-			if (obj.RequestType != Request.Type.OBJECT) {
+			if (obj.Type != RequestType.OBJECT) {
 				throw new ArgumentException("V8Service: attempt to Remove non-object");
 			} else if (obj.Value == null || obj.Value.GetType() != typeof(long)) {
 				throw new InvalidOperationException("V8Service: expected an OID of type long; actual: " + obj.Value);
@@ -200,7 +200,5 @@ namespace isc.onec.bridge {
 
 			this.repository.Remove((long) obj.Value);
 		}
-
-		
 	}
 }
