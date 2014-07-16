@@ -5,7 +5,7 @@ namespace isc.onec.bridge {
 	/// <summary>
 	/// Instances of <code>Response</code> are immutable.
 	/// </summary>
-	public sealed class Response {
+	internal sealed class Response {
 		internal static readonly Response VOID = new Response();
 
 		private readonly ResponseType type;
