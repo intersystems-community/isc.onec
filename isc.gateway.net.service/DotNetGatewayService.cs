@@ -24,7 +24,7 @@ namespace isc.gateway.net {
 
 		private BridgeStarter bridgeStarter;
 
-		private static Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
 		private DotNetGatewayService() {
 			this.EventLog.Log = DefaultLogName;
