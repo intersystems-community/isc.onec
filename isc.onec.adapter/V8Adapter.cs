@@ -176,7 +176,7 @@ namespace isc.onec.bridge {
 				case "V82":
 					return V8Version.V82;
 				default:
-					throw new NotImplementedException("this version of 1C is not supported");
+					throw new NotImplementedException("1C " + version + " is not supported");
 			}
 		}
 
