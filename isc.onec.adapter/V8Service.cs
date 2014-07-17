@@ -85,7 +85,7 @@ namespace isc.onec.bridge {
 		internal Response Get(Request target, string property)
 		{
 			object rcw = Find(target);
-			object returnValue = adapter.get(rcw, property);
+			object returnValue = adapter.Get(rcw, property);
 
 			return this.Unmarshal(returnValue);
 		}
@@ -96,7 +96,7 @@ namespace isc.onec.bridge {
 			for (int i = 0; i < args.Length; i++) {
 				arguments[i] = this.Marshal(args[i]);
 			}
-			object returnValue = this.adapter.invoke(rcw, method, arguments);
+			object returnValue = this.adapter.Invoke(rcw, method, arguments);
 
 			return this.Unmarshal(returnValue);
 		}
@@ -163,7 +163,7 @@ namespace isc.onec.bridge {
 		}
 
 		private Response Unmarshal(object value) {
-			if (adapter.isObject(value)) {
+			if (value is MarshalByRefObject) {
 				long oid = this.Add(value);
 				return new Response(ResponseType.OBJECT, oid);
 			} else if (value != null && value.GetType() == typeof(bool)) {

@@ -1,57 +1,64 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using NLog;
+using System.Diagnostics;
 
 namespace isc.onec.bridge {
 	internal sealed class V8Adapter {
 		private object connector;
 
-		private static ReaderWriterLock connectorLock = new ReaderWriterLock();
+		/// <summary>
+		/// XXX: which mutable state is guarded by this lock?
+		/// XXX: why R/W lock? this.connector is presumably thread-confined. 
+		/// </summary>
+		private static readonly ReaderWriterLock connectorLock = new ReaderWriterLock();
 
-		private bool connected;
-
-		public enum V8Version { V80, V81, V82 };
+		private enum V8Version {
+			V80,
+			V81,
+			V82,
+		};
 
 		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-		public V8Adapter()
-		{
+		internal V8Adapter() {
 			logger.Debug("V8Adapter is created");
 		}
-		public object get(object target, string name)
-		{
-			object result;
-			try
-			{
-				result = target.GetType().InvokeMember(name, BindingFlags.GetProperty | BindingFlags.Public, null, target, null);
+
+		/// <summary>
+		/// Retrieves the value of a property. 
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="property"></param>
+		/// <returns></returns>
+		internal object Get(object target, string property) {
+			try {
+				return target.GetType().InvokeMember(property, BindingFlags.GetProperty | BindingFlags.Public, null, target, null);
+			} catch (TargetInvocationException e) {
+				logger.DebugException("Get", e);
+				throw e.InnerException;
 			}
-			catch (TargetInvocationException exception)
-			{
-				logger.DebugException("get", exception);
-				throw exception.InnerException;
-			}
-			return result;
 		}
 
-		public void Set(object target, string property, object value) {
-			/*
-			 *  target.comObject.GetType().InvokeMember(propertyName, BindingFlags.PutDispProperty | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly, null, target.comObject, new object[] { propertyValue });
-			 */
-			try
-			{
+		/// <summary>
+		/// Sets the value of a property.
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="property"></param>
+		/// <param name="value"></param>
+		internal void Set(object target, string property, object value) {
+			try {
+//				target.comObject.GetType().InvokeMember(propertyName, BindingFlags.PutDispProperty | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly, null, target.comObject, new object[] { propertyValue });
 				target.GetType().InvokeMember(property, BindingFlags.SetProperty | BindingFlags.Public, null, target, new object[] { value });
-			}
-			catch (TargetInvocationException exception)
-			{
-				logger.DebugException("set", exception);
-				throw exception.InnerException;
+			} catch (TargetInvocationException e) {
+				logger.DebugException("Set", e);
+				throw e.InnerException;
 			}
 		}
 
-		internal object invoke(object target, string method, object[] args) {
+		internal object Invoke(object target, string method, object[] args) {
 			try {
 				//obj2 = target.comObject.GetType().InvokeMember(methodName, BindingFlags.InvokeMethod, null, target.comObject, methodParams, modifiers, null, null);
 				// | BindingFlags.Public
@@ -65,67 +72,41 @@ namespace isc.onec.bridge {
 		/// <summary>
 		/// XXX: Accesses mutable state w/o synchronization
 		/// </summary>
-		public object Connect(string url) {
-			object context;
+		internal object Connect(string url) {
 			try {
-				V8Version version = getVersion(url);
+				V8Version version = GetVersion(url);
+				/// XXX: why particularly read lock here?
+				/// What mutable state are we trying to read after a load barrier (lfence)?
 				connectorLock.AcquireReaderLock(-1);
-				this.connector = this.createConnector(version);
+				this.connector = CreateConnector(version);
 				logger.Debug("New V8.ComConnector is created");
-				context = invoke(this.connector, "Connect", new object[] { url });
-
-				this.connected = true;
+				object context = this.Invoke(this.connector, "Connect", new object[] { url });
 
 				logger.Debug("Connection is established");
+				return context;
 			} catch (Exception) {
 				this.Disconnect();
 				throw;
 			} finally {
-				 connectorLock.ReleaseReaderLock();
+				connectorLock.ReleaseReaderLock();
 			}
-
-			return context;
 		}
 
 		/// <summary>
 		/// XXX: Accesses mutable state w/o synchronization
 		/// </summary>
-		public void Disconnect() {
+		internal void Disconnect() {
 			this.Free(ref this.connector);
+			Debug.Assert(this.connector == null, "this.connector != null");
 
-			stimulateGC();
-			this.connected = false;
+			// XXX: Is this really necessary?
+			GC.Collect();
+			GC.WaitForPendingFinalizers();
 
 			logger.Debug("Disconnection is done.");
-			
 		}
 
-		public V8Version[] getInstalledVersions()
-		{
-			V8Version[] values = (V8Version[])Enum.GetValues(typeof(V8Version));
-			List<V8Version> list = new List<V8Version>();
-			foreach (V8Version version in values)
-			{
-				try
-				{
-					this.createConnector(version);
-					list.Add(version);
-				}
-				catch
-				{
-				}
-			}
-			return list.ToArray();
-		}
-		private void stimulateGC()
-		{
-			GC.Collect();
-			GC.Collect();
-			//GC.Collect(GC.MaxGeneration);
-			GC.WaitForPendingFinalizers();
-		}
-
-		private object createConnector(V8Version version) {
+		private static object CreateConnector(V8Version version) {
 			string str;
 			switch (version) {
 			case V8Version.V80:
@@ -144,7 +125,7 @@ namespace isc.onec.bridge {
 			return Activator.CreateInstance(typeFromProgID);
 		}
 
-		public void Free(ref object rcw) {
+		internal void Free(ref object rcw) {
 			if (rcw != null) {
 				logger.Debug("Releasing object " + ((MarshalByRefObject)rcw).ToString());
 				Marshal.ReleaseComObject(rcw);
@@ -154,11 +135,7 @@ namespace isc.onec.bridge {
 			}
 		}
 
-		public bool isObject(object val) {
-			return (val is MarshalByRefObject);
-		}
-
-		private V8Version getVersion(string url) {
+		private static V8Version GetVersion(string url) {
 			string version = "V81";
 			string[] parameters = url.Split(';');
 			for (int i = 0; i < parameters.Length; i++) {
@@ -169,14 +146,14 @@ namespace isc.onec.bridge {
 			}
 
 			switch (version) {
-				case "V80":
-					return V8Version.V80;
-				case "V81":
-					return V8Version.V81;
-				case "V82":
-					return V8Version.V82;
-				default:
-					throw new NotImplementedException("1C " + version + " is not supported");
+			case "V80":
+				return V8Version.V80;
+			case "V81":
+				return V8Version.V81;
+			case "V82":
+				return V8Version.V82;
+			default:
+				throw new NotImplementedException("1C " + version + " is not supported");
 			}
 		}
 
@@ -185,7 +162,7 @@ namespace isc.onec.bridge {
 		/// </summary>
 		internal bool Connected {
 			get {
-				return this.connected;
+				return this.connector != null;
 			}
 		}
 	}
