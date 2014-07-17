@@ -42,8 +42,8 @@ namespace isc.onec.bridge {
 
 		public void Disconnect() {
 			if (this.service.Connected) {
-				var journalReport = this.service.getJournalReport();
-				if (journalReport != null && journalReport.Length != 0) {
+				var journalReport = V8Service.GetJournalReport();
+				if (journalReport.Length != 0) {
 					logger.Debug(journalReport);
 					eventLog.WriteEntry(journalReport, EventLogEntryType.Information);
 				}
@@ -102,7 +102,7 @@ namespace isc.onec.bridge {
 				return Response.VOID;
 			case Command.COUNT:
 				return this.DoCommandIfConnected(() => {
-					return this.service.getCounters();
+					return this.service.GetCounters();
 				});
 			default:
 				/*

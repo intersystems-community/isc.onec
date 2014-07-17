@@ -1,10 +1,26 @@
 ﻿using System;
-using NLog;
 using System.Collections.Generic;
 using System.Threading;
+using NLog;
 
 namespace isc.onec.bridge {
-	public class V8Service {
+	/// <summary>
+	/// Class state invariant:
+	/// <ul>
+	/// <li>In disconnected mode:<ul>
+	/// <li><code>this.adapter.Connected</code> is <code>false</code></li>
+	/// <li><code>this.context</code> is <code>null</code></li>
+	/// <li><code>this.client</code> is <code>null</code></li>
+	/// </ul></li>
+	/// <li>In connected mode:<ul>
+	/// <li><code>this.adapter.Connected</code> is <code>true</code></li>
+	/// <li><code>this.context</code> is non-<code>null</code></li>
+	/// <li><code>this.client</code> may be non-<code>null</code></li>
+	/// <li><code>this.client</code> may be contained in <code>journal</code> (if non-<code>null</code>)</li>
+	/// </ul></li>
+	/// </ul>
+	/// </summary>
+	internal sealed class V8Service {
 		private readonly V8Adapter adapter;
 
 		/// <summary>
@@ -15,7 +31,6 @@ namespace isc.onec.bridge {
 		private readonly Repository repository;
 
 		/// <summary>
-		/// XXX: Not set back to null on disconnect.
 		/// XXX: Shared access.
 		/// XXX: This actually looks like a *last connected client*, as the value gets rewritten upon connect.
 		/// </summary>
@@ -40,57 +55,58 @@ namespace isc.onec.bridge {
 			this.repository = new Repository();
 		}
 
-		private static void RemoveFromJournal(string client) {
-			if (client != null) {
-				journal.Remove(client);
-			}
-		}
-
-		private static void AddToJournal(string client, string url) {
-			if (client != null) {
-				journal.Add(client, url);
-			}
-		}
-
 		/// <summary>
 		/// Connects to the <code>url</code>.
 		/// XXX: Should be entered by a single thread, and only once.
 		/// </summary>
 		/// <param name="url"></param>
 		/// <param name="client">can be <code>null</code></param>
-		public void Connect(string url, string client) {
-			this.client = client;
+		internal void Connect(string url, string client) {
 			logger.Debug("connect from session with #" + client);
-			if (ExistsInJournal(client)) {
-				Thread.Sleep(1000);
-				if (ExistsInJournal(client))
-				{
+
+			if (this.Connected) {
+				throw new InvalidOperationException("Attempt to connect while connected; old client: " + this.client + "; new client: " + client);
+			}
+
+			/// XXX: attempt to use a state shared among multiple instances w/o proper locking.
+			if (client != null) {
+				if (journal.ContainsKey(client)) {
 					throw new InvalidOperationException("Attempt to create more than one connection to 1C from the same job. Client #" + client);
+				} else {
+					journal.Add(client, url);
 				}
 			}
+
 			this.context = this.adapter.Connect(url);
-
-			AddToJournal(client, url);
+			this.client = client;
 		}
-
-
-
 	   
 		internal void Set(Request target, string property, Request value) {
+			if (!this.Connected) {
+				throw new InvalidOperationException("Attempt to call Set() while disconnected");
+			}
+
 			object rcw = this.Find(target);
 			object argument = this.Marshal(value);
 			this.adapter.Set(rcw, property, argument);
 		}
 
-		internal Response Get(Request target, string property)
-		{
-			object rcw = Find(target);
-			object returnValue = adapter.Get(rcw, property);
+		internal Response Get(Request target, string property) {
+			if (!this.Connected) {
+				throw new InvalidOperationException("Attempt to call Get() while disconnected");
+			}
+
+			object rcw = this.Find(target);
+			object returnValue = this.adapter.Get(rcw, property);
 
 			return this.Unmarshal(returnValue);
 		}
 
 		internal Response Invoke(Request target, string method, Request[] args) {
+			if (!this.Connected) {
+				throw new InvalidOperationException("Attempt to call Invoke() while disconnected");
+			}
+
 			object rcw = this.Find(target);
 			object[] arguments = new object[args.Length];
 			for (int i = 0; i < args.Length; i++) {
@@ -102,38 +118,57 @@ namespace isc.onec.bridge {
 		}
 
 		internal void Free(Request request) {
-			object rcw = this.Find(request);
-			this.Remove(request);
-			this.adapter.Free(ref rcw);
-
 			logger.Debug("Freeing object on request " + request.ToString());
+
+			if (!this.Connected) {
+				throw new InvalidOperationException("Attempt to call Free() while disconnected");
+			}
+
+			object rcw = this.Find(request);
+			if (request.Type != RequestType.OBJECT) {
+				throw new ArgumentException("V8Service: attempt to Remove non-object");
+			} else if (request.Value == null || request.Value.GetType() != typeof(long)) {
+				throw new InvalidOperationException("V8Service: expected an OID of type long; actual: " + request.Value);
+			}
+
+			this.repository.Remove((long) request.Value);
+			this.adapter.Free(ref rcw);
 		}
 
 		internal void Disconnect() {
-			logger.Debug("disconnecting from #" + this.client +". Adapter is "+adapter.ToString());
+			logger.Debug("disconnecting from #" + this.client + ". Adapter is " + this.adapter);
+
+			if (!this.Connected) {
+				return;
+			}
+
 			this.repository.CleanAll(delegate(object rcw) {
 				this.adapter.Free(ref rcw);
 			});
 
-			this.adapter.Free(ref context);
+			this.adapter.Free(ref this.context);
 			this.adapter.Disconnect();
 
-			RemoveFromJournal(this.client);
+			if (this.client != null) {
+				journal.Remove(this.client);
+			}
+
+			this.context = null;
+			this.client = null;
 		}
 
-		internal string getJournalReport() {
+		/// <summary>
+		/// XXX: Only used for logging, so encapsulate the data returned.
+		/// </summary>
+		/// <returns></returns>
+		internal static string GetJournalReport() {
 			var report = "";
 
-			foreach (KeyValuePair<string, string> pair in journal)
-			{
-				report += (pair.Key+"   "+pair.Value+"\n");
+			foreach (KeyValuePair<string, string> pair in journal) {
+				report += (pair.Key + "   " + pair.Value+"\n");
 			}
 
 			return report;
-		}
-
-		private static bool ExistsInJournal(string client) {
-			return client == null ? false : journal.ContainsKey(client);
 		}
 
 		internal bool Connected {
@@ -142,8 +177,8 @@ namespace isc.onec.bridge {
 			}
 		}
 
-		public Response getCounters() {
-			string value = repository.CachedCount + "," + repository.AddedCount;
+		internal Response GetCounters() {
+			string value = this.repository.CachedCount + "," + this.repository.AddedCount;
 			return new Response(ResponseType.DATA, value);
 		}
 
@@ -164,7 +199,7 @@ namespace isc.onec.bridge {
 
 		private Response Unmarshal(object value) {
 			if (value is MarshalByRefObject) {
-				long oid = this.Add(value);
+				long oid = this.repository.Add(value);
 				return new Response(ResponseType.OBJECT, oid);
 			} else if (value != null && value.GetType() == typeof(bool)) {
 				return new Response(((bool) value));
@@ -179,20 +214,6 @@ namespace isc.onec.bridge {
 			return request.Type == RequestType.CONTEXT
 				? this.context
 				: this.repository.Find((long) request.Value);
-		}
-
-		private long Add(object rcw) {
-			return this.repository.Add(rcw);
-		}
-
-		private void Remove(Request obj) {
-			if (obj.Type != RequestType.OBJECT) {
-				throw new ArgumentException("V8Service: attempt to Remove non-object");
-			} else if (obj.Value == null || obj.Value.GetType() != typeof(long)) {
-				throw new InvalidOperationException("V8Service: expected an OID of type long; actual: " + obj.Value);
-			}
-
-			this.repository.Remove((long) obj.Value);
 		}
 	}
 }
