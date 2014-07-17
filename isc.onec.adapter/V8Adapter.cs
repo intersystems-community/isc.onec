@@ -7,8 +7,6 @@ using NLog;
 
 namespace isc.onec.bridge {
 	internal sealed class V8Adapter {
-		private string url;
-
 		private object connector;
 
 		private static ReaderWriterLock connectorLock = new ReaderWriterLock();
@@ -77,7 +75,6 @@ namespace isc.onec.bridge {
 				context = invoke(this.connector, "Connect", new object[] { url });
 
 				this.connected = true;
-				this.url = url;
 
 				logger.Debug("Connection is established");
 			} catch (Exception) {
