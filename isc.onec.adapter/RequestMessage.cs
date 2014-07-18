@@ -9,7 +9,7 @@ namespace isc.onec.tcp {
 		public static readonly RequestMessage Disconnect = new RequestMessage(Command.DISCONNECT,
 				-1,
 				"",
-				new int[0],
+				new RequestType[0],
 				new string[0]);
 
 		internal Command Command {
@@ -34,14 +34,8 @@ namespace isc.onec.tcp {
 			private set;
 		}
 
-		/// <summary>
-		/// XXX: To be encapsulated.
-		/// </summary>
-		private readonly int[] types;
+		private readonly RequestType[] types;
 
-		/// <summary>
-		/// XXX: To be encapsulated.
-		/// </summary>
 		private readonly string[] values;
 
 		internal int ArgumentCount {
@@ -66,10 +60,10 @@ namespace isc.onec.tcp {
 			// types & values
 			int argumentCount = data[offset++];
 
-			this.types = new int[argumentCount];
+			this.types = new RequestType[argumentCount];
 			this.values = new string[argumentCount];
 			for (int i = 0; i < argumentCount; i++) {
-				this.types[i] = data[offset++];
+				this.types[i] = (RequestType) Enum.ToObject(typeof(RequestType), data[offset++]);
 				this.values[i] = ReadString(data, ref offset);
 			}
 		}
@@ -77,7 +71,7 @@ namespace isc.onec.tcp {
 		private RequestMessage(Command command,
 				int oid,
 				string operand,
-				int[] types,
+				RequestType[] types,
 				string[] values) {
 			if (types == null || values == null || types.Length != values.Length) {
 				throw new ArgumentException(types.Length + " != " + values.Length);
@@ -100,7 +94,7 @@ namespace isc.onec.tcp {
 			return header + data;
 		}
 
-		internal int GetTypeAt(int index) {
+		internal RequestType GetTypeAt(int index) {
 			if (index < 0 || index >= this.ArgumentCount) {
 				throw new ArgumentException("Index " + index + " not within the range [0, " + (this.ArgumentCount - 1) + "]");
 			}

@@ -19,7 +19,7 @@ namespace isc.onec.bridge {
 
 		private static readonly EventLog eventLog = EventLogFactory.Instance;
 
-		private Request(RequestType type, string value) {
+		internal Request(RequestType type, string value) {
 			if (type == RequestType.OBJECT) {
 				try {
 					Convert.ToInt32(value);
@@ -42,11 +42,6 @@ namespace isc.onec.bridge {
 			this.value = value;
 		}
 
-		internal Request(int typeId, string value) :
-			this(ValueOf(typeId), value) {
-			// empty
-		}
-
 		internal RequestType Type {
 			get {
 				return this.type;
@@ -64,10 +59,6 @@ namespace isc.onec.bridge {
 					return this.value;
 				}
 			}
-		}
-
-		private static RequestType ValueOf(int number) {
-			return (RequestType) Enum.ToObject(typeof(RequestType), number);
 		}
 	}
 }
