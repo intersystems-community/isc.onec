@@ -183,6 +183,11 @@ namespace isc.onec.bridge {
 			return new Response(ResponseType.DATA, value);
 		}
 
+		/// <summary>
+		/// Converts a <code>Request</code> to a COM object or a primitive value.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
 		private object Marshal(Request value) {
 			switch (value.Type) {
 			case RequestType.OBJECT:
@@ -198,6 +203,11 @@ namespace isc.onec.bridge {
 			}
 		}
 
+		/// <summary>
+		/// Converts a COM object or a primitive value to a <code>Response</code>.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
 		private Response Unmarshal(object value) {
 			if (value is MarshalByRefObject) {
 				long oid = this.repository.Add(value);
