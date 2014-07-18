@@ -41,15 +41,7 @@ namespace isc.onec.bridge {
 		}
 
 		public void Disconnect() {
-			if (this.service.Connected) {
-				var journalReport = V8Service.GetJournalReport();
-				if (journalReport.Length != 0) {
-					logger.Debug(journalReport);
-					eventLog.WriteEntry(journalReport, EventLogEntryType.Information);
-				}
-
-				this.service.Disconnect();
-			}
+			this.service.Disconnect();
 		}
 
 		public string Client {

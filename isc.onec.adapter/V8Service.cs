@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.Diagnostics;
+using isc.general;
 using NLog;
 
 namespace isc.onec.bridge {
@@ -43,6 +44,8 @@ namespace isc.onec.bridge {
 		}
 
 		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
+		private static readonly EventLog eventLog = EventLogFactory.Instance;
 
 		/// <summary>
 		/// A shared map of clients to their URL's.
@@ -142,6 +145,8 @@ namespace isc.onec.bridge {
 				return;
 			}
 
+			DumpClients();
+
 			this.repository.CleanAll(delegate(object rcw) {
 				this.adapter.Free(ref rcw);
 			});
@@ -158,10 +163,9 @@ namespace isc.onec.bridge {
 		}
 
 		/// <summary>
-		/// XXX: Only used for logging, so encapsulate the data returned.
+		/// Only used for logging purposes.
 		/// </summary>
-		/// <returns></returns>
-		internal static string GetJournalReport() {
+		private static void DumpClients() {
 			var report = "";
 
 			// XXX: clients should be locked during iteration
@@ -169,7 +173,10 @@ namespace isc.onec.bridge {
 				report += (client.Key + "   " + client.Value+"\n");
 			}
 
-			return report;
+			if (report.Length != 0) {
+				logger.Debug(report);
+				eventLog.WriteEntry(report, EventLogEntryType.Information);
+			}
 		}
 
 		internal bool Connected {
