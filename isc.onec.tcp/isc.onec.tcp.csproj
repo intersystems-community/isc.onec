@@ -62,7 +62,6 @@
   </Target>
   -->
   <ItemGroup>
-    <Compile Include="Decoder.cs" />
     <Compile Include="Encoder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RequestMessage.cs" />

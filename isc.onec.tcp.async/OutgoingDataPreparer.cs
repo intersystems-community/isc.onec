@@ -89,7 +89,7 @@ namespace isc.onec.tcp.async{
 		private static byte[] process(Server server, byte[] data) {
 			string[] reply;
 			try {
-				RequestMessage request = (new MessageDecoder(data)).decode();
+				RequestMessage request = new RequestMessage(data);
 
 				if (server == null) {
 					/*

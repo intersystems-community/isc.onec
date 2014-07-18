@@ -20,8 +20,7 @@ namespace isc.onec.bridge {
 			this.service = new V8Service();
 		}
 
-		public Response Run(int commandType, string target, string operand, string[] vals, int[] types) {
-			var command = (Command) Enum.ToObject(typeof(Command), commandType);
+		public Response Run(Command command, string target, string operand, string[] vals, int[] types) {
 			//if target is "." it is context
 			try {
 				var obj = new Request(target == "." ? "" : target);
