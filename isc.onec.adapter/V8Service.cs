@@ -47,7 +47,7 @@ namespace isc.onec.bridge {
 		/// <summary>
 		/// A shared map of clients to their URL's.
 		/// </summary>
-		private static readonly Dictionary<string, string> journal = new Dictionary<string, string>();
+		private static readonly Dictionary<string, string> clients = new Dictionary<string, string>();
 
 		internal V8Service() {
 			logger.Debug("isc.onec.bridge.V8Service is created");
@@ -70,10 +70,10 @@ namespace isc.onec.bridge {
 
 			/// XXX: attempt to use a state shared among multiple instances w/o proper locking.
 			if (client != null) {
-				if (journal.ContainsKey(client)) {
+				if (clients.ContainsKey(client)) {
 					throw new InvalidOperationException("Attempt to create more than one connection to 1C from the same job. Client #" + client);
 				} else {
-					journal.Add(client, url);
+					clients.Add(client, url);
 				}
 			}
 
@@ -150,7 +150,7 @@ namespace isc.onec.bridge {
 			this.adapter.Disconnect();
 
 			if (this.client != null) {
-				journal.Remove(this.client);
+				clients.Remove(this.client);
 			}
 
 			this.context = null;
@@ -164,8 +164,9 @@ namespace isc.onec.bridge {
 		internal static string GetJournalReport() {
 			var report = "";
 
-			foreach (KeyValuePair<string, string> pair in journal) {
-				report += (pair.Key + "   " + pair.Value+"\n");
+			// XXX: clients should be locked during iteration
+			foreach (KeyValuePair<string, string> client in clients) {
+				report += (client.Key + "   " + client.Value+"\n");
 			}
 
 			return report;
