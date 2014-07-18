@@ -11,24 +11,24 @@ namespace isc.onec.bridge {
 		/// Provide locks or replace with Concurrent.Dictionary
 		/// (see http://msdn.microsoft.com/en-us/library/dd997305%28v=vs.110%29.aspx).
 		/// </summary>
-		private readonly Dictionary<long, object> cache;
+		private readonly Dictionary<int, object> cache;
 
 		/// <summary>
 		/// XXX: non-synchronized variable access (use either volatile or Interlocked)
 		/// </summary>
-		private long addedCount;
+		private int addedCount;
 
 		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
 		internal Repository() {
-			this.cache = new Dictionary<long, object>();
+			this.cache = new Dictionary<int, object>();
 		}
 
 		~Repository() {
 			logger.Debug("Repository destructor. Cache has " + cache.Count + " items.");
 		}
 
-		internal object Find(long oid) {
+		internal object Find(int oid) {
 			object rcw;
 
 			if (!this.cache.TryGetValue(oid, out rcw)) {
@@ -38,23 +38,26 @@ namespace isc.onec.bridge {
 			return rcw;
 		}
 
-		internal long Add(object rcw) {
-			long oid = ++this.addedCount;
+		internal int Add(object rcw) {
+			if (this.addedCount == int.MaxValue) {
+				throw new InvalidOperationException("Integer overflow");
+			}
+			int oid = ++this.addedCount;
 			this.cache.Add(oid, rcw);
 			return oid;
 		}
 
-		internal void Remove(long oid) {
+		internal void Remove(int oid) {
 			this.cache.Remove(oid);
 		}
 		
-		internal long CachedCount {
+		internal int CachedCount {
 			get {
 				return this.cache.Count;
 			}
 		}
 
-		internal long AddedCount {
+		internal int AddedCount {
 			get {
 				return this.addedCount;
 			}
@@ -62,7 +65,7 @@ namespace isc.onec.bridge {
 		
 		internal void CleanAll(ObjectProcessor processor) {	
 			if (processor != null) {
-				foreach (KeyValuePair<long, object> pair in this.cache) {
+				foreach (KeyValuePair<int, object> pair in this.cache) {
 					processor(pair.Value);
 				}
 			}

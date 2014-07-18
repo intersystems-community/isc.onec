@@ -212,7 +212,7 @@ namespace isc.onec.bridge {
 		/// <returns></returns>
 		private Response Unmarshal(object value) {
 			if (value is MarshalByRefObject) {
-				long oid = this.repository.Add(value);
+				int oid = this.repository.Add(value);
 				return new Response(ResponseType.OBJECT, oid);
 			} else if (value != null && value.GetType() == typeof(bool)) {
 				return new Response(((bool) value));

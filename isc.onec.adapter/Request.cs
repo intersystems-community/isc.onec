@@ -11,7 +11,7 @@ namespace isc.onec.bridge {
 
 		/// <summary>
 		/// DATA:	???
-		/// OBJECT:	OID (long)
+		/// OBJECT:	OID (int)
 		/// CONTEXT:	OID (empty string)
 		/// NUMBER:	long
 		/// </summary>
@@ -20,11 +20,19 @@ namespace isc.onec.bridge {
 		private static readonly EventLog eventLog = EventLogFactory.Instance;
 
 		private Request(RequestType type, string value) {
-			if (type == RequestType.NUMBER || type == RequestType.OBJECT) {
+			if (type == RequestType.OBJECT) {
+				try {
+					Convert.ToInt32(value);
+				} catch (FormatException fe) {
+					string message = "Expected a 32-bit signed integer, received: \"" + value + "\" (length: " + value.Length + ")";
+					eventLog.WriteEntry(message, EventLogEntryType.Error);
+					throw new ArgumentException(message, fe);
+				}
+			} else if (type == RequestType.NUMBER) {
 				try {
 					Convert.ToInt64(value);
 				} catch (FormatException fe) {
-					string message = "Expected a number, received: \"" + value + "\" (length: " + value.Length + ")";
+					string message = "Expected a 64-bit signed integer, received: \"" + value + "\" (length: " + value.Length + ")";
 					eventLog.WriteEntry(message, EventLogEntryType.Error);
 					throw new ArgumentException(message, fe);
 				}
@@ -47,9 +55,14 @@ namespace isc.onec.bridge {
 
 		internal object Value {
 			get {
-				return this.type == RequestType.NUMBER || this.type == RequestType.OBJECT
-					? Convert.ToInt64(this.value)
-					: (object) this.value;
+				switch (this.type) {
+				case RequestType.OBJECT:
+					return Convert.ToInt32(this.value);
+				case RequestType.NUMBER:
+					return Convert.ToInt64(this.value);
+				default:
+					return this.value;
+				}
 			}
 		}
 
