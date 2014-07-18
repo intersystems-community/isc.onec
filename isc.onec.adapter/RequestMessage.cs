@@ -7,7 +7,7 @@ namespace isc.onec.tcp {
 	/// </summary>
 	public sealed class RequestMessage {
 		public static readonly RequestMessage Disconnect = new RequestMessage(Command.DISCONNECT,
-				"",
+				-1,
 				"",
 				new int[0],
 				new string[0]);
@@ -18,9 +18,10 @@ namespace isc.onec.tcp {
 		}
 
 		/// <summary>
-		/// XXX: Change type to int
+		/// An object's OID, or 0 in case this is a context rather than an object,
+		/// or -1 in case this request is a disconnect request.
 		/// </summary>
-		internal string Target {
+		internal int Oid {
 			get;
 			private set;
 		}
@@ -55,9 +56,8 @@ namespace isc.onec.tcp {
 			// command
 			this.Command = (Command) Enum.ToObject(typeof(Command), data[offset++]);
 
-			// target
-			int oid = BitConverter.ToInt32(data, offset);
-			this.Target = oid == 0 ? "." : Convert.ToString(oid);
+			// OID
+			this.Oid = BitConverter.ToInt32(data, offset);
 			offset += 4;
 
 			// operand
@@ -75,7 +75,7 @@ namespace isc.onec.tcp {
 		}
 
 		private RequestMessage(Command command,
-				string target,
+				int oid,
 				string operand,
 				int[] types,
 				string[] values) {
@@ -84,14 +84,14 @@ namespace isc.onec.tcp {
 			}
 
 			this.Command = command;
-			this.Target = target;
+			this.Oid = oid;
 			this.Operand = operand;
 			this.types = types;
 			this.values = values;
 		}
 
 		public override string ToString() {
-			string header = this.Command + "," + this.Target + "," + this.Operand;
+			string header = this.Command + "," + this.Oid + "," + this.Operand;
 			string data = "values[" + this.ArgumentCount + "]={";
 			for (int i = 0; i < this.ArgumentCount; i++) {
 				data += this.types[i] + ":" + this.values[i] + ",";

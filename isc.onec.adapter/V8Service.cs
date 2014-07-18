@@ -84,33 +84,33 @@ namespace isc.onec.bridge {
 			this.client = client;
 		}
 	   
-		internal void Set(Request target, string property, Request value) {
+		internal void Set(int oid, string property, Request value) {
 			if (!this.Connected) {
 				throw new InvalidOperationException("Attempt to call Set() while disconnected");
 			}
 
-			object rcw = this.Find(target);
+			object rcw = this.Find(oid);
 			object argument = this.Marshal(value);
 			this.adapter.Set(rcw, property, argument);
 		}
 
-		internal Response Get(Request target, string property) {
+		internal Response Get(int oid, string property) {
 			if (!this.Connected) {
 				throw new InvalidOperationException("Attempt to call Get() while disconnected");
 			}
 
-			object rcw = this.Find(target);
+			object rcw = this.Find(oid);
 			object returnValue = this.adapter.Get(rcw, property);
 
 			return this.Unmarshal(returnValue);
 		}
 
-		internal Response Invoke(Request target, string method, Request[] args) {
+		internal Response Invoke(int oid, string method, Request[] args) {
 			if (!this.Connected) {
 				throw new InvalidOperationException("Attempt to call Invoke() while disconnected");
 			}
 
-			object rcw = this.Find(target);
+			object rcw = this.Find(oid);
 			object[] arguments = new object[args.Length];
 			for (int i = 0; i < args.Length; i++) {
 				arguments[i] = this.Marshal(args[i]);
@@ -120,21 +120,16 @@ namespace isc.onec.bridge {
 			return this.Unmarshal(returnValue);
 		}
 
-		internal void Free(Request request) {
-			logger.Debug("Freeing object on request " + request.ToString());
+		internal void Free(int oid) {
+			logger.Debug("Freeing object with OID " + oid);
 
 			if (!this.Connected) {
 				throw new InvalidOperationException("Attempt to call Free() while disconnected");
 			}
 
-			object rcw = this.Find(request);
-			if (request.Type != RequestType.OBJECT) {
-				throw new ArgumentException("V8Service: attempt to Remove non-object");
-			} else if (request.Value == null || request.Value.GetType() != typeof(long)) {
-				throw new InvalidOperationException("V8Service: expected an OID of type long; actual: " + request.Value);
-			}
+			object rcw = this.Find(oid);
 
-			this.repository.Remove((long) request.Value);
+			this.repository.Remove(oid);
 			this.adapter.Free(ref rcw);
 		}
 
@@ -193,15 +188,15 @@ namespace isc.onec.bridge {
 		/// <summary>
 		/// Converts a <code>Request</code> to a COM object or a primitive value.
 		/// </summary>
-		/// <param name="value"></param>
+		/// <param name="request"></param>
 		/// <returns></returns>
-		private object Marshal(Request value) {
-			switch (value.Type) {
+		private object Marshal(Request request) {
+			switch (request.Type) {
 			case RequestType.OBJECT:
-				return this.Find(value);
+				return this.Find((int) request.Value);
 			case RequestType.DATA:
 			case RequestType.NUMBER:
-				return value.Value;
+				return request.Value;
 			default:
 				/*
 				 * CONTEXT
@@ -225,13 +220,10 @@ namespace isc.onec.bridge {
 			return new Response(ResponseType.DATA, value);
 		}
 
-		private object Find(Request request) {
-			if (request.Type == RequestType.DATA || request.Type == RequestType.NUMBER) {
-				throw new ArgumentException("Expecting either an OBJECT or a CONTEXT request: " + request);
-			}
-			return request.Type == RequestType.CONTEXT
+		private object Find(int oid) {
+			return oid == 0
 				? this.context
-				: this.repository.Find((long) request.Value);
+				: this.repository.Find(oid);
 		}
 	}
 }

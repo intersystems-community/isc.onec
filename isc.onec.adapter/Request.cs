@@ -19,11 +19,6 @@ namespace isc.onec.bridge {
 
 		private static readonly EventLog eventLog = EventLogFactory.Instance;
 
-		internal Request(string oid) :
-			this(oid.Length == 0 ? RequestType.CONTEXT : RequestType.OBJECT, oid) {
-			// empty
-		}
-
 		private Request(RequestType type, string value) {
 			if (type == RequestType.NUMBER || type == RequestType.OBJECT) {
 				try {

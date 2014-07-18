@@ -23,23 +23,21 @@ namespace isc.onec.bridge {
 
 		public Response Run(RequestMessage request) {
 			try {
-				// If target is "." it is context
-				var obj = new Request(request.Target == "." ? "" : request.Target);
 				switch (request.Command) {
 				case Command.GET:
 					return this.DoCommandIfConnected(() => {
-						return this.service.Get(obj, request.Operand);
+						return this.service.Get(request.Oid, request.Operand);
 					});
 				case Command.SET:
 					return this.DoCommandIfConnected(() => {
 						Request value = new Request(request.GetTypeAt(0), request.GetValueAt(0));
-						this.service.Set(obj, request.Operand, value);
+						this.service.Set(request.Oid, request.Operand, value);
 						return Response.Void;
 					});
 				case Command.INVOKE:
 					return this.DoCommandIfConnected(() => {
 						Request[] args = request.BuildRequestList();
-						return this.service.Invoke(obj, request.Operand, args);
+						return this.service.Invoke(request.Oid, request.Operand, args);
 					});
 				case Command.CONNECT:
 					var client = request.ArgumentCount > 0 ? request.GetValueAt(0) : null;
@@ -50,7 +48,7 @@ namespace isc.onec.bridge {
 					return Response.Void;
 				case Command.FREE:
 					if (this.service.Connected) {
-						this.service.Free(obj);
+						this.service.Free(request.Oid);
 					}
 					return Response.Void;
 				case Command.COUNT:
