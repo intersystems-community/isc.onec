@@ -747,7 +747,6 @@ INPUT                  = isc.gateway.net \
                          isc.gateway.net.service \
                          isc.general \
                          isc.onec.adapter \
-                         isc.onec.tcp \
                          isc.onec.tcp.async
 
 # This tag can be used to specify the character encoding of the source files

@@ -96,10 +96,6 @@
       <Project>{8C6CFF56-9ECA-423C-AF0F-122E7B414EFF}</Project>
       <Name>isc.onec.adapter</Name>
     </ProjectReference>
-    <ProjectReference Include="..\isc.onec.tcp\isc.onec.tcp.csproj">
-      <Project>{CFE2C47D-294A-410E-A319-C1627531A293}</Project>
-      <Name>isc.onec.tcp</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="intersystems.ico" />

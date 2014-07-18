@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<FxCopProject Version="1.36" Name="My FxCop Project">
+<FxCopProject Version="1.36" Name="Caché 1C Bridge">
  <ProjectOptions>
   <SharedProject>True</SharedProject>
   <Stylesheet Apply="False">c:\program_files\microsoft fxcop 1.36\Xml\FxCopReport.xsl</Stylesheet>
@@ -26,7 +26,6 @@
   <Target Name="$(ProjectDir)/isc.gateway.net.service/bin/x86/Debug/isc.onec.adapter.dll" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/isc.gateway.net.service/bin/x86/Debug/isc.onec.service.exe" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/isc.gateway.net.service/bin/x86/Debug/isc.onec.tcp.async.dll" Analyze="True" AnalyzeAllChildren="True" />
-  <Target Name="$(ProjectDir)/isc.gateway.net.service/bin/x86/Debug/isc.onec.tcp.dll" Analyze="True" AnalyzeAllChildren="True" />
  </Targets>
  <Rules>
   <RuleFiles>
@@ -144,6 +143,11 @@
    </Namespace>
    <Namespace Name="isc.onec.tcp">
     <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2014-07-18 11:52:29Z">
+      <Issue>
+       <Item>isc.onec.tcp</Item>
+      </Issue>
+     </Message>
      <Message Id="isc" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2014-07-18 08:43:16Z">
       <Issue Name="Namespace">
        <Item>isc</Item>
@@ -675,17 +679,17 @@
            </Message>
           </Messages>
           <Members>
-           <Member Name="#Run(System.Int32,System.String,System.String,System.String[],System.Int32[])">
+           <Member Name="#Run(isc.onec.bridge.Command,System.String,System.String,System.String[],System.Int32[])">
             <Messages>
-             <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Created="2014-07-18 08:43:16Z">
+             <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Created="2014-07-18 11:52:29Z">
               <Issue>
-               <Item>'Server.Run(int, string, string, string[], int[])'</Item>
+               <Item>'Server.Run(Command, string, string, string[], int[])'</Item>
                <Item>'Exception'</Item>
               </Issue>
              </Message>
-             <Message Id="vals" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Created="2014-07-18 08:43:16Z">
+             <Message Id="vals" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Created="2014-07-18 11:52:29Z">
               <Issue Name="MemberParameter">
-               <Item>'Server.Run(int, string, string, string[], int[])'</Item>
+               <Item>'Server.Run(Command, string, string, string[], int[])'</Item>
                <Item>vals</Item>
                <Item>'vals'</Item>
               </Issue>
@@ -742,6 +746,96 @@
                <Item>'Type.InvokeMember(string, BindingFlags, Binder, object, object[])'</Item>
                <Item>'V8Adapter.Set(object, string, object)'</Item>
                <Item>'Type.InvokeMember(string, BindingFlags, Binder, object, object[], CultureInfo)'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+       <Namespace Name="isc.onec.tcp">
+        <Types>
+         <Type Name="MessageEncoder">
+          <Members>
+           <Member Name="#combine(System.Byte[],System.Byte[],System.Byte[])">
+            <Messages>
+             <Message Id="combine" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2014-07-18 11:52:29Z">
+              <Issue Name="Member">
+               <Item>combine</Item>
+               <Item>'MessageEncoder.combine(byte[], byte[], byte[])'</Item>
+               <Item>Combine</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#encode()">
+            <Messages>
+             <Message Id="encode" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2014-07-18 11:52:29Z">
+              <Issue Name="Member">
+               <Item>encode</Item>
+               <Item>'MessageEncoder.encode()'</Item>
+               <Item>Encode</Item>
+              </Issue>
+             </Message>
+             <Message Id="System.Convert.ToSByte(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2014-07-18 11:52:29Z">
+              <Issue>
+               <Item>'Convert.ToSByte(string)'</Item>
+               <Item>'MessageEncoder.encode()'</Item>
+               <Item>'Convert.ToSByte(string, IFormatProvider)'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="RequestMessage">
+          <Members>
+           <Member Name="#.ctor(System.Byte[])">
+            <Messages>
+             <Message Id="System.Convert.ToString(System.Int32)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2014-07-18 11:52:29Z">
+              <Issue>
+               <Item>'Convert.ToString(int)'</Item>
+               <Item>'RequestMessage.RequestMessage(byte[])'</Item>
+               <Item>'Convert.ToString(int, IFormatProvider)'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Disconnect">
+            <Messages>
+             <Message TypeName="DoNotDeclareReadOnlyMutableReferenceTypes" Category="Microsoft.Security" CheckId="CA2104" Created="2014-07-18 11:52:29Z">
+              <Issue>
+               <Item>'RequestMessage.Disconnect'</Item>
+               <Item>'RequestMessage'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#types">
+            <Messages>
+             <Message TypeName="ArrayFieldsShouldNotBeReadOnly" Category="Microsoft.Security" CheckId="CA2105" Created="2014-07-18 11:52:29Z">
+              <Issue>
+               <Item>'RequestMessage.types'</Item>
+              </Issue>
+             </Message>
+             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2014-07-18 11:52:29Z">
+              <Issue>
+               <Item>'RequestMessage.types'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#values">
+            <Messages>
+             <Message TypeName="ArrayFieldsShouldNotBeReadOnly" Category="Microsoft.Security" CheckId="CA2105" Created="2014-07-18 11:52:29Z">
+              <Issue>
+               <Item>'RequestMessage.values'</Item>
+              </Issue>
+             </Message>
+             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2014-07-18 11:52:29Z">
+              <Issue>
+               <Item>'RequestMessage.values'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -1214,210 +1308,11 @@
      </Module>
     </Modules>
    </Target>
-   <Target Name="$(ProjectDir)/isc.gateway.net.service/bin/x86/Debug/isc.onec.tcp.dll">
-    <Modules>
-     <Module Name="isc.onec.tcp.dll">
-      <Messages>
-       <Message TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210" Created="2014-07-18 08:43:16Z">
-        <Issue Name="NoStrongName">
-         <Item>'isc.onec.tcp.dll'</Item>
-        </Issue>
-       </Message>
-       <Message Id="isc" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2014-07-18 08:43:16Z">
-        <Issue Name="Assembly">
-         <Item>isc</Item>
-         <Item>'isc.onec.tcp.dll'</Item>
-         <Item>Isc</Item>
-        </Issue>
-       </Message>
-       <Message Id="onec" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2014-07-18 08:43:16Z">
-        <Issue Name="Assembly">
-         <Item>onec</Item>
-         <Item>'isc.onec.tcp.dll'</Item>
-         <Item>Onec</Item>
-        </Issue>
-       </Message>
-       <Message Id="tcp" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2014-07-18 08:43:16Z">
-        <Issue Name="Assembly">
-         <Item>tcp</Item>
-         <Item>'isc.onec.tcp.dll'</Item>
-         <Item>Tcp</Item>
-        </Issue>
-       </Message>
-       <Message Id="isc" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Created="2014-07-18 08:43:16Z">
-        <Issue Name="Assembly">
-         <Item>isc</Item>
-         <Item>'isc.onec.tcp.dll'</Item>
-        </Issue>
-       </Message>
-       <Message Id="onec" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Created="2014-07-18 08:43:16Z">
-        <Issue Name="Assembly">
-         <Item>onec</Item>
-         <Item>'isc.onec.tcp.dll'</Item>
-        </Issue>
-       </Message>
-       <Message TypeName="MarkAssembliesWithClsCompliant" Category="Microsoft.Design" CheckId="CA1014" Created="2014-07-18 08:43:16Z">
-        <Issue>
-         <Item>'isc.onec.tcp.dll'</Item>
-        </Issue>
-       </Message>
-       <Message TypeName="MarkAssembliesWithComVisible" Category="Microsoft.Design" CheckId="CA1017" Created="2014-07-18 08:43:16Z">
-        <Issue Name="AttributeTrue" Level="Error">
-         <Item>'isc.onec.tcp.dll'</Item>
-        </Issue>
-       </Message>
-      </Messages>
-      <Namespaces>
-       <Namespace Name="isc.onec.tcp">
-        <Types>
-         <Type Name="MessageDecoder">
-          <Members>
-           <Member Name="#.ctor(System.Byte[])">
-            <Messages>
-             <Message TypeName="DoNotInitializeUnnecessarily" Category="Microsoft.Performance" CheckId="CA1805" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'MessageDecoder.MessageDecoder(byte[])'</Item>
-               <Item>'MessageDecoder.current'</Item>
-               <Item>'int'</Item>
-               <Item>0</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#decode()">
-            <Messages>
-             <Message Id="decode" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2014-07-18 08:43:16Z">
-              <Issue Name="Member">
-               <Item>decode</Item>
-               <Item>'MessageDecoder.decode()'</Item>
-               <Item>Decode</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#getTarget(System.Byte[])">
-            <Messages>
-             <Message Id="System.Convert.ToString(System.Int32)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'Convert.ToString(int)'</Item>
-               <Item>'MessageDecoder.getTarget(byte[])'</Item>
-               <Item>'Convert.ToString(int, IFormatProvider)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#logger">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'MessageDecoder.logger'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="MessageEncoder">
-          <Members>
-           <Member Name="#combine(System.Byte[],System.Byte[],System.Byte[])">
-            <Messages>
-             <Message Id="combine" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2014-07-18 08:43:16Z">
-              <Issue Name="Member">
-               <Item>combine</Item>
-               <Item>'MessageEncoder.combine(byte[], byte[], byte[])'</Item>
-               <Item>Combine</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#encode()">
-            <Messages>
-             <Message Id="encode" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2014-07-18 08:43:16Z">
-              <Issue Name="Member">
-               <Item>encode</Item>
-               <Item>'MessageEncoder.encode()'</Item>
-               <Item>Encode</Item>
-              </Issue>
-             </Message>
-             <Message Id="System.Convert.ToSByte(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'Convert.ToSByte(string)'</Item>
-               <Item>'MessageEncoder.encode()'</Item>
-               <Item>'Convert.ToSByte(string, IFormatProvider)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="RequestMessage">
-          <Members>
-           <Member Name="#command">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'RequestMessage.command'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#createDisconnectMessage()">
-            <Messages>
-             <Message Id="create" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2014-07-18 08:43:16Z">
-              <Issue Name="Member">
-               <Item>create</Item>
-               <Item>'RequestMessage.createDisconnectMessage()'</Item>
-               <Item>Create</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#operand">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'RequestMessage.operand'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#target">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'RequestMessage.target'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#types">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'RequestMessage.types'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#values">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'RequestMessage.values'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-        </Types>
-       </Namespace>
-      </Namespaces>
-     </Module>
-    </Modules>
-   </Target>
   </Targets>
   <Rules>
+   <Rule TypeName="ArrayFieldsShouldNotBeReadOnly" Category="Microsoft.Security" CheckId="CA2105">
+    <Resolution Name="Default">Either replace {0} with a strongly typed collection that cannot be changed, or replace the public field with a method that returns a clone of a private array.</Resolution>
+   </Rule>
    <Rule TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210">
     <Resolution Name="NoStrongName">Sign {0} with a strong name key.</Resolution>
    </Rule>
@@ -1438,6 +1333,9 @@
    </Rule>
    <Rule TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031">
     <Resolution Name="Default">Modify {0} to catch a more specific exception than {1} or rethrow the exception.</Resolution>
+   </Rule>
+   <Rule TypeName="DoNotDeclareReadOnlyMutableReferenceTypes" Category="Microsoft.Security" CheckId="CA2104">
+    <Resolution Name="Default">Remove the read-only designation from {0} or change the field to one that is an immutable reference type. If the reference type {1} is, in fact, immutable, exclude this message.</Resolution>
    </Rule>
    <Rule TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051">
     <Resolution Name="Default">Because field {0} is visible outside of its declaring type, change its accessibility to private and add a property, with the same accessibility as the field has currently, to provide access to it.</Resolution>
