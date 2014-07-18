@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using isc.general;
+using isc.onec.tcp;
 using NLog;
 
 namespace isc.onec.bridge {
@@ -20,15 +21,51 @@ namespace isc.onec.bridge {
 			this.service = new V8Service();
 		}
 
-		public Response Run(Command command, string target, string operand, string[] vals, int[] types) {
-			//if target is "." it is context
+		public Response Run(RequestMessage request) {
 			try {
-				var obj = new Request(target == "." ? "" : target);
-				return this.DoCommand(command, obj, operand, vals, types);
+				// If target is "." it is context
+				var obj = new Request(request.Target == "." ? "" : request.Target);
+				switch (request.Command) {
+				case Command.GET:
+					return this.DoCommandIfConnected(() => {
+						return this.service.Get(obj, request.Operand);
+					});
+				case Command.SET:
+					return this.DoCommandIfConnected(() => {
+						Request value = new Request(request.GetTypeAt(0), request.GetValueAt(0));
+						this.service.Set(obj, request.Operand, value);
+						return Response.Void;
+					});
+				case Command.INVOKE:
+					return this.DoCommandIfConnected(() => {
+						Request[] args = request.BuildRequestList();
+						return this.service.Invoke(obj, request.Operand, args);
+					});
+				case Command.CONNECT:
+					var client = request.ArgumentCount > 0 ? request.GetValueAt(0) : null;
+					this.service.Connect(request.Operand, client);
+					return Response.Void;
+				case Command.DISCONNECT:
+					this.Disconnect();
+					return Response.Void;
+				case Command.FREE:
+					if (this.service.Connected) {
+						this.service.Free(obj);
+					}
+					return Response.Void;
+				case Command.COUNT:
+					return this.DoCommandIfConnected(() => {
+						return this.service.GetCounters();
+					});
+				default:
+					/*
+					 * Never.
+					 */
+					throw new ArgumentException("Command not supported");
+				}
 			} catch (Exception e) {
 				var message = e.Source + ":" + this.Client + ":";
-				message += command.ToString() + ":";
-				message += target + ":" + operand + ":" + vals.ToString() + ":" + types.ToString();
+				message += request;
 				logger.ErrorException(message, e);
 				eventLog.WriteEntry(e.ToStringWithIlOffsets(), EventLogEntryType.Warning);
 				eventLog.WriteEntry(message, EventLogEntryType.Warning);
@@ -51,68 +88,6 @@ namespace isc.onec.bridge {
 
 		private Response DoCommandIfConnected(Func<Response> f) {
 			return this.service.Connected ? f() : Response.NewException("Not connected");
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="command"></param>
-		/// <param name="obj"></param>
-		/// <param name="operand">an URL, or a method or property name.</param>
-		/// <param name="vals"></param>
-		/// <param name="types"></param>
-		/// <returns></returns>
-		private Response DoCommand(Command command, Request obj, string operand, string[] vals, int[] types) {
-			switch (command) {
-			case Command.GET:
-				return this.DoCommandIfConnected(() => {
-					return this.service.Get(obj, operand);
-				});
-			case Command.SET:
-				return this.DoCommandIfConnected(() => {
-					Request value = new Request(types[0], vals[0]);
-					this.service.Set(obj, operand, value);
-					return Response.Void;
-				});
-			case Command.INVOKE:
-				return this.DoCommandIfConnected(() => {
-					Request[] args = BuildRequestList(vals, types);
-					return this.service.Invoke(obj, operand, args);
-				});
-			case Command.CONNECT:
-				var client = types.Length > 0 ? (string) (new Request(types[0], vals[0])).Value : null;
-				this.service.Connect(operand, client);
-				return Response.Void;
-			case Command.DISCONNECT:
-				this.Disconnect();
-				return Response.Void;
-			case Command.FREE:
-				if (this.service.Connected) {
-					this.service.Free(obj);
-				}
-				return Response.Void;
-			case Command.COUNT:
-				return this.DoCommandIfConnected(() => {
-					return this.service.GetCounters();
-				});
-			default:
-				/*
-				 * Never.
-				 */
-				throw new ArgumentException("Command not supported");
-			}
-		}
-
-		private static Request[] BuildRequestList(string[] values, int[] types) {
-			if (values == null || types == null || values.Length != types.Length) {
-				throw new ArgumentException("Server: protocol error. Not all values have types.");
-			}
-
-			Request[] requests = new Request[values.Length];
-			for (int i = 0; i < values.Length; i++) {
-				requests[i] = new Request(types[i], values[i]);
-			}
-			return requests;
 		}
 	}
 }

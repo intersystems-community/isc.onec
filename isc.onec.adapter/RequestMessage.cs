@@ -12,17 +12,23 @@ namespace isc.onec.tcp {
 				new int[0],
 				new string[0]);
 
-		public Command Command {
+		internal Command Command {
 			get;
 			private set;
 		}
 
-		public string Target {
+		/// <summary>
+		/// XXX: Change type to int
+		/// </summary>
+		internal string Target {
 			get;
 			private set;
 		}
 
-		public string Operand {
+		/// <summary>
+		/// An URL, or a method or property name.
+		/// </summary>
+		internal string Operand {
 			get;
 			private set;
 		}
@@ -30,14 +36,14 @@ namespace isc.onec.tcp {
 		/// <summary>
 		/// XXX: To be encapsulated.
 		/// </summary>
-		public readonly int[] types;
+		private readonly int[] types;
 
 		/// <summary>
 		/// XXX: To be encapsulated.
 		/// </summary>
-		public readonly string[] values;
+		private readonly string[] values;
 
-		public int ArgumentCount {
+		internal int ArgumentCount {
 			get {
 				return this.types.Length;
 			}
@@ -73,7 +79,7 @@ namespace isc.onec.tcp {
 				string operand,
 				int[] types,
 				string[] values) {
-			if (types.Length != values.Length) {
+			if (types == null || values == null || types.Length != values.Length) {
 				throw new ArgumentException(types.Length + " != " + values.Length);
 			}
 
@@ -94,24 +100,14 @@ namespace isc.onec.tcp {
 			return header + data;
 		}
 
-		/// <summary>
-		/// May be removed if unused.
-		/// </summary>
-		/// <param name="index"></param>
-		/// <returns></returns>
-		public int GetTypeAt(int index) {
+		internal int GetTypeAt(int index) {
 			if (index < 0 || index >= this.ArgumentCount) {
 				throw new ArgumentException("Index " + index + " not within the range [0, " + (this.ArgumentCount - 1) + "]");
 			}
 			return this.types[index];
 		}
 
-		/// <summary>
-		/// May be removed if unused.
-		/// </summary>
-		/// <param name="index"></param>
-		/// <returns></returns>
-		public string GetValueAt(int index) {
+		internal string GetValueAt(int index) {
 			if (index < 0 || index >= this.ArgumentCount) {
 				throw new ArgumentException("Index " + index + " not within the range [0, " + (this.ArgumentCount - 1) + "]");
 			}
@@ -124,6 +120,14 @@ namespace isc.onec.tcp {
 			string s = new System.Text.UnicodeEncoding().GetString(data, offset, length * 2);
 			offset += length * 2;
 			return s;
+		}
+
+		internal Request[] BuildRequestList() {
+			Request[] requests = new Request[this.ArgumentCount];
+			for (int i = 0; i < this.ArgumentCount; i++) {
+				requests[i] = new Request(this.types[i], this.values[i]);
+			}
+			return requests;
 		}
 	}
 }
