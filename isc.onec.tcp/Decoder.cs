@@ -15,32 +15,23 @@ namespace isc.onec.tcp {
 
 		public MessageDecoder(byte[] data) {
 			this.data = data;
-			this.current = 0;
 		}
 
-		public  RequestMessage decode() {
-			RequestMessage message = new RequestMessage();
+		public RequestMessage decode() {
+			int num = this.data[this.current++];
 
-			message.command = getCommand(data);
-			message.target = getTarget(data);
-			message.operand = getOperand(data);
-
-			addValues(message);
-
-			return message;
-		}
-
-		private void addValues(RequestMessage message) {
-			int num = data[current];
-			current += 1;
-
-			message.types = new int[num];
-			message.vals = new string[num];
-
+			int[] types = new int[num];
+			string[] values = new string[num];
 			for (int i = 0; i < num; i++) {
-				message.types[i] = this.Type;
-				message.vals[i] = this.Value;
+				types[i] = this.Type;
+				values[i] = this.Value;
 			}
+
+			return new RequestMessage(this.getCommand(data),
+				this.getTarget(data),
+				this.getOperand(data),
+				types,
+				values);
 		}
 
 		private string Value {
