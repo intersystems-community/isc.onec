@@ -73,7 +73,7 @@ namespace isc.onec.bridge {
 				return this.DoCommandIfConnected(() => {
 					Request value = new Request(types[0], vals[0]);
 					this.service.Set(obj, operand, value);
-					return Response.VOID;
+					return Response.Void;
 				});
 			case Command.INVOKE:
 				return this.DoCommandIfConnected(() => {
@@ -83,15 +83,15 @@ namespace isc.onec.bridge {
 			case Command.CONNECT:
 				var client = types.Length > 0 ? (string) (new Request(types[0], vals[0])).Value : null;
 				this.service.Connect(operand, client);
-				return Response.VOID;
+				return Response.Void;
 			case Command.DISCONNECT:
 				this.Disconnect();
-				return Response.VOID;
+				return Response.Void;
 			case Command.FREE:
 				if (this.service.Connected) {
 					this.service.Free(obj);
 				}
-				return Response.VOID;
+				return Response.Void;
 			case Command.COUNT:
 				return this.DoCommandIfConnected(() => {
 					return this.service.GetCounters();
