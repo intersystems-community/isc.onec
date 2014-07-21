@@ -14,17 +14,17 @@ namespace isc.onec.tcp.async {
 		/// Max # of connections to a socket can be limited by the Windows Operating System
 		/// also.
 		/// </summary>
-		private const Int32 _MaxConnections = 100;
+		private const int DefaultMaxConnections = 100;
 
 		/// <summary>
 		/// allows excess SAEA objects in pool.
 		/// </summary>
-		private const Int32 ExcessSaeaObjectsInPool = 1;
+		private const int ExcessSaeaObjectsInPool = 1;
 
 		/// <summary>
 		/// The size of the queue of incoming connections for the listen socket.
 		/// </summary>
-		private const Int32 _Backlog = 100;
+		private const int DefaultBacklog = 100;
 
 		/// <summary>
 		/// This is the maximum number of asynchronous accept operations that can be
@@ -32,7 +32,7 @@ namespace isc.onec.tcp.async {
 		/// SocketAsyncEventArgs objects that do accept operations. Note that this
 		/// is NOT the same as the maximum # of connections.
 		/// </summary>
-		private const Int32 _MaxSimultaneousAcceptOps = 40;
+		private const int DefaultMaxSimultaneousAcceptOps = 40;
 
 		/// <summary>
 		/// This number must be the same as the value on the client.
@@ -40,59 +40,58 @@ namespace isc.onec.tcp.async {
 		/// you change the code, because 4 is the length of 32 bit integer, which
 		/// is what we are using as prefix.
 		/// </summary>
-		private const Int32 _ReceivePrefixLength = 4;
+		private const int DefaultReceivePrefixLength = 4;
 
 		/// <summary>
 		/// You would want a buffer size larger than 25 probably, unless you know the
 		/// data will almost always be less than 25. It is just 25 in our test app.
 		/// </summary>
-		private const Int32 _ReceiveBufferSize = 128;
+		private const int DefaultReceiveBufferSize = 128;
 
-		private const Int32 _SendPrefixLength = 4;
+		private const int DefaultSendPrefixLength = 4;
 
 		/// <summary>
 		/// For the BufferManager
 		/// </summary>
-		private const Int32 _OpsToPreAllocate = 2; // 1 for receive, 1 for send
-
+		private const int DefaultOpsToPreAllocate = 2; // 1 for receive, 1 for send
 
 		// the maximum number of connections the sample is designed to handle simultaneously 
-		private readonly Int32 maxConnections;
+		private readonly int maxConnections;
 
 		// this variable allows us to create some extra SAEA objects for the pool,
 		// if we wish.
-		private readonly Int32 numberOfSaeaForRecSend;
+		private readonly int numberOfSaeaForRecSend;
 
 		// max # of pending connections the listener can hold in queue
-		private readonly Int32 backlog;
+		private readonly int backlog;
 
 		// tells us how many objects to put in pool for accept operations
-		private readonly Int32 maxSimultaneousAcceptOps;
+		private readonly int maxSimultaneousAcceptOps;
 
 		// buffer size to use for each socket receive operation
-		private readonly Int32 receiveBufferSize;
+		private readonly int receiveBufferSize;
 
 		// length of message prefix for receive ops
-		private readonly Int32 receivePrefixLength;
+		private readonly int receivePrefixLength;
 
 		// length of message prefix for send ops
-		private readonly Int32 sendPrefixLength;
+		private readonly int sendPrefixLength;
 
 		// See comments in buffer manager.
-		private readonly Int32 opsToPreAllocate;
+		private readonly int opsToPreAllocate;
 
 		// Endpoint for the listener.
 		private readonly IPEndPoint localEndPoint;
 
 		internal SocketListenerSettings(IPEndPoint localEndPoint,
-				Int32 maxConnections = _MaxConnections,
-				Int32 numberOfSaeaForRecSend = _MaxConnections + ExcessSaeaObjectsInPool,
-				Int32 backlog = _Backlog,
-				Int32 maxSimultaneousAcceptOps = _MaxSimultaneousAcceptOps,
-				Int32 receivePrefixLength = _ReceivePrefixLength,
-				Int32 receiveBufferSize = _ReceiveBufferSize,
-				Int32 sendPrefixLength = _SendPrefixLength,
-				Int32 opsToPreAllocate = _OpsToPreAllocate) {
+				int maxConnections = DefaultMaxConnections,
+				int numberOfSaeaForRecSend = DefaultMaxConnections + ExcessSaeaObjectsInPool,
+				int backlog = DefaultBacklog,
+				int maxSimultaneousAcceptOps = DefaultMaxSimultaneousAcceptOps,
+				int receivePrefixLength = DefaultReceivePrefixLength,
+				int receiveBufferSize = DefaultReceiveBufferSize,
+				int sendPrefixLength = DefaultSendPrefixLength,
+				int opsToPreAllocate = DefaultOpsToPreAllocate) {
 			this.maxConnections = maxConnections;
 			this.numberOfSaeaForRecSend = numberOfSaeaForRecSend;
 			this.backlog = backlog;
@@ -104,62 +103,70 @@ namespace isc.onec.tcp.async {
 			this.localEndPoint = localEndPoint;
 		}
 
-	public Int32 MaxConnections
+		public int MaxConnections
 	{
 	    get
 	    {
 		return this.maxConnections;
 	    }
 	}
-	public Int32 NumberOfSaeaForRecSend
+
+	public int NumberOfSaeaForRecSend
 	{
 	    get
 	    {
 		return this.numberOfSaeaForRecSend;
 	    }
 	}
-	public Int32 Backlog
+
+	public int Backlog
 	{
 	    get
 	    {
 		return this.backlog;
 	    }
 	}
-	public Int32 MaxAcceptOps
+
+	public int MaxAcceptOps
 	{
 	    get
 	    {
 		return this.maxSimultaneousAcceptOps;
 	    }
 	}
-	public Int32 ReceivePrefixLength
+
+	public int ReceivePrefixLength
 	{
 	    get
 	    {
 		return this.receivePrefixLength;
 	    }
 	}
-	public Int32 BufferSize
+
+	public int BufferSize
 	{
 	    get
 	    {
 		return this.receiveBufferSize;
 	    }
 	}
-	public Int32 SendPrefixLength
+
+	public int SendPrefixLength
 	{
 	    get
 	    {
 		return this.sendPrefixLength;
 	    }
 	}
-	public Int32 OpsToPreAllocate
+
+	public int OpsToPreAllocate
 	{
 	    get
 	    {
 		return this.opsToPreAllocate;
 	    }
 	}
+
 	public IPEndPoint LocalEndPoint
 	{
 	    get

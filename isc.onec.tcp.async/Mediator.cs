@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
 
-
 namespace isc.onec.tcp.async {
 	internal sealed class Mediator {
 		private readonly IncomingDataPreparer incomingDataPreparer;
@@ -15,9 +14,7 @@ namespace isc.onec.tcp.async {
 		/// Called by <see cref="isc.onec.tcp.async.DataHoldingUserToken"/>.
 		/// </summary>
 		/// <param name="socketAsyncEventArgs"></param>
-		internal Mediator(SocketAsyncEventArgs socketAsyncEventArgs)
-		{
-			
+		internal Mediator(SocketAsyncEventArgs socketAsyncEventArgs) {
 			this.socketAsyncEventArgs = socketAsyncEventArgs;
 			this.incomingDataPreparer = new IncomingDataPreparer(this.socketAsyncEventArgs);
 			this.outgoingDataPreparer = new OutgoingDataPreparer();			

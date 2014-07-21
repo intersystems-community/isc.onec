@@ -5,50 +5,48 @@ using System.Text;
 
 namespace isc.onec.tcp.async {
 	internal sealed class PrefixHandler {
-		public Int32 HandlePrefix(SocketAsyncEventArgs e, DataHoldingUserToken receiveSendToken, Int32 remainingBytesToProcess) {			
-			//receivedPrefixBytesDoneCount tells us how many prefix bytes were
-			//processed during previous receive ops which contained data for 
-			//this message. Usually there will NOT have been any previous 
-			//receive ops here. So in that case,
-			//receiveSendToken.receivedPrefixBytesDoneCount would equal 0.
-			//Create a byte array to put the new prefix in, if we have not
-			//already done it in a previous loop.
-			if (receiveSendToken.receivedPrefixBytesDoneCount == 0)
+		public int HandlePrefix(SocketAsyncEventArgs e, DataHoldingUserToken receiveSendToken, int remainingBytesToProcess) {			
+			// receivedPrefixBytesDoneCount tells us how many prefix bytes were
+			// processed during previous receive ops which contained data for 
+			// this message. Usually there will NOT have been any previous 
+			// receive ops here. So in that case,
+			// receiveSendToken.receivedPrefixBytesDoneCount would equal 0.
+			// Create a byte array to put the new prefix in, if we have not
+			// already done it in a previous loop.
+			if (receiveSendToken.ReceivedPrefixBytesDoneCount == 0)
 			{
-				receiveSendToken.byteArrayForPrefix = new Byte[receiveSendToken.receivePrefixLength];
+				receiveSendToken.ByteArrayForPrefix = new byte[receiveSendToken.ReceivePrefixLength];
 			}
 
 			// If this next if-statement is true, then we have received >=
 			// enough bytes to have the prefix. So we can determine the 
 			// length of the message that we are working on.
-			if (remainingBytesToProcess >= receiveSendToken.receivePrefixLength - receiveSendToken.receivedPrefixBytesDoneCount)
+			if (remainingBytesToProcess >= receiveSendToken.ReceivePrefixLength - receiveSendToken.ReceivedPrefixBytesDoneCount)
 			{
-				//Now copy that many bytes to byteArrayForPrefix.
-				//We can use the variable receiveMessageOffset as our main
-				//index to show which index to get data from in the TCP
-				//buffer.
-				Buffer.BlockCopy(e.Buffer, receiveSendToken.receiveMessageOffset - receiveSendToken.receivePrefixLength + receiveSendToken.receivedPrefixBytesDoneCount, receiveSendToken.byteArrayForPrefix, receiveSendToken.receivedPrefixBytesDoneCount, receiveSendToken.receivePrefixLength - receiveSendToken.receivedPrefixBytesDoneCount);
+				// Now copy that many bytes to byteArrayForPrefix.
+				// We can use the variable receiveMessageOffset as our main
+				// index to show which index to get data from in the TCP
+				// buffer.
+				Buffer.BlockCopy(e.Buffer, receiveSendToken.ReceiveMessageOffset - receiveSendToken.ReceivePrefixLength + receiveSendToken.ReceivedPrefixBytesDoneCount, receiveSendToken.ByteArrayForPrefix, receiveSendToken.ReceivedPrefixBytesDoneCount, receiveSendToken.ReceivePrefixLength - receiveSendToken.ReceivedPrefixBytesDoneCount);
 
-				remainingBytesToProcess = remainingBytesToProcess - receiveSendToken.receivePrefixLength + receiveSendToken.receivedPrefixBytesDoneCount;
+				remainingBytesToProcess = remainingBytesToProcess - receiveSendToken.ReceivePrefixLength + receiveSendToken.ReceivedPrefixBytesDoneCount;
 
-				receiveSendToken.recPrefixBytesDoneThisOp = receiveSendToken.receivePrefixLength - receiveSendToken.receivedPrefixBytesDoneCount;
+				receiveSendToken.RecPrefixBytesDoneThisOp = receiveSendToken.ReceivePrefixLength - receiveSendToken.ReceivedPrefixBytesDoneCount;
 
-				receiveSendToken.receivedPrefixBytesDoneCount = receiveSendToken.receivePrefixLength;
+				receiveSendToken.ReceivedPrefixBytesDoneCount = receiveSendToken.ReceivePrefixLength;
 
-				receiveSendToken.lengthOfCurrentIncomingMessage = BitConverter.ToInt32(receiveSendToken.byteArrayForPrefix, 0);				
-			}
+				receiveSendToken.LengthOfCurrentIncomingMessage = BitConverter.ToInt32(receiveSendToken.ByteArrayForPrefix, 0);				
+			} else {
+				// This next else-statement deals with the situation 
+				// where we have some bytes
+				// of this prefix in this receive operation, but not all.
 
-			//This next else-statement deals with the situation 
-			//where we have some bytes
-			//of this prefix in this receive operation, but not all.
-			else
-			{
-				//Write the bytes to the array where we are putting the
-				//prefix data, to save for the next loop.
-				Buffer.BlockCopy(e.Buffer, receiveSendToken.receiveMessageOffset - receiveSendToken.receivePrefixLength + receiveSendToken.receivedPrefixBytesDoneCount, receiveSendToken.byteArrayForPrefix, receiveSendToken.receivedPrefixBytesDoneCount, remainingBytesToProcess);
+				// Write the bytes to the array where we are putting the
+				// prefix data, to save for the next loop.
+				Buffer.BlockCopy(e.Buffer, receiveSendToken.ReceiveMessageOffset - receiveSendToken.ReceivePrefixLength + receiveSendToken.ReceivedPrefixBytesDoneCount, receiveSendToken.ByteArrayForPrefix, receiveSendToken.ReceivedPrefixBytesDoneCount, remainingBytesToProcess);
 
-				receiveSendToken.recPrefixBytesDoneThisOp = remainingBytesToProcess;
-				receiveSendToken.receivedPrefixBytesDoneCount += remainingBytesToProcess;
+				receiveSendToken.RecPrefixBytesDoneThisOp = remainingBytesToProcess;
+				receiveSendToken.ReceivedPrefixBytesDoneCount += remainingBytesToProcess;
 				remainingBytesToProcess = 0;
 			}
 
@@ -58,8 +56,8 @@ namespace isc.onec.tcp.async {
 			// less than the amount of data needed for prefix. 
 			if (remainingBytesToProcess == 0)
 			{   
-				receiveSendToken.receiveMessageOffset -= receiveSendToken.recPrefixBytesDoneThisOp;
-				receiveSendToken.recPrefixBytesDoneThisOp = 0;
+				receiveSendToken.ReceiveMessageOffset -= receiveSendToken.RecPrefixBytesDoneThisOp;
+				receiveSendToken.RecPrefixBytesDoneThisOp = 0;
 			}
 			return remainingBytesToProcess;
 		}

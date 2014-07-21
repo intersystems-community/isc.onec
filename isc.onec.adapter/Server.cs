@@ -13,9 +13,9 @@ namespace isc.onec.bridge {
 	public sealed class Server {
 		private readonly V8Service service;
 
-		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-		private static readonly EventLog eventLog = EventLogFactory.Instance;
+		private static readonly EventLog EventLog = EventLogFactory.Instance;
 
 		public Server() {
 			this.service = new V8Service();
@@ -64,9 +64,9 @@ namespace isc.onec.bridge {
 			} catch (Exception e) {
 				var message = e.Source + ":" + this.Client + ":";
 				message += request;
-				logger.ErrorException(message, e);
-				eventLog.WriteEntry(e.ToStringWithIlOffsets(), EventLogEntryType.Warning);
-				eventLog.WriteEntry(message, EventLogEntryType.Warning);
+				Logger.ErrorException(message, e);
+				EventLog.WriteEntry(e.ToStringWithIlOffsets(), EventLogEntryType.Warning);
+				EventLog.WriteEntry(message, EventLogEntryType.Warning);
 
 				this.Disconnect();
 

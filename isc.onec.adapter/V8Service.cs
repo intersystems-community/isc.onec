@@ -35,25 +35,25 @@ namespace isc.onec.bridge {
 		/// XXX: Shared access.
 		/// XXX: This actually looks like a *last connected client*, as the value gets rewritten upon connect.
 		/// </summary>
-		private String client;
+		private string client;
 
-		internal String Client {
+		internal string Client {
 			get {
 				return this.client;
 			}
 		}
 
-		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-		private static readonly EventLog eventLog = EventLogFactory.Instance;
+		private static readonly EventLog EventLog = EventLogFactory.Instance;
 
 		/// <summary>
 		/// A shared map of clients to their URL's.
 		/// </summary>
-		private static readonly Dictionary<string, string> clients = new Dictionary<string, string>();
+		private static readonly Dictionary<string, string> Clients = new Dictionary<string, string>();
 
 		internal V8Service() {
-			logger.Debug("isc.onec.bridge.V8Service is created");
+			Logger.Debug("isc.onec.bridge.V8Service is created");
 			this.adapter = new V8Adapter();
 			this.repository = new Repository();
 		}
@@ -65,7 +65,7 @@ namespace isc.onec.bridge {
 		/// <param name="url"></param>
 		/// <param name="client">can be <code>null</code></param>
 		internal void Connect(string url, string client) {
-			logger.Debug("connect from session with #" + client);
+			Logger.Debug("connect from session with #" + client);
 
 			if (this.Connected) {
 				throw new InvalidOperationException("Attempt to connect while connected; old client: " + this.client + "; new client: " + client);
@@ -73,10 +73,10 @@ namespace isc.onec.bridge {
 
 			/// XXX: attempt to use a state shared among multiple instances w/o proper locking.
 			if (client != null) {
-				if (clients.ContainsKey(client)) {
+				if (Clients.ContainsKey(client)) {
 					throw new InvalidOperationException("Attempt to create more than one connection to 1C from the same job. Client #" + client);
 				} else {
-					clients.Add(client, url);
+					Clients.Add(client, url);
 				}
 			}
 
@@ -121,7 +121,7 @@ namespace isc.onec.bridge {
 		}
 
 		internal void Free(int oid) {
-			logger.Debug("Freeing object with OID " + oid);
+			Logger.Debug("Freeing object with OID " + oid);
 
 			if (!this.Connected) {
 				throw new InvalidOperationException("Attempt to call Free() while disconnected");
@@ -134,7 +134,7 @@ namespace isc.onec.bridge {
 		}
 
 		internal void Disconnect() {
-			logger.Debug("disconnecting from #" + this.client + ". Adapter is " + this.adapter);
+			Logger.Debug("disconnecting from #" + this.client + ". Adapter is " + this.adapter);
 
 			if (!this.Connected) {
 				return;
@@ -150,7 +150,7 @@ namespace isc.onec.bridge {
 			this.adapter.Disconnect();
 
 			if (this.client != null) {
-				clients.Remove(this.client);
+				Clients.Remove(this.client);
 			}
 
 			this.context = null;
@@ -161,16 +161,16 @@ namespace isc.onec.bridge {
 		/// Only used for logging purposes.
 		/// </summary>
 		private static void DumpClients() {
-			var report = "";
+			var report = string.Empty;
 
 			// XXX: clients should be locked during iteration
-			foreach (KeyValuePair<string, string> client in clients) {
-				report += (client.Key + "   " + client.Value+"\n");
+			foreach (KeyValuePair<string, string> client in Clients) {
+				report += client.Key + "   " + client.Value + "\n";
 			}
 
 			if (report.Length != 0) {
-				logger.Debug(report);
-				eventLog.WriteEntry(report, EventLogEntryType.Information);
+				Logger.Debug(report);
+				EventLog.WriteEntry(report, EventLogEntryType.Information);
 			}
 		}
 
@@ -215,7 +215,7 @@ namespace isc.onec.bridge {
 				int oid = this.repository.Add(value);
 				return new Response(ResponseType.OBJECT, oid);
 			} else if (value != null && value.GetType() == typeof(bool)) {
-				return new Response(((bool) value));
+				return new Response((bool) value);
 			}
 			return new Response(ResponseType.DATA, value);
 		}

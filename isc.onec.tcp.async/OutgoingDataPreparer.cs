@@ -5,14 +5,13 @@ using isc.general;
 using isc.onec.bridge;
 using NLog;
 
-namespace isc.onec.tcp.async{
+namespace isc.onec.tcp.async {
 	internal sealed class OutgoingDataPreparer {
-		
 		private DataHolder theDataHolder;
 
-		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-		private static readonly EventLog eventLog = EventLogFactory.Instance;
+		private static readonly EventLog EventLog = EventLogFactory.Instance;
 
 		public OutgoingDataPreparer()
 		{			
@@ -21,50 +20,50 @@ namespace isc.onec.tcp.async{
 		internal void PrepareOutgoingData(SocketAsyncEventArgs e, DataHolder handledDataHolder)
 		{
 			DataHoldingUserToken theUserToken = (DataHoldingUserToken)e.UserToken;
-		   
-			
-			theDataHolder = handledDataHolder;
 
-			//In this example code, we will send back the receivedTransMissionId,
+			this.theDataHolder = handledDataHolder;
+
+			// In this example code, we will send back the receivedTransMissionId,
 			// followed by the
-			//message that the client sent to the server. And we must
-			//prefix it with the length of the message. So we put 3 
-			//things into the array.
+			// message that the client sent to the server. And we must
+			// prefix it with the length of the message. So we put 3 
+			// things into the array.
 			// 1) prefix,
 			// 2) receivedTransMissionId,
 			// 3) the message that we received from the client, which
 			// we stored in our DataHolder until we needed it.
-			//That is our communication protocol. The client must know the protocol.
+			// That is our communication protocol. The client must know the protocol.
 
-			//Convert the receivedTransMissionId to byte array.
-			//Byte[] idByteArray = BitConverter.GetBytes(theDataHolder.receivedTransMissionId);
+			// Convert the receivedTransMissionId to byte array.
+////			Byte[] idByteArray = BitConverter.GetBytes(theDataHolder.receivedTransMissionId);
 
-			//Determine the length of all the data that we will send back.
-			//Int32 lengthOfCurrentOutgoingMessage = idByteArray.Length + theDataHolder.dataMessageReceived.Length;
-			Byte[] reply;
-			if (theDataHolder.isError)
+			// Determine the length of all the data that we will send back.
+////			Int32 lengthOfCurrentOutgoingMessage = idByteArray.Length + theDataHolder.dataMessageReceived.Length;
+			byte[] reply;
+			if (this.theDataHolder.IsError)
 			{
 				reply = SendError(theUserToken.Server);
 			}
 			else
 			{
-				reply = process(theUserToken.Server, theDataHolder.dataMessageReceived);
+				reply = process(theUserToken.Server, this.theDataHolder.DataMessageReceived);
 			}
-			Int32 lengthOfCurrentOutgoingMessage = reply.Length;
+			int lengthOfCurrentOutgoingMessage = reply.Length;
 
-			//So, now we convert the length integer into a byte array.
-			Byte[] arrayOfBytesInPrefix = BitConverter.GetBytes(lengthOfCurrentOutgoingMessage);
+			// So, now we convert the length integer into a byte array.
+			byte[] arrayOfBytesInPrefix = BitConverter.GetBytes(lengthOfCurrentOutgoingMessage);
 			
-			//Create the byte array to send.
-			theUserToken.dataToSend = new Byte[theUserToken.sendPrefixLength + lengthOfCurrentOutgoingMessage];
+			// Create the byte array to send.
+			theUserToken.DataToSend = new byte[theUserToken.SendPrefixLength + lengthOfCurrentOutgoingMessage];
 			
-			//Now copy the 3 things to the theUserToken.dataToSend.
-			Buffer.BlockCopy(arrayOfBytesInPrefix, 0, theUserToken.dataToSend, 0, theUserToken.sendPrefixLength);
-			//The message that the client sent is already in a byte array, in DataHolder.
-			Buffer.BlockCopy(reply, 0, theUserToken.dataToSend, theUserToken.sendPrefixLength , reply.Length);
+			// Now copy the 3 things to the theUserToken.dataToSend.
+			Buffer.BlockCopy(arrayOfBytesInPrefix, 0, theUserToken.DataToSend, 0, theUserToken.SendPrefixLength);
+
+			// The message that the client sent is already in a byte array, in DataHolder.
+			Buffer.BlockCopy(reply, 0, theUserToken.DataToSend, theUserToken.SendPrefixLength, reply.Length);
 			
-			theUserToken.sendBytesRemainingCount = theUserToken.sendPrefixLength + lengthOfCurrentOutgoingMessage;
-			theUserToken.bytesSentAlreadyCount = 0;
+			theUserToken.SendBytesRemainingCount = theUserToken.SendPrefixLength + lengthOfCurrentOutgoingMessage;
+			theUserToken.BytesSentAlreadyCount = 0;
 		}
 
 		private static byte[] SendError(Server server) {
@@ -74,10 +73,10 @@ namespace isc.onec.tcp.async{
 				 * Return value ignored.
 				 */
 				server.Run(RequestMessage.Disconnect);
-				logger.Error("OutgoingDataPreparer.sendError(): error was sent");
+				Logger.Error("OutgoingDataPreparer.sendError(): error was sent");
 				message = "Bridge: Fatal network error";
 			} catch (Exception e) {
-				logger.ErrorException("Unprocessed exception:",e);
+				Logger.ErrorException("Unprocessed exception:", e);
 				message = "Bridge: Fatal network error. Unprocessed exception.";
 			}
 
@@ -95,17 +94,16 @@ namespace isc.onec.tcp.async{
 					 * Most probably, this doesn't ever happen,
 					 * and the NullReferenceException observed is https://bitbucket.org/bass/isc.onec/issue/4
 					 */
-					const string message = "OutgoingDataPreparer.process(): no server object.";
-					logger.Error(message);
-					eventLog.WriteEntry(message, EventLogEntryType.Error);
-					reply = Response.NewException(message).Serialize();
-
+					const string Message = "OutgoingDataPreparer.process(): no server object.";
+					Logger.Error(Message);
+					EventLog.WriteEntry(Message, EventLogEntryType.Error);
+					reply = Response.NewException(Message).Serialize();
 				} else {
 					reply = server.Run(request).Serialize();
 				}
 			} catch (Exception e) {
 				var message = e.ToStringWithIlOffsets();
-				eventLog.WriteEntry(message, EventLogEntryType.Error);
+				EventLog.WriteEntry(message, EventLogEntryType.Error);
 				reply = Response.NewException(message).Serialize();
 			}
 			return new MessageEncoder(reply).encode();

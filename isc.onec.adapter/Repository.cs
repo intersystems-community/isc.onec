@@ -18,14 +18,14 @@ namespace isc.onec.bridge {
 		/// </summary>
 		private int addedCount;
 
-		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 		internal Repository() {
 			this.cache = new Dictionary<int, object>();
 		}
 
 		~Repository() {
-			logger.Debug("Repository destructor. Cache has " + cache.Count + " items.");
+			Logger.Debug("Repository destructor. Cache has " + this.cache.Count + " items.");
 		}
 
 		internal object Find(int oid) {

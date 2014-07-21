@@ -6,30 +6,28 @@ using System.Threading;
 namespace isc.onec.tcp.async
 {	
 	internal sealed class SocketAsyncEventArgsPool {		
-		//just for assigning an ID so we can watch our objects while testing.
-		private Int32 nextTokenId = 0;
+		// just for assigning an ID so we can watch our objects while testing.
+		private int nextTokenId;
 		
 		// Pool of reusable SocketAsyncEventArgs objects.
 		// WTF? Consider using a concurrent collection *instead* of ths entire class.
-		Stack<SocketAsyncEventArgs> pool;
+		private readonly Stack<SocketAsyncEventArgs> pool;
 		
 		// initializes the object pool to the specified size.
 		// "capacity" = Maximum number of SocketAsyncEventArgs objects
-		internal SocketAsyncEventArgsPool(Int32 capacity)
+		internal SocketAsyncEventArgsPool(int capacity)
 		{
-			
-		  
 			this.pool = new Stack<SocketAsyncEventArgs>(capacity);
 		}
 
 		// The number of SocketAsyncEventArgs instances in the pool.
 		// WTF? This may fail to return the most current value. 
-		internal Int32 Count
+		internal int Count
 		{
 			get { return this.pool.Count; }
 		}
 
-		internal Int32 NextTokenId {
+		internal int NextTokenId {
 			get {
 				return Interlocked.Increment(ref this.nextTokenId);
 			}

@@ -17,7 +17,7 @@ namespace isc.onec.bridge {
 		/// </summary>
 		private readonly string value;
 
-		private static readonly EventLog eventLog = EventLogFactory.Instance;
+		private static readonly EventLog EventLog = EventLogFactory.Instance;
 
 		internal Request(RequestType type, string value) {
 			if (type == RequestType.OBJECT) {
@@ -25,7 +25,7 @@ namespace isc.onec.bridge {
 					Convert.ToInt32(value);
 				} catch (FormatException fe) {
 					string message = "Expected a 32-bit signed integer, received: \"" + value + "\" (length: " + value.Length + ")";
-					eventLog.WriteEntry(message, EventLogEntryType.Error);
+					EventLog.WriteEntry(message, EventLogEntryType.Error);
 					throw new ArgumentException(message, fe);
 				}
 			} else if (type == RequestType.NUMBER) {
@@ -33,7 +33,7 @@ namespace isc.onec.bridge {
 					Convert.ToInt64(value);
 				} catch (FormatException fe) {
 					string message = "Expected a 64-bit signed integer, received: \"" + value + "\" (length: " + value.Length + ")";
-					eventLog.WriteEntry(message, EventLogEntryType.Error);
+					EventLog.WriteEntry(message, EventLogEntryType.Error);
 					throw new ArgumentException(message, fe);
 				}
 			}

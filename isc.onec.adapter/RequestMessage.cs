@@ -8,7 +8,7 @@ namespace isc.onec.tcp {
 	public sealed class RequestMessage {
 		public static readonly RequestMessage Disconnect = new RequestMessage(Command.DISCONNECT,
 				-1,
-				"",
+				string.Empty,
 				new RequestType[0],
 				new string[0]);
 

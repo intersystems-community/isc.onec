@@ -6,9 +6,9 @@ using NLog;
 
 namespace isc.gateway.net {
 	public sealed class BridgeStarter : IDisposable {
-		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-		private static readonly EventLog eventLog = EventLogFactory.Instance;
+		private static readonly EventLog EventLog = EventLogFactory.Instance;
 
 		private readonly int port;
 
@@ -18,7 +18,7 @@ namespace isc.gateway.net {
 		/// The default server port number. Must be consistent with the value
 		/// of DEFAULT_PORT constant defined in install.cmd/uninstall.cmd batch scripts.
 		/// </summary>
-		private static int DefaultPort = 9101;
+		private static readonly int DefaultPort = 9101;
 
 		private TCPAsyncServer server;
 
@@ -36,21 +36,21 @@ namespace isc.gateway.net {
 		/// <see cref = "System.IDisposable.Dispose()"/>
 		/// </summary>
 		public void Dispose() {
-			logger.Debug("BridgeStarter exits");
+			Logger.Debug("BridgeStarter exits");
 			this.server.Dispose();
 		}
 
 		public void ProcessConnections() {
 			try {
-				//instantiate the SocketListener.
-				this.server = new TCPAsyncServer(this.port, keepAlive);
+				// Instantiate the SocketListener.
+				this.server = new TCPAsyncServer(this.port, this.keepAlive);
 
-				var message = "TCP Server started on port " + port + ". KeepAlive is " + keepAlive;
-				logger.Info(message);
-				eventLog.WriteEntry(message);
-			} catch(Exception ex) {
-				logger.Error("Unable to start TCP Server: "+ex.Message);
-				eventLog.WriteEntry(ex.ToStringWithIlOffsets(), EventLogEntryType.Error);
+				var message = "TCP Server started on port " + this.port + ". KeepAlive is " + this.keepAlive;
+				Logger.Info(message);
+				EventLog.WriteEntry(message);
+			} catch (Exception ex) {
+				Logger.Error("Unable to start TCP Server: " + ex.Message);
+				EventLog.WriteEntry(ex.ToStringWithIlOffsets(), EventLogEntryType.Error);
 			}
 		}
 	}

@@ -18,7 +18,7 @@ namespace isc.gateway.net {
 
 		private readonly ServiceInstaller serviceInstaller;
 
-		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 		public DotNetGatewayServiceInstaller() {
 			ServiceProcessInstaller serviceProcessInstaller = new ServiceProcessInstaller();
@@ -41,9 +41,9 @@ namespace isc.gateway.net {
 		public override void Install(IDictionary stateSaver) {
 			var portString = this.Context.Parameters[ParameterPort];
 			if (portString == null || portString.Length == 0) {
-				const string message = ErrorPortMissing;
-				WriteLine(message, ConsoleColor.Red);
-				throw new InstallException(message);
+				const string Message = ErrorPortMissing;
+				WriteLine(Message, ConsoleColor.Red);
+				throw new InstallException(Message);
 			}
 			try {
 				var port = Convert.ToInt32(portString);
@@ -69,9 +69,9 @@ namespace isc.gateway.net {
 		public override void Uninstall(IDictionary savedState) {
 			var portString = this.Context.Parameters[ParameterPort];
 			if (portString == null || portString.Length == 0) {
-				const string message = ErrorPortMissing;
-				WriteLine(message, ConsoleColor.Red);
-				throw new InstallException(message);
+				const string Message = ErrorPortMissing;
+				WriteLine(Message, ConsoleColor.Red);
+				throw new InstallException(Message);
 			}
 			try {
 				var port = Convert.ToInt32(portString);
@@ -87,24 +87,24 @@ namespace isc.gateway.net {
 
 		/// <summary>
 		/// </summary>
-		/// <param name="ServiceName"></param>
+		/// <param name="serviceName"></param>
 		/// <param name="args"></param>
-		private static void ChangeStartParameters(string ServiceName, string[] args) {
+		private static void ChangeStartParameters(string serviceName, string[] args) {
 			var key = Registry.LocalMachine
 					.OpenSubKey("System")
 					.OpenSubKey("CurrentControlSet")
 					.OpenSubKey("Services")
-					.OpenSubKey(ServiceName, true);
-			const string subKey = "ImagePath";
-			var imagePath = (string) key.GetValue(subKey);
+					.OpenSubKey(serviceName, true);
+			const string SubKey = "ImagePath";
+			var imagePath = (string) key.GetValue(SubKey);
 
 			/*-
 			 * Group #1 is the path to EXE.
 			 * Group #3 (if any) is the port number.
 			 * Group #5 (if any) is the keepalive flag.
 			 */
-			const string imagePathPattern = "^\\\"?([^\\\"]+\\.[Ee][Xx][Ee])\\\"?(\\s+(\\d+)(\\s+([Tt][Rr][Uu][Ee]|[Ff][Aa][Ll][Ss][Ee]))?)?\\s*$";
-			if (!Regex.IsMatch(imagePath, imagePathPattern)) {
+			const string ImagePathPattern = "^\\\"?([^\\\"]+\\.[Ee][Xx][Ee])\\\"?(\\s+(\\d+)(\\s+([Tt][Rr][Uu][Ee]|[Ff][Aa][Ll][Ss][Ee]))?)?\\s*$";
+			if (!Regex.IsMatch(imagePath, ImagePathPattern)) {
 				/*
 				 * Never.
 				 */
@@ -112,7 +112,7 @@ namespace isc.gateway.net {
 				return;
 			}
 
-			var match = Regex.Match(imagePath, imagePathPattern);
+			var match = Regex.Match(imagePath, ImagePathPattern);
 			if (match.Groups.Count < 2) {
 				/*
 				 * Never.
@@ -121,9 +121,9 @@ namespace isc.gateway.net {
 				return;
 			}
 
-			key.SetValue(subKey, '"' + match.Groups[1].Value + "\" " + String.Join(" ", args));
+			key.SetValue(SubKey, '"' + match.Groups[1].Value + "\" " + string.Join(" ", args));
 
-			logger.Warn("\\System\\CurrentControlSet\\Services\\" + ServiceName + "\\ImagePath is changed.\nOld value:" + imagePath + "\nNew value:" + key.GetValue(subKey));
+			Logger.Warn("\\System\\CurrentControlSet\\Services\\" + serviceName + "\\ImagePath is changed.\nOld value:" + imagePath + "\nNew value:" + key.GetValue(SubKey));
 		}
 
 		private static void WriteLine(string message, ConsoleColor color) {

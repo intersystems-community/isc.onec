@@ -1,90 +1,91 @@
-﻿using System;
-using System.Net.Sockets;
-using System.Threading;
-//for testing
-using NLog;
+﻿using System.Net.Sockets;
 using isc.onec.bridge;
+using NLog;
 
 namespace isc.onec.tcp.async {
 	internal sealed class DataHoldingUserToken {
-		internal Mediator theMediator;
-		internal DataHolder theDataHolder;
+		internal readonly Mediator Mediator;
 
-		internal readonly Int32 bufferOffsetReceive;
-		internal readonly Int32 permanentReceiveMessageOffset;
-		internal readonly Int32 bufferOffsetSend;
+		internal DataHolder DataHolder;
 
-		private readonly Int32 tokenId; //for testing only		
+		internal readonly int BufferOffsetReceive;
+		internal readonly int PermanentReceiveMessageOffset;
+		internal readonly int BufferOffsetSend;
 
-		internal Int32 lengthOfCurrentIncomingMessage;
+		private readonly int tokenId; // for testing only		
 
-		//receiveMessageOffset is used to mark the byte position where the message
-		//begins in the receive buffer. This value can sometimes be out of
-		//bounds for the data stream just received. But, if it is out of bounds, the 
-		//code will not access it.
-		internal Int32 receiveMessageOffset;
-		internal Byte[] byteArrayForPrefix;
-		internal readonly Int32 receivePrefixLength;
-		internal Int32 receivedPrefixBytesDoneCount = 0;
-		internal Int32 receivedMessageBytesDoneCount = 0;
-		//This variable will be needed to calculate the value of the
-		//receiveMessageOffset variable in one situation. Notice that the
-		//name is similar but the usage is different from the variable
-		//receiveSendToken.receivePrefixBytesDone.
-		internal Int32 recPrefixBytesDoneThisOp = 0;
+		internal int LengthOfCurrentIncomingMessage;
 
-		internal Int32 sendBytesRemainingCount;
-		internal readonly Int32 sendPrefixLength;
-		internal Byte[] dataToSend;
-		internal Int32 bytesSentAlreadyCount;
+		// receiveMessageOffset is used to mark the byte position where the message
+		// begins in the receive buffer. This value can sometimes be out of
+		// bounds for the data stream just received. But, if it is out of bounds, the 
+		// code will not access it.
+		internal int ReceiveMessageOffset;
+		internal byte[] ByteArrayForPrefix;
+		internal readonly int ReceivePrefixLength;
+		internal int ReceivedPrefixBytesDoneCount;
+		internal int ReceivedMessageBytesDoneCount;
 
-		//The session ID correlates with all the data sent in a connected session.
-		//It is different from the transmission ID in the DataHolder, which relates
-		//to one TCP message. A connected session could have many messages, if you
-		//set up your app to allow it.
-		//private Int32 sessionId;				
+		// This variable will be needed to calculate the value of the
+		// receiveMessageOffset variable in one situation. Notice that the
+		// name is similar but the usage is different from the variable
+		// receiveSendToken.receivePrefixBytesDone.
+		internal int RecPrefixBytesDoneThisOp;
+
+		internal int SendBytesRemainingCount;
+		internal readonly int SendPrefixLength;
+		internal byte[] DataToSend;
+		internal int BytesSentAlreadyCount;
+
+		// The session ID correlates with all the data sent in a connected session.
+		// It is different from the transmission ID in the DataHolder, which relates
+		// to one TCP message. A connected session could have many messages, if you
+		// set up your app to allow it.
+////		private Int32 sessionId;				
 
 		private Server server;
 
-		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-		internal DataHoldingUserToken(SocketAsyncEventArgs e, Int32 rOffset, Int32 sOffset, Int32 receivePrefixLength, Int32 sendPrefixLength, Int32 tokenId) {
+		internal DataHoldingUserToken(SocketAsyncEventArgs e, int receiveOffset, int sendOffset, int receivePrefixLength, int sendPrefixLength, int tokenId) {
 			this.tokenId = tokenId;
 
-			//Create a Mediator that has a reference to the SAEA object.
-			this.theMediator = new Mediator(e);
-			this.bufferOffsetReceive = rOffset;
-			this.bufferOffsetSend = sOffset;
-			this.receivePrefixLength = receivePrefixLength;
-			this.sendPrefixLength = sendPrefixLength;
-			this.receiveMessageOffset = rOffset + receivePrefixLength;
-			this.permanentReceiveMessageOffset = this.receiveMessageOffset;
+			// Create a Mediator that has a reference to the SAEA object.
+			this.Mediator = new Mediator(e);
+			this.BufferOffsetReceive = receiveOffset;
+			this.BufferOffsetSend = sendOffset;
+			this.ReceivePrefixLength = receivePrefixLength;
+			this.SendPrefixLength = sendPrefixLength;
+			this.ReceiveMessageOffset = receiveOffset + receivePrefixLength;
+			this.PermanentReceiveMessageOffset = this.ReceiveMessageOffset;
 		}
+
 		~DataHoldingUserToken() {
-			logger.Debug("DataHoldingUserToken destructor is called");
+			Logger.Debug("DataHoldingUserToken destructor is called");
 			this.server = null;
 		}
-		//Let's use an ID for this object during testing, just so we can see what
-		//is happening better if we want to.
-		internal Int32 TokenId {
+
+		// Let's use an ID for this object during testing, just so we can see what
+		// is happening better if we want to.
+		internal int TokenId {
 			get {
 				return this.tokenId;
 			}
 		}
 
 		internal void CreateNewDataHolder() {
-			theDataHolder = new DataHolder();
+			this.DataHolder = new DataHolder();
 		}
 
 		public void Reset() {
-			this.receivedPrefixBytesDoneCount = 0;
-			this.receivedMessageBytesDoneCount = 0;
-			this.recPrefixBytesDoneThisOp = 0;
-			this.receiveMessageOffset = this.permanentReceiveMessageOffset;
+			this.ReceivedPrefixBytesDoneCount = 0;
+			this.ReceivedMessageBytesDoneCount = 0;
+			this.RecPrefixBytesDoneThisOp = 0;
+			this.ReceiveMessageOffset = this.PermanentReceiveMessageOffset;
 		}
 
 		public void CleanUp() {
-			logger.Debug("Cleanup is called");
+			Logger.Debug("Cleanup is called");
 			if (this.server != null) {
 				this.server.Disconnect();
 				this.server = null;
@@ -98,9 +99,8 @@ namespace isc.onec.tcp.async {
 		}
 
 		internal void StartSession() {
-			logger.Debug("Creating new isc.onec.bridge.Server");
+			Logger.Debug("Creating new isc.onec.bridge.Server");
 			this.server = new Server();
-
 		}
 	}
 }

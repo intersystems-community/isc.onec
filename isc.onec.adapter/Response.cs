@@ -14,7 +14,7 @@ namespace isc.onec.bridge {
 
 		private Response() {
 			this.type = ResponseType.VOID;
-			this.value = "";
+			this.value = string.Empty;
 		}
 
 		internal Response(Exception e) {

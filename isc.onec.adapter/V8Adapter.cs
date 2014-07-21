@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using NLog;
-using System.Diagnostics;
 
 namespace isc.onec.bridge {
 	internal sealed class V8Adapter {
@@ -13,18 +13,18 @@ namespace isc.onec.bridge {
 		/// XXX: which mutable state is guarded by this lock?
 		/// XXX: why R/W lock? this.connector is presumably thread-confined. 
 		/// </summary>
-		private static readonly ReaderWriterLock connectorLock = new ReaderWriterLock();
+		private static readonly ReaderWriterLock ConnectorLock = new ReaderWriterLock();
 
 		private enum V8Version {
 			V80,
 			V81,
 			V82,
-		};
+		}
 
-		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 		internal V8Adapter() {
-			logger.Debug("V8Adapter is created");
+			Logger.Debug("V8Adapter is created");
 		}
 
 		/// <summary>
@@ -37,7 +37,7 @@ namespace isc.onec.bridge {
 			try {
 				return target.GetType().InvokeMember(property, BindingFlags.GetProperty | BindingFlags.Public, null, target, null);
 			} catch (TargetInvocationException e) {
-				logger.DebugException("Get", e);
+				Logger.DebugException("Get", e);
 				throw e.InnerException;
 			}
 		}
@@ -50,21 +50,21 @@ namespace isc.onec.bridge {
 		/// <param name="value"></param>
 		internal void Set(object target, string property, object value) {
 			try {
-//				target.comObject.GetType().InvokeMember(propertyName, BindingFlags.PutDispProperty | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly, null, target.comObject, new object[] { propertyValue });
+////				target.comObject.GetType().InvokeMember(propertyName, BindingFlags.PutDispProperty | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly, null, target.comObject, new object[] { propertyValue });
 				target.GetType().InvokeMember(property, BindingFlags.SetProperty | BindingFlags.Public, null, target, new object[] { value });
 			} catch (TargetInvocationException e) {
-				logger.DebugException("Set", e);
+				Logger.DebugException("Set", e);
 				throw e.InnerException;
 			}
 		}
 
 		internal object Invoke(object target, string method, object[] args) {
 			try {
-				//obj2 = target.comObject.GetType().InvokeMember(methodName, BindingFlags.InvokeMethod, null, target.comObject, methodParams, modifiers, null, null);
+////				obj2 = target.comObject.GetType().InvokeMember(methodName, BindingFlags.InvokeMethod, null, target.comObject, methodParams, modifiers, null, null);
 				// | BindingFlags.Public
-				return target.GetType().InvokeMember(method, BindingFlags.InvokeMethod, null, target, args,null,null,null);
+				return target.GetType().InvokeMember(method, BindingFlags.InvokeMethod, null, target, args, null, null, null);
 			} catch (TargetInvocationException exception) {
-				logger.DebugException("invoke", exception);
+				Logger.DebugException("invoke", exception);
 				throw exception.InnerException;
 			}
 		}
@@ -77,18 +77,18 @@ namespace isc.onec.bridge {
 				V8Version version = GetVersion(url);
 				/// XXX: why particularly read lock here?
 				/// What mutable state are we trying to read after a load barrier (lfence)?
-				connectorLock.AcquireReaderLock(-1);
+				ConnectorLock.AcquireReaderLock(-1);
 				this.connector = CreateConnector(version);
-				logger.Debug("New V8.ComConnector is created");
+				Logger.Debug("New V8.ComConnector is created");
 				object context = this.Invoke(this.connector, "Connect", new object[] { url });
 
-				logger.Debug("Connection is established");
+				Logger.Debug("Connection is established");
 				return context;
 			} catch (Exception) {
 				this.Disconnect();
 				throw;
 			} finally {
-				connectorLock.ReleaseReaderLock();
+				ConnectorLock.ReleaseReaderLock();
 			}
 		}
 
@@ -103,7 +103,7 @@ namespace isc.onec.bridge {
 			GC.Collect();
 			GC.WaitForPendingFinalizers();
 
-			logger.Debug("Disconnection is done.");
+			Logger.Debug("Disconnection is done.");
 		}
 
 		private static object CreateConnector(V8Version version) {
@@ -127,7 +127,7 @@ namespace isc.onec.bridge {
 
 		internal void Free(ref object rcw) {
 			if (rcw != null) {
-				logger.Debug("Releasing object " + ((MarshalByRefObject)rcw).ToString());
+				Logger.Debug("Releasing object " + ((MarshalByRefObject)rcw).ToString());
 				Marshal.ReleaseComObject(rcw);
 				Marshal.FinalReleaseComObject(rcw);
 

@@ -18,13 +18,13 @@ namespace isc.gateway.net {
 		/// Arguments of the Windows service which are passed to BridgeStarter intance.
 		/// Currently, the TCP port number and, optionally, the KeepAlive value. 
 		/// </summary>
-		private String[] args;
+		private string[] args;
 
 		private BackgroundWorker backgroundWorker;
 
 		private BridgeStarter bridgeStarter;
 
-		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 		private DotNetGatewayService() {
 			this.EventLog.Log = DefaultLogName;
@@ -54,18 +54,18 @@ namespace isc.gateway.net {
 			this.CanShutdown = true;
 			this.CanStop = true;
 
-			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(unhandledExceptionHandler);
+			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(this.unhandledExceptionHandler);
 		}
 
-		private DotNetGatewayService(String[] args): this() {
+		private DotNetGatewayService(string[] args) : this() {
 			this.args = args;
 		}
 	 
-		public static void Main(String[] args) {
+		public static void Main(string[] args) {
 			if (Environment.UserInteractive) {
 				Console.WriteLine(typeof(DotNetGatewayService) + " should be run as service");
 				return;
-			}	  
+			}
 			ServiceBase.Run(new DotNetGatewayService(args));
 		}
 
@@ -77,7 +77,7 @@ namespace isc.gateway.net {
 		}
 
 		protected override void OnStart(string[] args) {
-			//It has really no sense on normal server, but RG has troubles with virtual machine start time
+			// It has really no sense on normal server, but RG has troubles with virtual machine start time
 			this.RequestAdditionalTime(120000);
 
 			if (args.Length != 0) {
@@ -94,7 +94,7 @@ namespace isc.gateway.net {
 
 			this.backgroundWorker.WorkerSupportsCancellation = true;
 			this.backgroundWorker.DoWork += new DoWorkEventHandler(bw_DoWork);
-			this.backgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
+			this.backgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(this.bw_RunWorkerCompleted);
 
 			this.backgroundWorker.RunWorkerAsync(this.bridgeStarter);
 		}
@@ -102,53 +102,53 @@ namespace isc.gateway.net {
 		private void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
 			if (e.Error != null) {
 				this.EventLog.WriteEntry(e.Error.ToStringWithIlOffsets(), EventLogEntryType.Error);
-				logger.ErrorException("bw_RunWorkerCompleted: Exception happened, stopping ... ", e.Error);
+				Logger.ErrorException("bw_RunWorkerCompleted: Exception happened, stopping ... ", e.Error);
 				this.ExitCode = 1;
 				this.Stop();
 			}
 		}
 
 		private static void bw_DoWork(object sender, DoWorkEventArgs e) {
-			((BridgeStarter) (e.Argument)).ProcessConnections();
+			((BridgeStarter) e.Argument).ProcessConnections();
 		}
 
 		private void unhandledExceptionHandler(object sender, UnhandledExceptionEventArgs ue) {
 			Exception e = (Exception)ue.ExceptionObject;
 			this.EventLog.WriteEntry(e.ToStringWithIlOffsets(), EventLogEntryType.Error);
-			logger.ErrorException("Stopping. Unhandled exception happened. ",e);
+			Logger.ErrorException("Stopping. Unhandled exception happened. ", e);
 			this.ExitCode = 1;
 			this.Stop();
 		}
 
 		protected override void OnStop() {
-			//Of course it would be better to close all sockets immedie
+			// Of course it would be better to close all sockets immedie
 			this.RequestAdditionalTime(120000);
-			logger.Info("Cache Bridge Service is stopping.");
+			Logger.Info("Cache Bridge Service is stopping.");
 			this.bridgeStarter.Dispose();
 			this.backgroundWorker.CancelAsync();
 			this.backgroundWorker.Dispose();
 		}
 
 		protected override void OnShutdown() {
-			logger.Info("Cache Bridge Service was shutdowned.");
-			this.EventLog.WriteEntry("Cache Bridge Service was shutdowned.", EventLogEntryType.Information);
+			Logger.Info("Cache Bridge Service was shutdowned.");
+			this.EventLog.WriteEntry("Cache Bridge Service was shut down.", EventLogEntryType.Information);
 			base.OnShutdown();
 		}
 
 		protected override void OnCustomCommand(int command) {
-			logger.Info("Cache Bridge Service was custom commanded."+command);
-			this.EventLog.WriteEntry("Cache Bridge Service custom commanded."+command, EventLogEntryType.Information);
+			Logger.Info("Cache Bridge Service was custom commanded." + command);
+			this.EventLog.WriteEntry("Cache Bridge Service custom commanded." + command, EventLogEntryType.Information);
 			base.OnCustomCommand(command);
 		}
 
 		protected override void OnContinue() {
-			logger.Info("Cache Bridge Service was continued.");
+			Logger.Info("Cache Bridge Service was continued.");
 			this.EventLog.WriteEntry("Cache Bridge Service was continued.", EventLogEntryType.Information);
 			base.OnContinue();
 		}
 
 		protected override void OnPause() {
-			logger.Info("Cache Bridge Service was paused.");
+			Logger.Info("Cache Bridge Service was paused.");
 			this.EventLog.WriteEntry("Cache Bridge Service was paused", EventLogEntryType.Information);
 			base.OnPause();
 		}

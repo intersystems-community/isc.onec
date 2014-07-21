@@ -8,14 +8,12 @@ using System.Threading;
 namespace isc.onec.tcp.async
 {
 	internal sealed class IncomingDataPreparer {
-		//object that will be used to lock the listOfDataHolders
+		// object that will be used to lock the listOfDataHolders
 		private object lockerForList = new object();
 		private DataHolder theDataHolder;
 		private SocketAsyncEventArgs theSaeaObject;
 
-		public IncomingDataPreparer(SocketAsyncEventArgs e)
-		{
-			
+		public IncomingDataPreparer(SocketAsyncEventArgs e) {
 			this.theSaeaObject = e;
 		}
 				
@@ -28,13 +26,10 @@ namespace isc.onec.tcp.async
 		{
 			DataHoldingUserToken receiveToken = (DataHoldingUserToken)theSaeaObject.UserToken;
 			
-			theDataHolder = incomingDataHolder;
-			theDataHolder.remoteEndpoint = this.GetRemoteEndpoint();
-			
-			
-			return theDataHolder;
-		}
+			this.theDataHolder = incomingDataHolder;
+			this.theDataHolder.RemoteEndpoint = this.GetRemoteEndpoint();
 
-			  
+			return this.theDataHolder;
+		}
 	}
 }

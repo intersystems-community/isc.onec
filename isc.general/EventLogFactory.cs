@@ -9,7 +9,7 @@ namespace isc.general {
 
 		private static volatile EventLog instance;
 
-		private static object syncRoot = new Object();
+		private static object syncRoot = new object();
 
 		private EventLogFactory() {
 			// empty
@@ -50,7 +50,7 @@ namespace isc.general {
 		}
 
 		private static EventLog NewEventLog(string source) {
-			const string logName = DefaultLogName;
+			const string LogName = DefaultLogName;
 
 			EventLog eventLog = GetEventLog();
 			eventLog.Source = source;
@@ -59,7 +59,7 @@ namespace isc.general {
 			 * Register a new source for this log if the source is missing.
 			 */
 			if (!EventLog.SourceExists(source)) {
-				EventLog.CreateEventSource(source, logName);
+				EventLog.CreateEventSource(source, LogName);
 			}
 
 			return eventLog;
