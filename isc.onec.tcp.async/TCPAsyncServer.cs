@@ -87,7 +87,7 @@ namespace isc.onec.tcp.async {
 			// receive and send, instead of sharing the buffer space, like the Microsoft
 			// example does.
 			this.theBufferManager = new BufferManager(this.socketListenerSettings.BufferSize * this.socketListenerSettings.NumberOfSaeaForRecSend * this.socketListenerSettings.OpsToPreAllocate,
-			this.socketListenerSettings.BufferSize * this.socketListenerSettings.OpsToPreAllocate);
+					this.socketListenerSettings.BufferSize * this.socketListenerSettings.OpsToPreAllocate);
 
 			this.sendReceivePool = new SocketAsyncEventArgsPool(this.socketListenerSettings.NumberOfSaeaForRecSend);
 			this.acceptPool = new SocketAsyncEventArgsPool(this.socketListenerSettings.MaxAcceptOps);

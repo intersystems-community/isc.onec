@@ -6,7 +6,7 @@ namespace isc.onec.tcp.async {
 	internal sealed class AcceptOpUserToken {
 		// The only reason to use this UserToken in our app is to give it an identifier,
 		// so that you can see it in the program flow. Otherwise, you would not need it.
-		private int tokenId; // for testing only
+		private readonly int tokenId; // for testing only
 
 		public AcceptOpUserToken(int tokenId) {
 			this.tokenId = tokenId;
