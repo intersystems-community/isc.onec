@@ -18,7 +18,7 @@ namespace isc.gateway.net {
 		/// The default server port number. Must be consistent with the value
 		/// of DEFAULT_PORT constant defined in install.cmd/uninstall.cmd batch scripts.
 		/// </summary>
-		private static readonly int DefaultPort = 9101;
+		private const int DefaultPort = 9101;
 
 		private TCPAsyncServer server;
 

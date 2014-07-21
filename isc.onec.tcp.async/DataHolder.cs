@@ -16,9 +16,6 @@ namespace isc.onec.tcp.async
 		// DataHolder has this byte array to which you can copy the data.
 		internal byte[] DataMessageReceived;
 
-		// for testing. With a packet analyzer this can help you see specific connections.
-		internal EndPoint RemoteEndpoint;
-
 		internal bool IsError;
 	}
 }

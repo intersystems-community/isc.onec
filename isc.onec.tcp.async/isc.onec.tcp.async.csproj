@@ -67,7 +67,6 @@
     <Compile Include="BufferManager.cs" />
     <Compile Include="DataHolder.cs" />
     <Compile Include="DataHoldingUserToken.cs" />
-    <Compile Include="IncomingDataPreparer.cs" />
     <Compile Include="Mediator.cs" />
     <Compile Include="MessageHandler.cs" />
     <Compile Include="OutgoingDataPreparer.cs" />
