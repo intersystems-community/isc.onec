@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Threading;
 using NLog;
 
 namespace isc.onec.bridge {
@@ -13,11 +12,7 @@ namespace isc.onec.bridge {
 	internal sealed class V8Adapter {
 		private object connector;
 
-		/// <summary>
-		/// XXX: which mutable state is guarded by this lock?
-		/// XXX: why R/W lock? this.connector is presumably thread-confined. 
-		/// </summary>
-		private static readonly ReaderWriterLock ConnectorLock = new ReaderWriterLock();
+		private static readonly object ConnectorLock = new object();
 
 		private enum V8Version {
 			V80,
@@ -77,20 +72,17 @@ namespace isc.onec.bridge {
 			try {
 				V8Version version = GetVersion(url);
 
-				// XXX: why particularly read lock here?
-				// XXX: What mutable state are we trying to read after a load barrier (lfence)?
-				ConnectorLock.AcquireReaderLock(-1);
-				this.connector = CreateConnector(version);
-				Logger.Debug("New V8.ComConnector is created");
-				object context = Invoke(this.connector, "Connect", new object[] { url });
+				lock (ConnectorLock) {
+					this.connector = CreateConnector(version);
+					Logger.Debug("New V8.ComConnector is created");
+					object context = Invoke(this.connector, "Connect", new object[] { url });
 
-				Logger.Debug("Connection is established");
-				return context;
+					Logger.Debug("Connection is established");
+					return context;
+				}
 			} catch (Exception) {
 				this.Disconnect();
 				throw;
-			} finally {
-				ConnectorLock.ReleaseReaderLock();
 			}
 		}
 
