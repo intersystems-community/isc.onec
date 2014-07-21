@@ -71,7 +71,7 @@ namespace isc.onec.bridge {
 				throw new InvalidOperationException("Attempt to connect while connected; old client: " + this.client + "; new client: " + client);
 			}
 
-			/// XXX: attempt to use a state shared among multiple instances w/o proper locking.
+			// XXX: attempt to use a state shared among multiple instances w/o proper locking.
 			if (client != null) {
 				if (Clients.ContainsKey(client)) {
 					throw new InvalidOperationException("Attempt to create more than one connection to 1C from the same job. Client #" + client);
