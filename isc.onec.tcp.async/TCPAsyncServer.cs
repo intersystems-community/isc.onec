@@ -48,9 +48,18 @@ namespace isc.onec.tcp.async {
 
 		private bool keepAlive;
 
+		// just for assigning an ID so we can watch our objects while testing.
+		private int nextTokenId;
+
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 		private static readonly EventLog EventLog = EventLogFactory.Instance;
+
+		private int NextTokenId {
+			get {
+				return Interlocked.Increment(ref this.nextTokenId);
+			}
+		}
 
 		private static SocketListenerSettings getSettings(int port) {
 			try {
@@ -146,7 +155,7 @@ namespace isc.onec.tcp.async {
 					EventLog.WriteEntry("TCPAsyncServer.Init(): BufferManager.SetBuffer(...) failed.", EventLogEntryType.Error);
 				}
 
-				int tokenId = this.sendReceivePool.NextTokenId + 1000000;
+				int tokenId = this.NextTokenId + 1000000;
 
 				// Attach the SocketAsyncEventArgs object
 				// to its event handler. Since this SocketAsyncEventArgs object is
@@ -196,7 +205,7 @@ namespace isc.onec.tcp.async {
 			// AcceptEventArg_Completed object when the accept op completes.
 			acceptEventArg.Completed += new EventHandler<SocketAsyncEventArgs>(this.AcceptEventArg_Completed);
 
-			acceptEventArg.UserToken = new AcceptOpUserToken(this.acceptPool.NextTokenId + 10000);
+			acceptEventArg.UserToken = new AcceptOpUserToken(this.NextTokenId + 10000);
 
 			return acceptEventArg;
 
