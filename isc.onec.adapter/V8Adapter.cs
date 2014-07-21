@@ -33,7 +33,7 @@ namespace isc.onec.bridge {
 		/// <param name="target"></param>
 		/// <param name="property"></param>
 		/// <returns></returns>
-		internal object Get(object target, string property) {
+		internal static object Get(object target, string property) {
 			try {
 				return target.GetType().InvokeMember(property, BindingFlags.GetProperty | BindingFlags.Public, null, target, null);
 			} catch (TargetInvocationException e) {
@@ -48,7 +48,7 @@ namespace isc.onec.bridge {
 		/// <param name="target"></param>
 		/// <param name="property"></param>
 		/// <param name="value"></param>
-		internal void Set(object target, string property, object value) {
+		internal static void Set(object target, string property, object value) {
 			try {
 ////				target.comObject.GetType().InvokeMember(propertyName, BindingFlags.PutDispProperty | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly, null, target.comObject, new object[] { propertyValue });
 				target.GetType().InvokeMember(property, BindingFlags.SetProperty | BindingFlags.Public, null, target, new object[] { value });
@@ -58,7 +58,7 @@ namespace isc.onec.bridge {
 			}
 		}
 
-		internal object Invoke(object target, string method, object[] args) {
+		internal static object Invoke(object target, string method, object[] args) {
 			try {
 ////				obj2 = target.comObject.GetType().InvokeMember(methodName, BindingFlags.InvokeMethod, null, target.comObject, methodParams, modifiers, null, null);
 				// | BindingFlags.Public
@@ -81,7 +81,7 @@ namespace isc.onec.bridge {
 				ConnectorLock.AcquireReaderLock(-1);
 				this.connector = CreateConnector(version);
 				Logger.Debug("New V8.ComConnector is created");
-				object context = this.Invoke(this.connector, "Connect", new object[] { url });
+				object context = Invoke(this.connector, "Connect", new object[] { url });
 
 				Logger.Debug("Connection is established");
 				return context;
@@ -97,7 +97,7 @@ namespace isc.onec.bridge {
 		/// XXX: Accesses mutable state w/o synchronization
 		/// </summary>
 		internal void Disconnect() {
-			this.Free(ref this.connector);
+			Free(ref this.connector);
 			Debug.Assert(this.connector == null, "this.connector != null");
 
 			// XXX: Is this really necessary?
@@ -126,7 +126,7 @@ namespace isc.onec.bridge {
 			return Activator.CreateInstance(typeFromProgID);
 		}
 
-		internal void Free(ref object rcw) {
+		internal static void Free(ref object rcw) {
 			if (rcw != null) {
 				Logger.Debug("Releasing object " + ((MarshalByRefObject)rcw).ToString());
 				Marshal.ReleaseComObject(rcw);

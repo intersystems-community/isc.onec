@@ -25,7 +25,6 @@ namespace isc.onec.tcp.async
 		internal BufferManager(int bufferBlockLength, int totalBufferBytesInEachSaeaObject)
 		{
 			this.bufferBlockLength = bufferBlockLength;
-			this.currentIndex = 0;
 			this.bufferBytesAllocatedForEachSaea = totalBufferBytesInEachSaeaObject;
 			this.freeIndexPool = new Stack<int>();
 		}

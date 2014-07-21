@@ -5,7 +5,7 @@ using isc.general;
 using NLog;
 
 namespace isc.onec.tcp.async {
-	internal sealed class MessageHandler {
+	internal static class MessageHandler {
 		private static readonly EventLog EventLog = EventLogFactory.Instance;
 
 		/// <summary>
@@ -15,7 +15,7 @@ namespace isc.onec.tcp.async {
 		/// <param name="receiveSendToken"></param>
 		/// <param name="remainingBytesToProcess"></param>
 		/// <returns>whether incoming TCP message is ready</returns>
-		public bool HandleMessage(byte[] source,
+		internal static bool HandleMessage(byte[] source,
 				DataHoldingUserToken receiveSendToken,
 				int remainingBytesToProcess) {
 			// Create the array where we'll store the complete message, 

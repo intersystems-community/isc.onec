@@ -40,9 +40,6 @@ namespace isc.onec.tcp.async {
 
 		private SocketListenerSettings socketListenerSettings;
 
-		private PrefixHandler prefixHandler;
-		private MessageHandler messageHandler;
-
 		// pool of reusable SocketAsyncEventArgs objects for accept operations
 		private readonly SocketAsyncEventArgsPool acceptPool;
 
@@ -85,9 +82,7 @@ namespace isc.onec.tcp.async {
 			this.keepAlive = keepAlive;
 
 			this.socketListenerSettings = getSettings(port);
-			this.prefixHandler = new PrefixHandler();
-			this.messageHandler = new MessageHandler();
-
+	
 			// Allocate memory for buffers. We are using a separate buffer space for
 			// receive and send, instead of sharing the buffer space, like the Microsoft
 			// example does.
@@ -449,7 +444,6 @@ namespace isc.onec.tcp.async {
 			// Any code that you put in this method will NOT be called if
 			// the operation completes synchronously, which will probably happen when
 			// there is some kind of socket error.
-			DataHoldingUserToken receiveSendToken = (DataHoldingUserToken) e.UserToken;
 
 			// determine which type of operation just completed and call the associated handler
 			switch (e.LastOperation) {
@@ -505,7 +499,7 @@ namespace isc.onec.tcp.async {
 			// If we have not got all of the prefix already,
 			// then we need to work on it here.
 			if (receiveSendToken.ReceivedPrefixBytesDoneCount < this.socketListenerSettings.ReceivePrefixLength) {
-				remainingBytesToProcess = this.prefixHandler.HandlePrefix(receiveSendEventArgs, receiveSendToken, remainingBytesToProcess);
+				remainingBytesToProcess = PrefixHandler.HandlePrefix(receiveSendEventArgs, receiveSendToken, remainingBytesToProcess);
 
 				if (remainingBytesToProcess == 0) {
 					// We need to do another receive op, since we do not have
@@ -522,7 +516,7 @@ namespace isc.onec.tcp.async {
 			// the first byte after the prefix.
 			bool incomingTcpMessageIsReady = false;
 			try {
-				incomingTcpMessageIsReady = this.messageHandler.HandleMessage(receiveSendEventArgs.Buffer, receiveSendToken, remainingBytesToProcess);
+				incomingTcpMessageIsReady = MessageHandler.HandleMessage(receiveSendEventArgs.Buffer, receiveSendToken, remainingBytesToProcess);
 			} catch (Exception e) {
 				try {
 					Logger.ErrorException("Weird error:", e);
@@ -745,7 +739,8 @@ namespace isc.onec.tcp.async {
 			BitConverter.GetBytes((uint) interval).CopyTo(inOptionValues, Marshal.SizeOf(dummy) * 2);
 
 			// call WSAIoctl via IOControl
-			int ignore = s.IOControl(IOControlCode.KeepAliveValues, inOptionValues, null);
+			// Return value ignored.
+			s.IOControl(IOControlCode.KeepAliveValues, inOptionValues, null);
 		}
 
 		/// <summary>
@@ -754,6 +749,7 @@ namespace isc.onec.tcp.async {
 		public void Dispose() {
 			this.listenSocket.Dispose();
 			this.theMaxConnectionsEnforcer.Dispose();
+			GC.SuppressFinalize(this);
 		}
 	}
 }

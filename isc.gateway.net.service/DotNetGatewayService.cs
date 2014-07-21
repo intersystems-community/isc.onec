@@ -73,6 +73,7 @@ namespace isc.gateway.net {
 			base.Dispose(disposing);
 			if (disposing) {
 				this.bridgeStarter.Dispose();
+				this.backgroundWorker.Dispose();
 			}
 		}
 

@@ -91,7 +91,7 @@ namespace isc.onec.bridge {
 
 			object rcw = this.Find(oid);
 			object argument = this.Marshal(value);
-			this.adapter.Set(rcw, property, argument);
+			V8Adapter.Set(rcw, property, argument);
 		}
 
 		internal Response Get(int oid, string property) {
@@ -100,7 +100,7 @@ namespace isc.onec.bridge {
 			}
 
 			object rcw = this.Find(oid);
-			object returnValue = this.adapter.Get(rcw, property);
+			object returnValue = V8Adapter.Get(rcw, property);
 
 			return this.Unmarshal(returnValue);
 		}
@@ -115,7 +115,7 @@ namespace isc.onec.bridge {
 			for (int i = 0; i < args.Length; i++) {
 				arguments[i] = this.Marshal(args[i]);
 			}
-			object returnValue = this.adapter.Invoke(rcw, method, arguments);
+			object returnValue = V8Adapter.Invoke(rcw, method, arguments);
 
 			return this.Unmarshal(returnValue);
 		}
@@ -130,7 +130,7 @@ namespace isc.onec.bridge {
 			object rcw = this.Find(oid);
 
 			this.repository.Remove(oid);
-			this.adapter.Free(ref rcw);
+			V8Adapter.Free(ref rcw);
 		}
 
 		internal void Disconnect() {
@@ -143,10 +143,10 @@ namespace isc.onec.bridge {
 			DumpClients();
 
 			this.repository.CleanAll(delegate(object rcw) {
-				this.adapter.Free(ref rcw);
+				V8Adapter.Free(ref rcw);
 			});
 
-			this.adapter.Free(ref this.context);
+			V8Adapter.Free(ref this.context);
 			this.adapter.Disconnect();
 
 			if (this.client != null) {

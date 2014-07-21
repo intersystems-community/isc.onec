@@ -4,8 +4,8 @@ using System.Net.Sockets;
 using System.Text;
 
 namespace isc.onec.tcp.async {
-	internal sealed class PrefixHandler {
-		public int HandlePrefix(SocketAsyncEventArgs e, DataHoldingUserToken receiveSendToken, int remainingBytesToProcess) {			
+	internal static class PrefixHandler {
+		internal static int HandlePrefix(SocketAsyncEventArgs e, DataHoldingUserToken receiveSendToken, int remainingBytesToProcess) {			
 			// receivedPrefixBytesDoneCount tells us how many prefix bytes were
 			// processed during previous receive ops which contained data for 
 			// this message. Usually there will NOT have been any previous 

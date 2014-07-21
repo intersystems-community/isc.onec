@@ -49,7 +49,7 @@ namespace isc.onec.tcp.async
 		{
 			if (item == null) 
 			{ 
-				throw new ArgumentNullException("Items added to a SocketAsyncEventArgsPool cannot be null"); 
+				throw new ArgumentNullException("item"); 
 			}
 			lock (this.pool)
 			{

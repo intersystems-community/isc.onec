@@ -27,7 +27,7 @@ namespace isc.general {
 
 		public static void Initialize(ServiceBase service) {
 			if (service == null) {
-				throw new ArgumentNullException();
+				throw new ArgumentNullException("service");
 			}
 
 			IfNotInitialized(() => {
