@@ -522,7 +522,7 @@ namespace isc.onec.tcp.async {
 					Logger.ErrorException("Weird error:", e);
 					EventLog.WriteEntry(e.ToStringWithIlOffsets(), EventLogEntryType.Error);
 					receiveSendToken.DataHolder.IsError = true;
-					receiveSendToken.Mediator.HandleData(receiveSendToken.DataHolder);
+					receiveSendToken.Mediator.DataHolder = receiveSendToken.DataHolder;
 
 					receiveSendToken.CreateNewDataHolder();
 
@@ -543,7 +543,7 @@ namespace isc.onec.tcp.async {
 				// Pass the DataHolder object to the Mediator here. The data in
 				// this DataHolder can be used for all kinds of things that an
 				// intelligent and creative person like you might think of.
-				receiveSendToken.Mediator.HandleData(receiveSendToken.DataHolder);
+				receiveSendToken.Mediator.DataHolder = receiveSendToken.DataHolder;
 
 				// Create a new DataHolder for next message.
 				receiveSendToken.CreateNewDataHolder();

@@ -6,22 +6,13 @@ using isc.onec.bridge;
 using NLog;
 
 namespace isc.onec.tcp.async {
-	internal sealed class OutgoingDataPreparer {
-		private DataHolder theDataHolder;
-
+	internal static class OutgoingDataPreparer {
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 		private static readonly EventLog EventLog = EventLogFactory.Instance;
 
-		public OutgoingDataPreparer()
-		{			
-		}
-
-		internal void PrepareOutgoingData(SocketAsyncEventArgs e, DataHolder handledDataHolder)
-		{
+		internal static void PrepareOutgoingData(SocketAsyncEventArgs e, DataHolder dataHolder) {
 			DataHoldingUserToken theUserToken = (DataHoldingUserToken)e.UserToken;
-
-			this.theDataHolder = handledDataHolder;
 
 			// In this example code, we will send back the receivedTransMissionId,
 			// followed by the
@@ -40,13 +31,13 @@ namespace isc.onec.tcp.async {
 			// Determine the length of all the data that we will send back.
 ////			Int32 lengthOfCurrentOutgoingMessage = idByteArray.Length + theDataHolder.dataMessageReceived.Length;
 			byte[] reply;
-			if (this.theDataHolder.IsError)
+			if (dataHolder.IsError)
 			{
 				reply = SendError(theUserToken.Server);
 			}
 			else
 			{
-				reply = process(theUserToken.Server, this.theDataHolder.DataMessageReceived);
+				reply = process(theUserToken.Server, dataHolder.DataMessageReceived);
 			}
 			int lengthOfCurrentOutgoingMessage = reply.Length;
 

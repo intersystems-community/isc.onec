@@ -5,7 +5,6 @@ using System.Text;
 
 namespace isc.onec.tcp.async {
 	internal sealed class Mediator {
-		private readonly OutgoingDataPreparer outgoingDataPreparer;
 		private DataHolder dataHolder;
 		private readonly SocketAsyncEventArgs socketAsyncEventArgs;
 
@@ -15,15 +14,16 @@ namespace isc.onec.tcp.async {
 		/// <param name="socketAsyncEventArgs"></param>
 		internal Mediator(SocketAsyncEventArgs socketAsyncEventArgs) {
 			this.socketAsyncEventArgs = socketAsyncEventArgs;
-			this.outgoingDataPreparer = new OutgoingDataPreparer();			
 		}
 
-		internal void HandleData(DataHolder dataHolder) {
-			this.dataHolder = dataHolder;
+		internal DataHolder DataHolder {
+			set {
+				this.dataHolder = value;
+			}
 		}
-		
+
 		internal void PrepareOutgoingData() {
-			this.outgoingDataPreparer.PrepareOutgoingData(this.socketAsyncEventArgs, this.dataHolder);			
+			OutgoingDataPreparer.PrepareOutgoingData(this.socketAsyncEventArgs, this.dataHolder);			
 		}
 
 		internal SocketAsyncEventArgs SocketAsyncEventArgs {
