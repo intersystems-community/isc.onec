@@ -37,27 +37,21 @@ namespace isc.onec.tcp.async {
 		internal byte[] DataToSend;
 		internal int BytesSentAlreadyCount;
 
-		// The session ID correlates with all the data sent in a connected session.
-		// It is different from the transmission ID in the DataHolder, which relates
-		// to one TCP message. A connected session could have many messages, if you
-		// set up your app to allow it.
-////		private Int32 sessionId;				
-
 		private Server server;
 
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-		internal DataHoldingUserToken(SocketAsyncEventArgs e, int receiveOffset, int sendOffset, int receivePrefixLength, int sendPrefixLength, int tokenId) {
+		internal DataHoldingUserToken(SocketAsyncEventArgs sendReceiveArgs,
+				SocketListenerSettings socketListenerSettings,
+				int tokenId) {
+			this.Mediator = new Mediator(sendReceiveArgs);
+			this.BufferOffsetReceive = sendReceiveArgs.Offset;
+			this.BufferOffsetSend = sendReceiveArgs.Offset + socketListenerSettings.BufferSize;
+			this.ReceivePrefixLength = socketListenerSettings.ReceivePrefixLength;
+			this.SendPrefixLength = socketListenerSettings.SendPrefixLength;
+			this.ReceiveMessageOffset = sendReceiveArgs.Offset + socketListenerSettings.ReceivePrefixLength;
+			this.PermanentReceiveMessageOffset = sendReceiveArgs.Offset + socketListenerSettings.ReceivePrefixLength;
 			this.tokenId = tokenId;
-
-			// Create a Mediator that has a reference to the SAEA object.
-			this.Mediator = new Mediator(e);
-			this.BufferOffsetReceive = receiveOffset;
-			this.BufferOffsetSend = sendOffset;
-			this.ReceivePrefixLength = receivePrefixLength;
-			this.SendPrefixLength = sendPrefixLength;
-			this.ReceiveMessageOffset = receiveOffset + receivePrefixLength;
-			this.PermanentReceiveMessageOffset = this.ReceiveMessageOffset;
 		}
 
 		~DataHoldingUserToken() {

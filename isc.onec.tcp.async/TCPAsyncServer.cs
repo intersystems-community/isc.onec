@@ -164,13 +164,9 @@ namespace isc.onec.tcp.async {
 				sendReceiveArgs.Completed += new EventHandler<SocketAsyncEventArgs>(this.IO_Completed);
 
 				// We can store data in the UserToken property of SAEA object.
-				// WTF? Three constructor parameters (sendReceiveArgs, socketListenerSettings, tokenId) is enough here.
 				DataHoldingUserToken theTempReceiveSendUserToken = new DataHoldingUserToken(sendReceiveArgs,
-					sendReceiveArgs.Offset,
-					sendReceiveArgs.Offset + this.socketListenerSettings.BufferSize,
-					this.socketListenerSettings.ReceivePrefixLength,
-					this.socketListenerSettings.SendPrefixLength,
-					tokenId);
+						this.socketListenerSettings,
+						tokenId);
 
 				// We'll have an object that we call DataHolder, that we can Remove from
 				// the UserToken when we are finished with it. So, we can hang on to the
