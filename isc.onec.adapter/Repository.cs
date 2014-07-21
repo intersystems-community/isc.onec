@@ -3,19 +3,20 @@ using System.Collections.Generic;
 using NLog;
 
 namespace isc.onec.bridge {
+	/// <summary>
+	/// Synchronization policy: thread confined.
+	/// Each client connected maintains its own instance.
+	/// </summary>
 	internal sealed class Repository {
 		internal delegate void ObjectProcessor(object rcw);
 
 		/// <summary>
-		/// XXX: Generic.Dictionary is not thread-safe!
-		/// Provide locks or replace with Concurrent.Dictionary
+		/// Generic.Dictionary is not thread-safe.
+		/// In case of concurrent access provide locks or replace with Concurrent.Dictionary
 		/// (see http://msdn.microsoft.com/en-us/library/dd997305%28v=vs.110%29.aspx).
 		/// </summary>
 		private readonly Dictionary<int, object> cache;
 
-		/// <summary>
-		/// XXX: non-synchronized variable access (use either volatile or Interlocked)
-		/// </summary>
 		private int addedCount;
 
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();

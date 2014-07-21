@@ -8,8 +8,8 @@ using NLog;
 namespace isc.onec.bridge {
 	/// <summary>
 	/// A "server" serving a single client. 
-	/// Relationship diagram:
-	/// Server -> V8Service -> {V8Adapter, Repository, Client}.
+	/// Synchronization policy: thread confined.
+	/// Each client connected maintains its own instance.
 	/// </summary>
 	public sealed class Server {
 		private readonly V8Service service;

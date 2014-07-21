@@ -6,6 +6,10 @@ using System.Threading;
 using NLog;
 
 namespace isc.onec.bridge {
+	/// <summary>
+	/// Synchronization policy: thread confined.
+	/// Each client connected maintains its own instance.
+	/// </summary>
 	internal sealed class V8Adapter {
 		private object connector;
 
@@ -69,15 +73,12 @@ namespace isc.onec.bridge {
 			}
 		}
 
-		/// <summary>
-		/// XXX: Accesses mutable state w/o synchronization
-		/// </summary>
 		internal object Connect(string url) {
 			try {
 				V8Version version = GetVersion(url);
 
 				// XXX: why particularly read lock here?
-				// What mutable state are we trying to read after a load barrier (lfence)?
+				// XXX: What mutable state are we trying to read after a load barrier (lfence)?
 				ConnectorLock.AcquireReaderLock(-1);
 				this.connector = CreateConnector(version);
 				Logger.Debug("New V8.ComConnector is created");
@@ -93,14 +94,11 @@ namespace isc.onec.bridge {
 			}
 		}
 
-		/// <summary>
-		/// XXX: Accesses mutable state w/o synchronization
-		/// </summary>
 		internal void Disconnect() {
 			Free(ref this.connector);
 			Debug.Assert(this.connector == null, "this.connector != null");
 
-			// XXX: Is this really necessary?
+			// XXX: Is manual garbage collection really necessary?
 			GC.Collect();
 			GC.WaitForPendingFinalizers();
 
@@ -158,9 +156,6 @@ namespace isc.onec.bridge {
 			}
 		}
 
-		/// <summary>
-		/// XXX: Accesses mutable state w/o synchronization
-		/// </summary>
 		internal bool Connected {
 			get {
 				return this.connector != null;

@@ -20,21 +20,16 @@ namespace isc.onec.bridge {
 	/// <li><code>this.client</code> may be contained in <code>journal</code> (if non-<code>null</code>)</li>
 	/// </ul></li>
 	/// </ul>
+	/// Synchronization policy: thread confined.
+	/// Each client connected maintains its own instance.
 	/// </summary>
 	internal sealed class V8Service {
 		private readonly V8Adapter adapter;
 
-		/// <summary>
-		/// XXX: shared access w/o synchronization.
-		/// </summary>
 		private object context;
 
 		private readonly Repository repository;
 
-		/// <summary>
-		/// XXX: Shared access.
-		/// XXX: This actually looks like a *last connected client*, as the value gets rewritten upon connect.
-		/// </summary>
 		private string client;
 
 		internal string Client {
@@ -60,7 +55,6 @@ namespace isc.onec.bridge {
 
 		/// <summary>
 		/// Connects to the <code>url</code>.
-		/// XXX: Should be entered by a single thread, and only once.
 		/// </summary>
 		/// <param name="url"></param>
 		/// <param name="client">can be <code>null</code></param>
@@ -71,12 +65,13 @@ namespace isc.onec.bridge {
 				throw new InvalidOperationException("Attempt to connect while connected; old client: " + this.client + "; new client: " + client);
 			}
 
-			// XXX: attempt to use a state shared among multiple instances w/o proper locking.
 			if (client != null) {
-				if (Clients.ContainsKey(client)) {
-					throw new InvalidOperationException("Attempt to create more than one connection to 1C from the same job. Client #" + client);
-				} else {
-					Clients.Add(client, url);
+				lock (Clients) {
+					if (Clients.ContainsKey(client)) {
+						throw new InvalidOperationException("Attempt to create more than one connection to 1C from the same job. Client #" + client);
+					} else {
+						Clients.Add(client, url);
+					}
 				}
 			}
 
@@ -150,7 +145,9 @@ namespace isc.onec.bridge {
 			this.adapter.Disconnect();
 
 			if (this.client != null) {
-				Clients.Remove(this.client);
+				lock (Clients) {
+					Clients.Remove(this.client);
+				}
 			}
 
 			this.context = null;
@@ -163,9 +160,10 @@ namespace isc.onec.bridge {
 		private static void DumpClients() {
 			var report = string.Empty;
 
-			// XXX: clients should be locked during iteration
-			foreach (KeyValuePair<string, string> client in Clients) {
-				report += client.Key + "   " + client.Value + "\n";
+			lock (Clients) {
+				foreach (KeyValuePair<string, string> client in Clients) {
+					report += client.Key + "   " + client.Value + "\n";
+				}
 			}
 
 			if (report.Length != 0) {

@@ -21,10 +21,12 @@ namespace isc.onec.tcp.async
 		}
 
 		// The number of SocketAsyncEventArgs instances in the pool.
-		// WTF? This may fail to return the most current value. 
-		internal int Count
-		{
-			get { return this.pool.Count; }
+		internal int Count {
+			get {
+				lock (this.pool) {
+					return this.pool.Count;
+				}
+			}
 		}
 
 		internal int NextTokenId {
