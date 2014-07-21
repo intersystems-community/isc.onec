@@ -5,7 +5,7 @@ using System.Net.Sockets;
 namespace isc.onec.tcp.async {	
 	internal sealed class SocketAsyncEventArgsPool {		
 		// Pool of reusable SocketAsyncEventArgs objects.
-		// WTF? Consider using a concurrent collection *instead* of ths entire class.
+		// XXX: Consider using ConcurrentStack *instead* of ths entire class.
 		private readonly Stack<SocketAsyncEventArgs> pool;
 		
 		// initializes the object pool to the specified size.
