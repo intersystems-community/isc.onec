@@ -40,14 +40,23 @@ namespace isc.onec.bridge {
 		}
 
 		/// <summary>
-		/// Converts this response into a string array.
+		/// Converts this response into a byte array.
 		/// </summary>
 		/// <returns></returns>
-		public string[] Serialize() {
-			return new string[] {
-				this.type.GetPrimitiveType().ToString(),
-				this.value == null ? null : this.value.ToString(),
-			};
+		public byte[] Serialize() {
+			string type = this.type.GetPrimitiveType().ToString();
+
+			byte[] tag = BitConverter.GetBytes(Convert.ToSByte(type));
+			byte[] value = this.value == null
+					? new byte[0]
+					: System.Text.Encoding.UTF8.GetBytes(this.value.ToString());
+			byte[] length = BitConverter.GetBytes(Convert.ToUInt16(value.Length));
+
+			byte[] data = new byte[tag.Length + length.Length + value.Length];
+			Buffer.BlockCopy(tag, 0, data, 0, tag.Length);
+			Buffer.BlockCopy(length, 0, data, tag.Length, length.Length);
+			Buffer.BlockCopy(value, 0, data, tag.Length + length.Length, value.Length);
+			return data;
 		}
 
 		/// <summary>
