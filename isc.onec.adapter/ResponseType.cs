@@ -2,9 +2,9 @@
 
 namespace isc.onec.bridge {
 	/// <summary>
-	/// Response type.
+	/// Response type. Takes 2 bytes on the wire.
 	/// </summary>
-	internal enum ResponseType {
+	internal enum ResponseType : sbyte {
 		/// <summary>
 		/// SET/CONNECT/DISCONNECT/FREE
 		/// </summary>

@@ -44,9 +44,10 @@ namespace isc.onec.bridge {
 		/// </summary>
 		/// <returns></returns>
 		public byte[] Serialize() {
-			string type = this.type.GetPrimitiveType().ToString();
+			sbyte type = (sbyte) this.type.GetPrimitiveType();
 
-			byte[] tag = BitConverter.GetBytes(Convert.ToSByte(type));
+			// Type is actually 2 bytes on the wire.
+			byte[] tag = BitConverter.GetBytes(type);
 			byte[] value = this.value == null
 					? new byte[0]
 					: System.Text.Encoding.UTF8.GetBytes(this.value.ToString());
