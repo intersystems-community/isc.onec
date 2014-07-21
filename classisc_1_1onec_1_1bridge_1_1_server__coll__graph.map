@@ -1,0 +1,5 @@
+<map id="isc.onec.bridge.Server" name="isc.onec.bridge.Server">
+<area shape="rect" id="node2" href="$classisc_1_1onec_1_1bridge_1_1_v8_service.html" title="Class state invariant: " alt="" coords="107,95,279,121"/>
+<area shape="rect" id="node3" href="$classisc_1_1onec_1_1bridge_1_1_repository.html" title="Synchronization policy: thread confined. Each client connected maintains its own instance. " alt="" coords="5,5,181,32"/>
+<area shape="rect" id="node4" href="$classisc_1_1onec_1_1bridge_1_1_v8_adapter.html" title="Synchronization policy: thread confined. Each client connected maintains its own instance. " alt="" coords="206,5,381,32"/>
+</map>

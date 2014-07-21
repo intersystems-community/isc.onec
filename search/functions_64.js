@@ -1,0 +1,10 @@
+var searchData=
+[
+  ['dataholdingusertoken',['DataHoldingUserToken',['../classisc_1_1onec_1_1tcp_1_1async_1_1_data_holding_user_token.html#a1d0b4d9b5fc3d46d058412dfbbbc6c4c',1,'isc::onec::tcp::async::DataHoldingUserToken']]],
+  ['disconnect',['Disconnect',['../classisc_1_1onec_1_1bridge_1_1_server.html#a2ec7c3300e6047d9ce0f06c31a079342',1,'isc.onec.bridge.Server.Disconnect()'],['../classisc_1_1onec_1_1bridge_1_1_v8_adapter.html#ab68ba69d03330d2451e4eb3dbddd5f49',1,'isc.onec.bridge.V8Adapter.Disconnect()'],['../classisc_1_1onec_1_1bridge_1_1_v8_service.html#abd4f4b0731c03980faa7aaecf98bc077',1,'isc.onec.bridge.V8Service.Disconnect()']]],
+  ['dispose',['Dispose',['../classisc_1_1gateway_1_1net_1_1_bridge_starter.html#ad35b5f4217aaec740bf3b4a77fa6d82e',1,'isc.gateway.net.BridgeStarter.Dispose()'],['../classisc_1_1gateway_1_1net_1_1_dot_net_gateway_service.html#a520d9a852babccdcdb042cf988a66cae',1,'isc.gateway.net.DotNetGatewayService.Dispose()'],['../classisc_1_1onec_1_1tcp_1_1async_1_1_t_c_p_async_server.html#a6391fd9205e6a1c2c231797f4ed7f398',1,'isc.onec.tcp.async.TCPAsyncServer.Dispose()']]],
+  ['docommandifconnected',['DoCommandIfConnected',['../classisc_1_1onec_1_1bridge_1_1_server.html#abe72f34598c12db5686524a1466f61b6',1,'isc::onec::bridge::Server']]],
+  ['dotnetgatewayservice',['DotNetGatewayService',['../classisc_1_1gateway_1_1net_1_1_dot_net_gateway_service.html#a048dcb0380477beaee2274bd41739905',1,'isc.gateway.net.DotNetGatewayService.DotNetGatewayService()'],['../classisc_1_1gateway_1_1net_1_1_dot_net_gateway_service.html#ad152ba1e734d1fbcaf2ebbbc47adfb84',1,'isc.gateway.net.DotNetGatewayService.DotNetGatewayService(string[] args)']]],
+  ['dotnetgatewayserviceinstaller',['DotNetGatewayServiceInstaller',['../classisc_1_1gateway_1_1net_1_1_dot_net_gateway_service_installer.html#a40c15a1fef468d1136a72edd0ef0045e',1,'isc::gateway::net::DotNetGatewayServiceInstaller']]],
+  ['dumpclients',['DumpClients',['../classisc_1_1onec_1_1bridge_1_1_v8_service.html#af3998a5e81541c358dcc77eff1a67002',1,'isc::onec::bridge::V8Service']]]
+];

@@ -1,0 +1,8 @@
+<map id="isc.onec.tcp.async.DataHoldingUserToken" name="isc.onec.tcp.async.DataHoldingUserToken">
+<area shape="rect" id="node2" href="$classisc_1_1onec_1_1bridge_1_1_server.html" title="A &quot;server&quot; serving a single client. Synchronization policy: thread confined. Each client connected ma..." alt="" coords="118,184,269,211"/>
+<area shape="rect" id="node3" href="$classisc_1_1onec_1_1bridge_1_1_v8_service.html" title="Class state invariant: " alt="" coords="107,95,279,121"/>
+<area shape="rect" id="node4" href="$classisc_1_1onec_1_1bridge_1_1_repository.html" title="Synchronization policy: thread confined. Each client connected maintains its own instance. " alt="" coords="5,5,181,32"/>
+<area shape="rect" id="node5" href="$classisc_1_1onec_1_1bridge_1_1_v8_adapter.html" title="Synchronization policy: thread confined. Each client connected maintains its own instance. " alt="" coords="206,5,381,32"/>
+<area shape="rect" id="node6" href="$classisc_1_1onec_1_1tcp_1_1async_1_1_mediator.html" title="isc.onec.tcp.async.Mediator" alt="" coords="411,184,597,211"/>
+<area shape="rect" id="node7" href="$classisc_1_1onec_1_1tcp_1_1async_1_1_data_holder.html" title="isc.onec.tcp.async.DataHolder" alt="" coords="329,95,529,121"/>
+</map>
