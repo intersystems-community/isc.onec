@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using isc.general;
 using isc.onec.tcp;
 using NLog;
@@ -19,9 +20,11 @@ namespace isc.onec.bridge {
 
 		public Server() {
 			this.service = new V8Service();
+			Logger.Debug("A new Server (Id = " + RuntimeHelpers.GetHashCode(this) + ") created.");
 		}
 
 		public Response Run(RequestMessage request) {
+			Logger.Debug("Server (Id = " + RuntimeHelpers.GetHashCode(this) + "): Run(...) invoked.");
 			try {
 				switch (request.Command) {
 				case Command.GET:
@@ -75,6 +78,7 @@ namespace isc.onec.bridge {
 		}
 
 		public void Disconnect() {
+			Logger.Debug("Server (Id = " + RuntimeHelpers.GetHashCode(this) + "): disconnect requested.");
 			this.service.Disconnect();
 		}
 
