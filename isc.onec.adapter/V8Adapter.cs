@@ -75,6 +75,7 @@ namespace isc.onec.bridge {
 		internal object Connect(string url) {
 			try {
 				V8Version version = GetVersion(url);
+
 				// XXX: why particularly read lock here?
 				// What mutable state are we trying to read after a load barrier (lfence)?
 				ConnectorLock.AcquireReaderLock(-1);
