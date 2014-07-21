@@ -275,11 +275,6 @@
          <Item>'isc.gateway.net.dll'</Item>
         </Issue>
        </Message>
-       <Message TypeName="MarkAssembliesWithComVisible" Category="Microsoft.Design" CheckId="CA1017" Created="2014-07-18 08:43:16Z">
-        <Issue Name="AttributeTrue" Level="Error">
-         <Item>'isc.gateway.net.dll'</Item>
-        </Issue>
-       </Message>
       </Messages>
       <Namespaces>
        <Namespace Name="isc.gateway.net">
@@ -356,28 +351,10 @@
          <Item>'isc.general.dll'</Item>
         </Issue>
        </Message>
-       <Message TypeName="MarkAssembliesWithComVisible" Category="Microsoft.Design" CheckId="CA1017" Created="2014-07-18 08:43:16Z">
-        <Issue Name="AttributeTrue" Level="Error">
-         <Item>'isc.general.dll'</Item>
-        </Issue>
-       </Message>
       </Messages>
       <Namespaces>
        <Namespace Name="isc.general">
         <Types>
-         <Type Name="EventLogFactory">
-          <Members>
-           <Member Name="#Initialize(System.ServiceProcess.ServiceBase)">
-            <Messages>
-             <Message TypeName="InstantiateArgumentExceptionsCorrectly" Category="Microsoft.Usage" CheckId="CA2208" Created="2014-07-18 08:43:16Z">
-              <Issue Name="NoArguments">
-               <Item>'ArgumentNullException'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="ExceptionUtilities">
           <Members>
            <Member Name="#GetStackTrace(System.Exception)">
@@ -475,11 +452,6 @@
        </Message>
        <Message TypeName="MarkAssembliesWithClsCompliant" Category="Microsoft.Design" CheckId="CA1014" Created="2014-07-18 08:43:16Z">
         <Issue>
-         <Item>'isc.onec.adapter.dll'</Item>
-        </Issue>
-       </Message>
-       <Message TypeName="MarkAssembliesWithComVisible" Category="Microsoft.Design" CheckId="CA1017" Created="2014-07-18 08:43:16Z">
-        <Issue Name="AttributeTrue" Level="Error">
          <Item>'isc.onec.adapter.dll'</Item>
         </Issue>
        </Message>
@@ -592,11 +564,11 @@
          </Type>
          <Type Name="Repository">
           <Members>
-           <Member Name="#Find(System.Int64)">
+           <Member Name="#Find(System.Int32)">
             <Messages>
-             <Message TypeName="DoNotRaiseReservedExceptionTypes" Category="Microsoft.Usage" CheckId="CA2201" Created="2014-07-18 08:43:16Z">
+             <Message TypeName="DoNotRaiseReservedExceptionTypes" Category="Microsoft.Usage" CheckId="CA2201" Created="2014-07-21 12:40:14Z">
               <Issue Name="TooGeneric">
-               <Item>'Repository.Find(long)'</Item>
+               <Item>'Repository.Find(int)'</Item>
                <Item>'Exception'</Item>
               </Issue>
              </Message>
@@ -608,6 +580,13 @@
           <Members>
            <Member Name="#.ctor(isc.onec.bridge.RequestType,System.String)">
             <Messages>
+             <Message Id="System.Convert.ToInt32(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2014-07-21 12:40:14Z">
+              <Issue>
+               <Item>'Convert.ToInt32(string)'</Item>
+               <Item>'Request.Request(RequestType, string)'</Item>
+               <Item>'Convert.ToInt32(string, IFormatProvider)'</Item>
+              </Issue>
+             </Message>
              <Message Id="System.Convert.ToInt64(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2014-07-18 08:43:16Z">
               <Issue>
                <Item>'Convert.ToInt64(string)'</Item>
@@ -621,6 +600,13 @@
             <Accessors>
              <Accessor Name="#get_Value()">
               <Messages>
+               <Message Id="System.Convert.ToInt32(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2014-07-21 12:40:14Z">
+                <Issue>
+                 <Item>'Convert.ToInt32(string)'</Item>
+                 <Item>'Request.Value.get()'</Item>
+                 <Item>'Convert.ToInt32(string, IFormatProvider)'</Item>
+                </Issue>
+               </Message>
                <Message Id="System.Convert.ToInt64(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2014-07-18 08:43:16Z">
                 <Issue>
                  <Item>'Convert.ToInt64(string)'</Item>
@@ -631,26 +617,6 @@
               </Messages>
              </Accessor>
             </Accessors>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="RequestTypeExtensions">
-          <Members>
-           <Member Name="#GetPrimitiveType(isc.onec.bridge.RequestType)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'RequestTypeExtensions.GetPrimitiveType(this RequestType)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="System.Convert.ChangeType(System.Object,System.TypeCode)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'Convert.ChangeType(object, TypeCode)'</Item>
-               <Item>'RequestTypeExtensions.GetPrimitiveType(this RequestType)'</Item>
-               <Item>'Convert.ChangeType(object, TypeCode, IFormatProvider)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
            </Member>
           </Members>
          </Type>
@@ -679,19 +645,12 @@
            </Message>
           </Messages>
           <Members>
-           <Member Name="#Run(isc.onec.bridge.Command,System.String,System.String,System.String[],System.Int32[])">
+           <Member Name="#Run(isc.onec.tcp.RequestMessage)">
             <Messages>
-             <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Created="2014-07-18 11:52:29Z">
+             <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Created="2014-07-21 12:40:14Z">
               <Issue>
-               <Item>'Server.Run(Command, string, string, string[], int[])'</Item>
+               <Item>'Server.Run(RequestMessage)'</Item>
                <Item>'Exception'</Item>
-              </Issue>
-             </Message>
-             <Message Id="vals" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Created="2014-07-18 11:52:29Z">
-              <Issue Name="MemberParameter">
-               <Item>'Server.Run(Command, string, string, string[], int[])'</Item>
-               <Item>vals</Item>
-               <Item>'vals'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -700,22 +659,8 @@
          </Type>
          <Type Name="V8Adapter">
           <Members>
-           <Member Name="#Free(System.Object&amp;)">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2014-07-18 08:43:16Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'V8Adapter.Free(ref object)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#Get(System.Object,System.String)">
             <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2014-07-18 08:43:16Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'V8Adapter.Get(object, string)'</Item>
-              </Issue>
-             </Message>
              <Message Id="System.Type.InvokeMember(System.String,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object,System.Object[])" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2014-07-18 08:43:16Z">
               <Issue>
                <Item>'Type.InvokeMember(string, BindingFlags, Binder, object, object[])'</Item>
@@ -725,22 +670,8 @@
              </Message>
             </Messages>
            </Member>
-           <Member Name="#Invoke(System.Object,System.String,System.Object[])">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2014-07-18 08:43:16Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'V8Adapter.Invoke(object, string, object[])'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#Set(System.Object,System.String,System.Object)">
             <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2014-07-18 08:43:16Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'V8Adapter.Set(object, string, object)'</Item>
-              </Issue>
-             </Message>
              <Message Id="System.Type.InvokeMember(System.String,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object,System.Object[])" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2014-07-18 08:43:16Z">
               <Issue>
                <Item>'Type.InvokeMember(string, BindingFlags, Binder, object, object[])'</Item>
@@ -756,86 +687,14 @@
        </Namespace>
        <Namespace Name="isc.onec.tcp">
         <Types>
-         <Type Name="MessageEncoder">
-          <Members>
-           <Member Name="#combine(System.Byte[],System.Byte[],System.Byte[])">
-            <Messages>
-             <Message Id="combine" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2014-07-18 11:52:29Z">
-              <Issue Name="Member">
-               <Item>combine</Item>
-               <Item>'MessageEncoder.combine(byte[], byte[], byte[])'</Item>
-               <Item>Combine</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#encode()">
-            <Messages>
-             <Message Id="encode" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2014-07-18 11:52:29Z">
-              <Issue Name="Member">
-               <Item>encode</Item>
-               <Item>'MessageEncoder.encode()'</Item>
-               <Item>Encode</Item>
-              </Issue>
-             </Message>
-             <Message Id="System.Convert.ToSByte(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2014-07-18 11:52:29Z">
-              <Issue>
-               <Item>'Convert.ToSByte(string)'</Item>
-               <Item>'MessageEncoder.encode()'</Item>
-               <Item>'Convert.ToSByte(string, IFormatProvider)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="RequestMessage">
           <Members>
-           <Member Name="#.ctor(System.Byte[])">
-            <Messages>
-             <Message Id="System.Convert.ToString(System.Int32)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2014-07-18 11:52:29Z">
-              <Issue>
-               <Item>'Convert.ToString(int)'</Item>
-               <Item>'RequestMessage.RequestMessage(byte[])'</Item>
-               <Item>'Convert.ToString(int, IFormatProvider)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#Disconnect">
             <Messages>
              <Message TypeName="DoNotDeclareReadOnlyMutableReferenceTypes" Category="Microsoft.Security" CheckId="CA2104" Created="2014-07-18 11:52:29Z">
               <Issue>
                <Item>'RequestMessage.Disconnect'</Item>
                <Item>'RequestMessage'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#types">
-            <Messages>
-             <Message TypeName="ArrayFieldsShouldNotBeReadOnly" Category="Microsoft.Security" CheckId="CA2105" Created="2014-07-18 11:52:29Z">
-              <Issue>
-               <Item>'RequestMessage.types'</Item>
-              </Issue>
-             </Message>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2014-07-18 11:52:29Z">
-              <Issue>
-               <Item>'RequestMessage.types'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#values">
-            <Messages>
-             <Message TypeName="ArrayFieldsShouldNotBeReadOnly" Category="Microsoft.Security" CheckId="CA2105" Created="2014-07-18 11:52:29Z">
-              <Issue>
-               <Item>'RequestMessage.values'</Item>
-              </Issue>
-             </Message>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2014-07-18 11:52:29Z">
-              <Issue>
-               <Item>'RequestMessage.values'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -899,21 +758,6 @@
       <Namespaces>
        <Namespace Name="isc.gateway.net">
         <Types>
-         <Type Name="DotNetGatewayService">
-          <Members>
-           <Member Name="#Dispose(System.Boolean)">
-            <Messages>
-             <Message Id="backgroundWorker" TypeName="DisposableFieldsShouldBeDisposed" Category="Microsoft.Usage" CheckId="CA2213" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'DotNetGatewayService'</Item>
-               <Item>'DotNetGatewayService.backgroundWorker'</Item>
-               <Item>'BackgroundWorker'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="DotNetGatewayServiceInstaller">
           <Members>
            <Member Name="#Install(System.Collections.IDictionary)">
@@ -1000,125 +844,10 @@
          <Item>'isc.onec.tcp.async.dll'</Item>
         </Issue>
        </Message>
-       <Message TypeName="MarkAssembliesWithComVisible" Category="Microsoft.Design" CheckId="CA1017" Created="2014-07-18 08:43:16Z">
-        <Issue Name="AttributeTrue" Level="Error">
-         <Item>'isc.onec.tcp.async.dll'</Item>
-        </Issue>
-       </Message>
       </Messages>
       <Namespaces>
        <Namespace Name="isc.onec.tcp.async">
         <Types>
-         <Type Name="AcceptOpUserToken">
-          <Members>
-           <Member Name="#TokenId">
-            <Accessors>
-             <Accessor Name="#set_TokenId(System.Int32)">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2014-07-18 08:43:16Z">
-                <Issue>
-                 <Item>'AcceptOpUserToken.TokenId.set(int)'</Item>
-                </Issue>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="BufferManager">
-          <Members>
-           <Member Name="#.ctor(System.Int32,System.Int32)">
-            <Messages>
-             <Message TypeName="DoNotInitializeUnnecessarily" Category="Microsoft.Performance" CheckId="CA1805" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'BufferManager.BufferManager(int, int)'</Item>
-               <Item>'BufferManager.currentIndex'</Item>
-               <Item>'int'</Item>
-               <Item>0</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="DataHolder">
-          <Members>
-           <Member Name="#.ctor()">
-            <Messages>
-             <Message TypeName="DoNotInitializeUnnecessarily" Category="Microsoft.Performance" CheckId="CA1805" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'DataHolder.DataHolder()'</Item>
-               <Item>'DataHolder.isError'</Item>
-               <Item>'bool'</Item>
-               <Item>false</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#remoteEndpoint">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'DataHolder.remoteEndpoint'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="DataHoldingUserToken">
-          <Members>
-           <Member Name="#.ctor(System.Net.Sockets.SocketAsyncEventArgs,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
-            <Messages>
-             <Message TypeName="DoNotInitializeUnnecessarily" Category="Microsoft.Performance" CheckId="CA1805" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'DataHoldingUserToken.DataHoldingUserToken(SocketAsyncEventArgs, int, int, int, int, int)'</Item>
-               <Item>'DataHoldingUserToken.recPrefixBytesDoneThisOp'</Item>
-               <Item>'int'</Item>
-               <Item>0</Item>
-              </Issue>
-              <Issue>
-               <Item>'DataHoldingUserToken.DataHoldingUserToken(SocketAsyncEventArgs, int, int, int, int, int)'</Item>
-               <Item>'DataHoldingUserToken.receivedMessageBytesDoneCount'</Item>
-               <Item>'int'</Item>
-               <Item>0</Item>
-              </Issue>
-              <Issue>
-               <Item>'DataHoldingUserToken.DataHoldingUserToken(SocketAsyncEventArgs, int, int, int, int, int)'</Item>
-               <Item>'DataHoldingUserToken.receivedPrefixBytesDoneCount'</Item>
-               <Item>'int'</Item>
-               <Item>0</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="IncomingDataPreparer">
-          <Members>
-           <Member Name="#HandleReceivedData(isc.onec.tcp.async.DataHolder,System.Net.Sockets.SocketAsyncEventArgs)">
-            <Messages>
-             <Message Id="receiveToken" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'IncomingDataPreparer.HandleReceivedData(DataHolder, SocketAsyncEventArgs)'</Item>
-               <Item>'receiveToken'</Item>
-               <Item>'DataHoldingUserToken'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#lockerForList">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'IncomingDataPreparer.lockerForList'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="MessageHandler">
           <Members>
            <Member Name="#HandleMessage(System.Byte[],isc.onec.tcp.async.DataHoldingUserToken,System.Int32)">
@@ -1127,11 +856,6 @@
               <Issue Name="TooGeneric">
                <Item>'MessageHandler.HandleMessage(byte[], DataHoldingUserToken, int)'</Item>
                <Item>'Exception'</Item>
-              </Issue>
-             </Message>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2014-07-18 08:43:16Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'MessageHandler.HandleMessage(byte[], DataHoldingUserToken, int)'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -1162,47 +886,6 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="PrefixHandler">
-          <Members>
-           <Member Name="#HandlePrefix(System.Net.Sockets.SocketAsyncEventArgs,isc.onec.tcp.async.DataHoldingUserToken,System.Int32)">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2014-07-18 08:43:16Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'PrefixHandler.HandlePrefix(SocketAsyncEventArgs, DataHoldingUserToken, int)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="SocketAsyncEventArgsPool">
-          <Members>
-           <Member Name="#.ctor(System.Int32)">
-            <Messages>
-             <Message TypeName="DoNotInitializeUnnecessarily" Category="Microsoft.Performance" CheckId="CA1805" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'SocketAsyncEventArgsPool.SocketAsyncEventArgsPool(int)'</Item>
-               <Item>'SocketAsyncEventArgsPool.nextTokenId'</Item>
-               <Item>'int'</Item>
-               <Item>0</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Push(System.Net.Sockets.SocketAsyncEventArgs)">
-            <Messages>
-             <Message TypeName="InstantiateArgumentExceptionsCorrectly" Category="Microsoft.Usage" CheckId="CA2208" Created="2014-07-18 08:43:16Z">
-              <Issue Name="IncorrectParameterName">
-               <Item>'SocketAsyncEventArgsPool.Push(SocketAsyncEventArgs)'</Item>
-               <Item>Items added to a SocketAsyncEventArgsPool cannot be null</Item>
-               <Item>'paramName'</Item>
-               <Item>'ArgumentNullException'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="TCPAsyncServer">
           <Messages>
            <Message Id="TCP" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2014-07-18 08:43:16Z">
@@ -1224,33 +907,12 @@
              </Message>
             </Messages>
            </Member>
-           <Member Name="#Dispose()">
-            <Messages>
-             <Message TypeName="CallGCSuppressFinalizeCorrectly" Category="Microsoft.Usage" CheckId="CA1816" Created="2014-07-18 08:43:16Z">
-              <Issue Name="NotCalled">
-               <Item>'TCPAsyncServer.Dispose()'</Item>
-               <Item>'GC.SuppressFinalize(object)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#getSettings(System.Int32)">
             <Messages>
              <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Created="2014-07-18 08:43:16Z">
               <Issue>
                <Item>'TCPAsyncServer.getSettings(int)'</Item>
                <Item>'Exception'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#IO_Completed(System.Object,System.Net.Sockets.SocketAsyncEventArgs)">
-            <Messages>
-             <Message Id="receiveSendToken" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'TCPAsyncServer.IO_Completed(object, SocketAsyncEventArgs)'</Item>
-               <Item>'receiveSendToken'</Item>
-               <Item>'DataHoldingUserToken'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -1265,17 +927,6 @@
               <Issue>
                <Item>'TCPAsyncServer.ProcessReceive(SocketAsyncEventArgs)'</Item>
                <Item>'Exception'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#SetKeepAlive(System.Net.Sockets.Socket,System.Boolean,System.UInt32,System.UInt32)">
-            <Messages>
-             <Message Id="ignore" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2014-07-18 08:43:16Z">
-              <Issue>
-               <Item>'TCPAsyncServer.SetKeepAlive(Socket, bool, uint, uint)'</Item>
-               <Item>'ignore'</Item>
-               <Item>'int'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -1310,26 +961,11 @@
    </Target>
   </Targets>
   <Rules>
-   <Rule TypeName="ArrayFieldsShouldNotBeReadOnly" Category="Microsoft.Security" CheckId="CA2105">
-    <Resolution Name="Default">Either replace {0} with a strongly typed collection that cannot be changed, or replace the public field with a method that returns a clone of a private array.</Resolution>
-   </Rule>
    <Rule TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210">
     <Resolution Name="NoStrongName">Sign {0} with a strong name key.</Resolution>
    </Rule>
    <Rule TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020">
     <Resolution Name="Default">Consider merging the types defined in '{0}' with another namespace.</Resolution>
-   </Rule>
-   <Rule TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811">
-    <Resolution Name="Default">{0} appears to have no upstream public or protected callers.</Resolution>
-   </Rule>
-   <Rule TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823">
-    <Resolution Name="Default">It appears that field {0} is never used or is only ever assigned to. Use this field or remove it.</Resolution>
-   </Rule>
-   <Rule TypeName="CallGCSuppressFinalizeCorrectly" Category="Microsoft.Usage" CheckId="CA1816">
-    <Resolution Name="NotCalled">Change {0} to call {1}. This will prevent unnecessary finalization of the object once it has been disposed and it has fallen out of scope.</Resolution>
-   </Rule>
-   <Rule TypeName="DisposableFieldsShouldBeDisposed" Category="Microsoft.Usage" CheckId="CA2213">
-    <Resolution Name="Default">{0} contains field {1} that is of IDisposable type: {2}. Change the Dispose method on {0} to call Dispose or Close on this field.</Resolution>
    </Rule>
    <Rule TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031">
     <Resolution Name="Default">Modify {0} to catch a more specific exception than {1} or rethrow the exception.</Resolution>
@@ -1337,14 +973,8 @@
    <Rule TypeName="DoNotDeclareReadOnlyMutableReferenceTypes" Category="Microsoft.Security" CheckId="CA2104">
     <Resolution Name="Default">Remove the read-only designation from {0} or change the field to one that is an immutable reference type. If the reference type {1} is, in fact, immutable, exclude this message.</Resolution>
    </Rule>
-   <Rule TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051">
-    <Resolution Name="Default">Because field {0} is visible outside of its declaring type, change its accessibility to private and add a property, with the same accessibility as the field has currently, to provide access to it.</Resolution>
-   </Rule>
    <Rule TypeName="DoNotExposeGenericLists" Category="Microsoft.Design" CheckId="CA1002">
     <Resolution Name="Default">Change {0} in {1} to use Collection&lt;T&gt;, ReadOnlyCollection&lt;T&gt; or KeyedCollection&lt;K,V&gt;</Resolution>
-   </Rule>
-   <Rule TypeName="DoNotInitializeUnnecessarily" Category="Microsoft.Performance" CheckId="CA1805">
-    <Resolution Name="Default">{0} initializes field {1} of type {2} to {3}. Remove this initialization because it will be done automatically by the runtime.</Resolution>
    </Rule>
    <Rule TypeName="DoNotRaiseReservedExceptionTypes" Category="Microsoft.Usage" CheckId="CA2201">
     <Resolution Name="TooGeneric">{0} creates an exception of type {1}, an exception type that is not sufficiently specific and should never be raised by user code. If this exception instance might be thrown, use a different exception type.</Resolution>
@@ -1360,25 +990,11 @@
    </Rule>
    <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
     <Resolution Name="Assembly">Correct the spelling of '{0}' in assembly name {1}.</Resolution>
-    <Resolution Name="MemberParameter">In method {0}, correct the spelling of '{1}' in parameter name {2} or remove it entirely if it represents any sort of Hungarian notation.</Resolution>
     <Resolution Name="MemberParameterMoreMeaningfulName">In method {0}, consider providing a more meaningful name than parameter name {1}.</Resolution>
     <Resolution Name="Namespace">Correct the spelling of '{0}' in namespace name '{1}'.</Resolution>
    </Rule>
-   <Rule TypeName="InstantiateArgumentExceptionsCorrectly" Category="Microsoft.Usage" CheckId="CA2208">
-    <Resolution Name="IncorrectParameterName">Method {0} passes '{1}' as the {2} argument to a {3} constructor. Replace this argument with one of the method's parameter names. Note that the provided parameter name should have the exact casing as declared on the method.</Resolution>
-    <Resolution Name="NoArguments">Call the {0} constructor that contains a message and/or paramName parameter.</Resolution>
-   </Rule>
    <Rule TypeName="MarkAssembliesWithClsCompliant" Category="Microsoft.Design" CheckId="CA1014">
     <Resolution Name="Default">Mark {0} with CLSCompliant(true) because it exposes externally visible types.</Resolution>
-   </Rule>
-   <Rule TypeName="MarkAssembliesWithComVisible" Category="Microsoft.Design" CheckId="CA1017">
-    <Resolution Name="AttributeTrue">Consider changing the ComVisible attribute on {0} to false, and opting in at the type level.</Resolution>
-   </Rule>
-   <Rule TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822">
-    <Resolution Name="Default">The 'this' parameter (or 'Me' in Visual Basic) of {0} is never used. Mark the member as static (or Shared in Visual Basic) or use 'this'/'Me' in the method body or at least one property accessor, if appropriate.</Resolution>
-   </Rule>
-   <Rule TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804">
-    <Resolution Name="Default">{0} declares a variable, {1}, of type {2}, which is never used or is only assigned to. Use this variable or remove it.</Resolution>
    </Rule>
    <Rule TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304">
     <Resolution Name="Default">Because the behavior of {0} could vary based on the current user's locale settings, replace this call in {1} with a call to {2}. If the result of {2} will be displayed to the user, specify 'CultureInfo.CurrentCulture' as the 'CultureInfo' parameter. Otherwise, if the result will be stored and accessed by software, such as when it is persisted to disk or to a database, specify 'CultureInfo.InvariantCulture'.</Resolution>
