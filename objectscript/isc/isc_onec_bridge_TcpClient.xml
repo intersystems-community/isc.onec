@@ -72,55 +72,178 @@ value is in format:
 	  1 byte - type
    2 bytes - length
    n bytes - value</Description>
-<FormalSpec>cmd,target,operand,vlist:%ListOfDataTypes,tlist:%ListOfDataTypes</FormalSpec>
+<Final>1</Final>
+<FormalSpec>cmd:%Integer,target:%Integer,operand:%String,vlist:%ListOfDataTypes,tlist:%ListOfDataTypes</FormalSpec>
+<ReturnType>%ListOfDataTypes</ReturnType>
 <Implementation><![CDATA[
-		  w:..debug "sending:"_..toString(cmd, target, operand, tlist, vlist),!	
-		  try {
-			  s header = $c(cmd)_$NCONVERT(target,"S4")_$NCONVERT($length(operand),"S2")_$ZCVT(operand,"O","SAME")
+	#dim reply as %ListOfDataTypes
+	#dim e as %Exception.SystemException
+	try {
+		#dim status as %Status = ..SendUnsafe(cmd, target, operand, vlist, tlist)
 		  
-			  if ($isObject(vlist)) {
-					s values = $c(vlist.Count())
+		if ('$system.Status.IsError(status)) {
+			set reply = ..Receive(cmd, target, operand, vlist, tlist)
+		} else {
+			// Problem writing data to the socket
+			set reply = ..NewExceptionResponse($system.Status.GetErrorText(status))
+		}
+	} catch (e) {
+		set reply = ..NewExceptionResponse("TcpClient.run(" _ ..toString(cmd, target, operand, tlist, vlist) _ ") when sending", e)
+	}
+	quit reply
+]]></Implementation>
+</Method>
 
-					for i=1:1:vlist.Count() {
-					  s v = vlist.GetAt(i)
-			
-					  s values = values_$c(tlist.GetAt(i))_$NCONVERT($length(v),"U2")_$ZCVT(v,"O","SAME")
-					}
-			  } else {
-				    s values = $c(0)
-			  }
-			  s len = $length(header_values)
-		
-			  d ..socket.Write($NCONVERT(len,"U4")_header_values,1,.sc)
-			  
-		  
-		  	  throw:$system.Status.IsError(sc) ##class(%Exception.StatusException).CreateFromStatus(sc)
-		  	  d ..socket.Flush()
-		  }
-		  catch e {
-			  throw ##class(isc.onec.NetworkError).get(e,"on send",..toString(cmd, target, operand, tlist, vlist))
-		  }
-		  
-		  
-		  try {
-			  s len = $SCONVERT(..read(4),"U4")
-			  s type = $a(..read(2))
-			  s length = $SCONVERT(..read(2),"U2")
-		  
-			  s value = ""
-			  s:length>0 value = $ZCVT(..read(length),"I","UTF8")
-		  
-			  w:..debug "recieve:"_type_":"_value,!
-			  s reply = ##class(%ListOfDataTypes).%New()
-			  d reply.Insert(type)
-			  d reply.Insert(value)	  
-		  }
-		  catch e {
-			  throw ##class(isc.onec.NetworkError).get(e,"on recieve",..toString(cmd, target, operand, tlist, vlist))
-		  }
+<Method name="SendUnsafe">
+<Description>
+Doesn't handle any exceptions, so exception handling is a client responsibility</Description>
+<Final>1</Final>
+<FormalSpec>cmd:%Integer,target:%Integer,operand:%String,vlist:%ListOfDataTypes,tlist:%ListOfDataTypes</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim header as %String = $char(cmd) _ $nconvert(target, "S4") _ $nconvert($length(operand), "S2") _ $zconvert(operand, "O", "SAME")
 
-		
-		  quit reply
+	#dim values as %String
+	if ($isobject(vlist)) {
+		set values = $char(vlist.Count())
+
+		#dim i as %Integer
+		for i = 1:1:vlist.Count() {
+			#dim v as %String = vlist.GetAt(i)
+
+			set values = values _ $char(tlist.GetAt(i)) _ $nconvert($length(v), "U2") _ $zconvert(v, "O", "SAME")
+		}
+	} else {
+		set values = $char(0)
+	}
+	#dim data = header _ values
+	
+	#dim status as %Status
+	do ..socket.Write($nconvert($length(data), "U4") _ data, 1, .status)
+	  
+	if ($system.Status.IsError(status)) {
+		quit status
+	}
+	
+	do ..socket.Flush()
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Receive">
+<Final>1</Final>
+<FormalSpec>cmd:%Integer,target:%Integer,operand:%String,vlist:%ListOfDataTypes,tlist:%ListOfDataTypes</FormalSpec>
+<Private>1</Private>
+<ReturnType>%ListOfDataTypes</ReturnType>
+<Implementation><![CDATA[
+	#dim reply as %ListOfDataTypes
+	#dim e as %Exception.SystemException
+	try {
+		set reply = ..ReceiveUnsafe(cmd, target, operand, vlist, tlist)
+	} catch (e) {
+		set reply = ..NewExceptionResponse("TcpClient.Receive(" _ ..toString(cmd, target, operand, tlist, vlist) _ ")", e)
+	}
+	quit reply
+]]></Implementation>
+</Method>
+
+<Method name="ReceiveUnsafe">
+<Description>
+Doesn't handle any exceptions, so exception handling is a client responsibility</Description>
+<Final>1</Final>
+<FormalSpec>cmd:%Integer,target:%Integer,operand:%String,vlist:%ListOfDataTypes,tlist:%ListOfDataTypes</FormalSpec>
+<Private>1</Private>
+<ReturnType>%ListOfDataTypes</ReturnType>
+<Implementation><![CDATA[
+	#dim errorMessageHeader as %String = "TcpClient.ReceiveUnsafe(" _ ..toString(cmd, target, operand, tlist, vlist) _ "): "
+	#dim errorMessage as %String
+
+	#dim rawPacketLength as %String = ..read(4)
+	/*
+	 * Check whether we've read packetLength correctly
+	 */
+	if ($length(rawPacketLength) '= 4) {
+		set errorMessage = "Failure reading an UInt32 (packetLength), " _ $length(rawPacketLength) _ " byte(s) read ("
+		set errorMessage = errorMessage _ "rawPacketLength = """ _ rawPacketLength _ """"
+		set errorMessage = errorMessage _ ")"
+		quit ..NewExceptionResponse(errorMessageHeader _ errorMessage)
+	}
+	#dim packetLength as %Integer = $sconvert(rawPacketLength, "U4")
+
+	#dim rawType as %String = ..read(2)
+	/*
+	 * Check whether we've read type correctly
+	 */
+	if ($length(rawType) '= 2) {
+		set errorMessage = "Failure reading an Int16 (type), " _ $length(rawType) _ " byte(s) read ("
+		set errorMessage = errorMessage _ "packetLength = """ _ packetLength _ """"
+		set errorMessage = errorMessage _ ", rawType = """ _ rawType _ """"
+		set errorMessage = errorMessage _ ")"
+		quit ..NewExceptionResponse(errorMessageHeader _ errorMessage)
+	}
+	#dim type as %Integer = $ascii(rawType)
+
+	#dim rawValueLength as %String = ..read(2)
+	/*
+	 * Check whether we've read valueLength correctly
+	 */
+	if ($length(rawValueLength) '= 2) {
+		set errorMessage = "Failure reading an UInt16 (valueLength), " _ $length(rawValueLength) _ " byte(s) read ("
+		set errorMessage = errorMessage _ "packetLength = """ _ packetLength _ """"
+		set errorMessage = errorMessage _ ", type = """ _ type _ """"
+		set errorMessage = errorMessage _ ", rawValueLength = """ _ rawValueLength _ """"
+		set errorMessage = errorMessage _ ")"
+		quit ..NewExceptionResponse(errorMessageHeader _ errorMessage)
+	}
+	#dim valueLength = $sconvert(rawValueLength, "U2")
+
+	#dim rawValue as %String = $select(valueLength > 0: ..read(valueLength), 1: "")
+	/*
+	 * Check whether we've read value correctly
+	 */
+	if ($length(rawValue) '= valueLength) {
+		set errorMessage = "Failure reading " _ valueLength _ " byte(s), " _ $length(rawValue) _ " byte(s) read ("
+		set errorMessage = errorMessage _ "packetLength = """ _ packetLength _ """"
+		set errorMessage = errorMessage _ ", type = """ _ type _ """"
+		set errorMessage = errorMessage _ ", valueLength = """ _ valueLength _ """"
+		set errorMessage = errorMessage _ ", rawValue = """ _ rawValue _ """"
+		set errorMessage = errorMessage _ ")"
+		quit ..NewExceptionResponse(errorMessageHeader _ errorMessage)
+	}
+	#dim value as %String = $zconvert(rawValue, "I", "UTF8")
+
+	/*
+	 * Check whether message invariants are held
+	 */
+	if ((type < ##class(Bridge).#VOIDREPLY) || (type > ##class(Bridge).#EXCEPTIONREPLY) || ((valueLength + 4) '= packetLength)) {
+		set errorMessage = "Message invariants not held ("
+		set errorMessage = errorMessage _ "packetLength = """ _ packetLength _ """"
+		set errorMessage = errorMessage _ ", type = """ _ type _ """"
+		set errorMessage = errorMessage _ ", valueLength = """ _ valueLength _ """"
+		set errorMessage = errorMessage _ ", value = """ _ value _ """"
+		set errorMessage = errorMessage _ ")"
+		quit ..NewExceptionResponse(errorMessageHeader _ errorMessage)
+	}
+
+	#dim reply as %ListOfDataTypes = ##class(%ListOfDataTypes).%New()
+	do reply.Insert(type)
+	do reply.Insert(value)
+	quit reply
+]]></Implementation>
+</Method>
+
+<Method name="NewExceptionResponse">
+<Final>1</Final>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>message:%String,e:%Exception.SystemException=$$$NULLOREF</FormalSpec>
+<Private>1</Private>
+<ReturnType>%ListOfDataTypes</ReturnType>
+<Implementation><![CDATA[
+	#dim reply as %ListOfDataTypes = ##class(%ListOfDataTypes).%New()
+	do reply.Insert(##class(Bridge).#EXCEPTIONREPLY)
+	do reply.Insert($zdatetime($now()) _ " " _ $select($isobject(e): message _ ": " _ e.DisplayString(), 1: message))
+	quit reply
 ]]></Implementation>
 </Method>
 
@@ -137,13 +260,15 @@ value is in format:
 
 <Method name="toString">
 <ClassMethod>1</ClassMethod>
-<FormalSpec>cmd,target,operand,tlist:%ListOfDataTypes,vlist:%ListOfDataTypes</FormalSpec>
+<FormalSpec>cmd:%Integer,target:%Integer,operand:%String,tlist:%ListOfDataTypes,vlist:%ListOfDataTypes</FormalSpec>
+<ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-	s values = "{" 
-	for i=1:1:tlist.Count() {
-		s values=values_tlist.GetAt(i)_":"_vlist.GetAt(i)_","
+	#dim values as %String = "{"
+	#dim i as %Integer 
+	for i = 1:1:tlist.Count() {
+		set values = values _ tlist.GetAt(i) _ ":" _ vlist.GetAt(i) _ ","
 	}
-	quit cmd_","_target_","_operand_".values:"_values_"}"
+	quit cmd _ "," _ target _ "," _ operand _ ".values:" _ values _ "}"
 ]]></Implementation>
 </Method>
 
