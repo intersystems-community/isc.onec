@@ -35,6 +35,8 @@ namespace isc.onec.bridge {
 			private set;
 		}
 
+		private readonly object disconnectionLock = new object();
+
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 		private static readonly EventLog EventLog = EventLogFactory.Instance;
@@ -71,10 +73,22 @@ namespace isc.onec.bridge {
 				if (this.Client != null) {
 					lock (Clients) {
 						if (Clients.ContainsKey(this.Client)) {
-							throw new InvalidOperationException("Attempt to create more than one connection to 1C from the same job. Client #" + client);
-						} else {
-							Clients.Add(this.Client, this);
+							Logger.Debug("Client with Id = " + this.Client + " was already connected. Disconnecting the other instance...");
+							V8Service that = Clients[this.Client];
+							Debug.Assert(that != null, "V8Service value at key " + this.Client + " not found");
+							Clients.Remove(this.Client);
+							try {
+								/*
+								 * Try to disconnect a stale connection information.
+								 */
+								that.Disconnect();
+								Logger.Debug("Client with Id = " + this.Client + " disconnected. Continuing connection procedure...");
+							} catch (Exception e) {
+								Logger.DebugException("Client with Id = " + this.Client + " failed to disconnect. Continuing connection procedure anyway...", e);
+							}
+							Debug.Assert(!Clients.ContainsKey(this.Client), "Failed to remove previous (stale) connection information");
 						}
+						Clients.Add(this.Client, this);
 					}
 				}
 
@@ -150,30 +164,41 @@ namespace isc.onec.bridge {
 			V8Adapter.Free(ref rcw);
 		}
 
+		/// <summary>
+		/// Can be called from multiple threads.
+		/// </summary>
 		internal void Disconnect() {
 			Logger.Debug("disconnecting from #" + this.Client + ". Adapter is " + this.adapter);
 
-			if (!this.Connected) {
-				return;
-			}
-
-			DumpClients();
-
-			this.repository.CleanAll(delegate(object rcw) {
-				V8Adapter.Free(ref rcw);
-			});
-
-			V8Adapter.Free(ref this.context);
-			this.adapter.Disconnect();
-
-			if (this.Client != null) {
-				lock (Clients) {
-					Clients.Remove(this.Client);
+			/*
+			 * Locks *instance* state.
+			 */
+			lock (this.disconnectionLock) {
+				if (!this.Connected) {
+					return;
 				}
-			}
 
-			this.context = null;
-			this.Client = null;
+				DumpClients();
+
+				this.repository.CleanAll(delegate(object rcw) {
+					V8Adapter.Free(ref rcw);
+				});
+
+				V8Adapter.Free(ref this.context);
+				this.adapter.Disconnect();
+
+				if (this.Client != null) {
+					/*
+					 * Locks *static* (shared) state. Stricter lock, narrower scope.
+					 */
+					lock (Clients) {
+						Clients.Remove(this.Client);
+					}
+				}
+
+				this.context = null;
+				this.Client = null;
+			}
 		}
 
 		/// <summary>
