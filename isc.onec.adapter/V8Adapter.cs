@@ -14,6 +14,14 @@ namespace isc.onec.bridge {
 
 		private static readonly object ConnectorLock = new object();
 
+		/// <summary>
+		/// Set to a non-null value when connected, and back to null when disconnected.
+		/// </summary>
+		internal string Url {
+			get;
+			private set;
+		}
+
 		private enum V8Version {
 			V80,
 			V81,
@@ -69,6 +77,10 @@ namespace isc.onec.bridge {
 		}
 
 		internal object Connect(string url) {
+			if (url == null || url.Length == 0) {
+				throw new ArgumentNullException("url");
+			}
+			this.Url = url;
 			try {
 				V8Version version = GetVersion(url);
 
@@ -87,6 +99,8 @@ namespace isc.onec.bridge {
 		}
 
 		internal void Disconnect() {
+			this.Url = null;
+
 			Free(ref this.connector);
 			Debug.Assert(this.connector == null, "this.connector != null");
 
@@ -150,6 +164,11 @@ namespace isc.onec.bridge {
 
 		internal bool Connected {
 			get {
+				/*
+				 * Connector and URL should be consistently null or non-null. 
+				 */
+				Debug.Assert((this.connector == null) == (this.Url == null));
+
 				return this.connector != null;
 			}
 		}
