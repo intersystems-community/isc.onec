@@ -221,10 +221,7 @@ namespace isc.onec.bridge {
 
 		internal bool Connected {
 			get {
-				/*
-				 * Invariant: if disconnected, client can't be non-null.
-				 */
-				Debug.Assert(this.adapter.Connected || this.Client == null);
+				Debug.Assert(this.adapter.Connected || this.Client == null, "Invariant violated: if disconnected, client can't be non-null");
 
 				return this.adapter.Connected;
 			}

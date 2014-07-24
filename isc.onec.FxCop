@@ -683,6 +683,20 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="V8Service">
+          <Members>
+           <Member Name="#Connect(System.String,System.String)">
+            <Messages>
+             <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Created="2014-07-24 13:42:57Z">
+              <Issue>
+               <Item>'V8Service.Connect(string, string)'</Item>
+               <Item>'Exception'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
         </Types>
        </Namespace>
        <Namespace Name="isc.onec.tcp">

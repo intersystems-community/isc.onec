@@ -164,10 +164,8 @@ namespace isc.onec.bridge {
 
 		internal bool Connected {
 			get {
-				/*
-				 * Connector and URL should be consistently null or non-null. 
-				 */
-				Debug.Assert((this.connector == null) == (this.Url == null));
+				Debug.Assert((this.connector == null) == (this.Url == null),
+					"Connector and URL should be consistently null or non-null");
 
 				return this.connector != null;
 			}
