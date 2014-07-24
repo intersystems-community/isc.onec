@@ -40,9 +40,9 @@ namespace isc.onec.bridge {
 		private static readonly EventLog EventLog = EventLogFactory.Instance;
 
 		/// <summary>
-		/// A shared map of clients to their URL's.
+		/// A shared map of clients to the corresponding V8Service instances.
 		/// </summary>
-		private static readonly Dictionary<string, string> Clients = new Dictionary<string, string>();
+		private static readonly Dictionary<string, V8Service> Clients = new Dictionary<string, V8Service>();
 
 		internal V8Service() {
 			Logger.Debug("isc.onec.bridge.V8Service is created");
@@ -73,7 +73,7 @@ namespace isc.onec.bridge {
 						if (Clients.ContainsKey(this.Client)) {
 							throw new InvalidOperationException("Attempt to create more than one connection to 1C from the same job. Client #" + client);
 						} else {
-							Clients.Add(this.Client, url);
+							Clients.Add(this.Client, this);
 						}
 					}
 				}
@@ -183,8 +183,8 @@ namespace isc.onec.bridge {
 			var report = string.Empty;
 
 			lock (Clients) {
-				foreach (KeyValuePair<string, string> client in Clients) {
-					report += client.Key + "   " + client.Value + "\n";
+				foreach (KeyValuePair<string, V8Service> client in Clients) {
+					report += client.Key + "   " + client.Value.adapter.Url + "\n";
 				}
 			}
 
