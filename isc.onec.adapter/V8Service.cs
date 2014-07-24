@@ -30,12 +30,9 @@ namespace isc.onec.bridge {
 
 		private readonly Repository repository;
 
-		private string client;
-
 		internal string Client {
-			get {
-				return this.client;
-			}
+			get;
+			private set;
 		}
 
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -59,24 +56,49 @@ namespace isc.onec.bridge {
 		/// <param name="url"></param>
 		/// <param name="client">can be <code>null</code></param>
 		internal void Connect(string url, string client) {
-			Logger.Debug("connect from session with #" + client);
+			Logger.Debug("Client " + client + " connecting to " + url + "...");
 
 			if (this.Connected) {
-				throw new InvalidOperationException("Attempt to connect while connected; old client: " + this.client + "; new client: " + client);
+				throw new InvalidOperationException("Attempt to connect while connected; old client: " + this.Client + "; new client: " + client);
 			}
 
-			if (client != null) {
-				lock (Clients) {
-					if (Clients.ContainsKey(client)) {
-						throw new InvalidOperationException("Attempt to create more than one connection to 1C from the same job. Client #" + client);
-					} else {
-						Clients.Add(client, url);
+			/*
+			 * Make sure we capture client information early,
+			 * before any exception is thrown.
+			 */
+			this.Client = client;
+			try {
+				if (this.Client != null) {
+					lock (Clients) {
+						if (Clients.ContainsKey(this.Client)) {
+							throw new InvalidOperationException("Attempt to create more than one connection to 1C from the same job. Client #" + client);
+						} else {
+							Clients.Add(this.Client, url);
+						}
 					}
 				}
-			}
 
-			this.context = this.adapter.Connect(url);
-			this.client = client;
+				this.context = this.adapter.Connect(url);
+			} catch {
+				Debug.Assert(this.repository.CachedCount == 0 && this.repository.AddedCount == 0,
+					"During a connection attempt, the repository should be empty");
+				Debug.Assert(this.context == null, "Context should be null");
+
+				if (this.Client != null) {
+					lock (Clients) {
+						Clients.Remove(this.Client);
+					}
+				}
+
+				/*
+				 * Restore the invariant.
+				 */
+				this.Client = null;
+
+				Debug.Assert(!this.Connected, "Still pretending to be connected");
+
+				throw;
+			}
 		}
 	   
 		internal void Set(int oid, string property, Request value) {
@@ -129,7 +151,7 @@ namespace isc.onec.bridge {
 		}
 
 		internal void Disconnect() {
-			Logger.Debug("disconnecting from #" + this.client + ". Adapter is " + this.adapter);
+			Logger.Debug("disconnecting from #" + this.Client + ". Adapter is " + this.adapter);
 
 			if (!this.Connected) {
 				return;
@@ -144,14 +166,14 @@ namespace isc.onec.bridge {
 			V8Adapter.Free(ref this.context);
 			this.adapter.Disconnect();
 
-			if (this.client != null) {
+			if (this.Client != null) {
 				lock (Clients) {
-					Clients.Remove(this.client);
+					Clients.Remove(this.Client);
 				}
 			}
 
 			this.context = null;
-			this.client = null;
+			this.Client = null;
 		}
 
 		/// <summary>
@@ -174,6 +196,11 @@ namespace isc.onec.bridge {
 
 		internal bool Connected {
 			get {
+				/*
+				 * Invariant: if disconnected, client can't be non-null.
+				 */
+				Debug.Assert(this.adapter.Connected || this.Client == null);
+
 				return this.adapter.Connected;
 			}
 		}

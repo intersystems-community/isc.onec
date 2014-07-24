@@ -71,6 +71,10 @@ namespace isc.onec.bridge {
 				EventLog.WriteEntry(e.ToStringWithIlOffsets(), EventLogEntryType.Warning);
 				EventLog.WriteEntry(message, EventLogEntryType.Warning);
 
+				/*
+				 * If an exception is thrown during a connection attempt,
+				 * this server *will* be already disconnected.
+				 */
 				this.Disconnect();
 
 				return new Response(e);
