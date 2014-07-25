@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using isc.general;
 using NLog;
 
@@ -20,7 +22,8 @@ namespace isc.onec.bridge {
 	/// <li><code>this.client</code> may be contained in <code>journal</code> (if non-<code>null</code>)</li>
 	/// </ul></li>
 	/// </ul>
-	/// Synchronization policy: thread confined.
+	/// Synchronization policy: thread confined
+	/// (except for the Disconnect() method which can be called concurrently).
 	/// Each client connected maintains its own instance.
 	/// </summary>
 	internal sealed class V8Service {
@@ -35,7 +38,7 @@ namespace isc.onec.bridge {
 			private set;
 		}
 
-		private readonly object connectionLock = new object();
+		private readonly object disconnectionLock = new object();
 
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -69,13 +72,25 @@ namespace isc.onec.bridge {
 			 * before any exception is thrown.
 			 */
 			this.Client = client;
+
+			int currentThreadId = Thread.CurrentThread.ManagedThreadId;
+			int instanceHashCode = RuntimeHelpers.GetHashCode(this);
 			try {
 				if (this.Client != null) {
+					Logger.Debug("V8Service.Connect(): Thread " + currentThreadId + " (V8Service instance " + instanceHashCode + ") about to acquire the lock on Clients");
 					lock (Clients) {
+						Logger.Debug("V8Service.Connect(): Thread " + currentThreadId + " (V8Service instance " + instanceHashCode + ") has acquired the lock on Clients");
 						if (Clients.ContainsKey(this.Client)) {
 							Logger.Debug("Client with Id = " + this.Client + " was already connected. Disconnecting the other instance...");
 							V8Service that = Clients[this.Client];
 							Debug.Assert(that != null, "V8Service value at key " + this.Client + " not found");
+							/*
+							 * If the below condition doesn't hold
+							 * (i.e. the same instance can be accessed by multiple threads),
+							 * this would be a violation of synchronization policy for this class.
+							 */
+							Logger.Debug("V8Service instances " + instanceHashCode + " and " + RuntimeHelpers.GetHashCode(that) + " are different: " + (this != that));
+							Debug.Assert(that != this, "V8Service value at key " + this.Client + " should be a different instance.");
 							Clients.Remove(this.Client);
 							try {
 								/*
@@ -90,6 +105,7 @@ namespace isc.onec.bridge {
 						}
 						Clients.Add(this.Client, this);
 					}
+					Logger.Debug("V8Service.Connect(): Thread " + currentThreadId + " (V8Service instance " + instanceHashCode + ") has released the lock on Clients");
 				}
 
 				this.context = this.adapter.Connect(url);
@@ -99,9 +115,12 @@ namespace isc.onec.bridge {
 				Debug.Assert(this.context == null, "Context should be null");
 
 				if (this.Client != null) {
+					Logger.Debug("V8Service.Connect(): Thread " + currentThreadId + " (V8Service instance " + instanceHashCode + ") about to acquire the lock on Clients");
 					lock (Clients) {
+						Logger.Debug("V8Service.Connect(): Thread " + currentThreadId + " (V8Service instance " + instanceHashCode + ") has acquired the lock on Clients");
 						Clients.Remove(this.Client);
 					}
+					Logger.Debug("V8Service.Connect(): Thread " + currentThreadId + " (V8Service instance " + instanceHashCode + ") has released the lock on Clients");
 				}
 
 				/*
@@ -168,12 +187,16 @@ namespace isc.onec.bridge {
 		/// Can be called from multiple threads.
 		/// </summary>
 		internal void Disconnect() {
-			Logger.Debug("disconnecting from #" + this.Client + ". Adapter is " + this.adapter);
+			Logger.Debug("Client with Id = " + this.Client + " disconnecting. Adapter is " + this.adapter);
 
+			int currentThreadId = Thread.CurrentThread.ManagedThreadId;
+			int instanceHashCode = RuntimeHelpers.GetHashCode(this);
+			Logger.Debug("V8Service.Disconnect(): Thread " + currentThreadId + " (V8Service instance " + instanceHashCode + ") about to acquire disconnectionLock");
 			/*
 			 * Locks *instance* state.
 			 */
-			lock (this.connectionLock) {
+			lock (this.disconnectionLock) {
+				Logger.Debug("V8Service.Disconnect(): Thread " + currentThreadId + " (V8Service instance " + instanceHashCode + ") has acquired disconnectionLock");
 				if (!this.Connected) {
 					return;
 				}
@@ -188,30 +211,39 @@ namespace isc.onec.bridge {
 				this.adapter.Disconnect();
 
 				if (this.Client != null) {
+					Logger.Debug("V8Service.Disconnect(): Thread " + currentThreadId + " (V8Service instance " + instanceHashCode + ") about to acquire the lock on Clients");
 					/*
 					 * Locks *static* (shared) state. Stricter lock, narrower scope.
 					 */
 					lock (Clients) {
+						Logger.Debug("V8Service.Disconnect(): Thread " + currentThreadId + " (V8Service instance " + instanceHashCode + ") has acquired the lock on Clients");
 						Clients.Remove(this.Client);
 					}
+					Logger.Debug("V8Service.Disconnect(): Thread " + currentThreadId + " (V8Service instance " + instanceHashCode + ") has released the lock on Clients");
 				}
 
 				this.context = null;
 				this.Client = null;
 			}
+			Logger.Debug("V8Service.Disconnect(): Thread " + currentThreadId + " (V8Service instance " + instanceHashCode + ") has released disconnectionLock");
 		}
 
 		/// <summary>
 		/// Only used for logging purposes.
+		/// <p>XXX: Formally, this code is not safe, either, as it accesses an unguarded #adapter property from other instances.</p>
 		/// </summary>
 		private static void DumpClients() {
 			var report = string.Empty;
 
+			int currentThreadId = Thread.CurrentThread.ManagedThreadId;
+			Logger.Debug("V8Service.DumpClients(): Thread " + currentThreadId + " about to acquire the lock on Clients");
 			lock (Clients) {
+				Logger.Debug("V8Service.DumpClients(): Thread " + currentThreadId + " has acquired the lock on Clients");
 				foreach (KeyValuePair<string, V8Service> client in Clients) {
 					report += client.Key + "   " + client.Value.adapter.Url + "\n";
 				}
 			}
+			Logger.Debug("V8Service.DumpClients(): Thread " + currentThreadId + " has released the lock on Clients");
 
 			if (report.Length != 0) {
 				Logger.Debug(report);
