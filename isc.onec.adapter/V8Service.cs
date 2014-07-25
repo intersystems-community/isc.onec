@@ -35,7 +35,7 @@ namespace isc.onec.bridge {
 			private set;
 		}
 
-		private readonly object disconnectionLock = new object();
+		private readonly object connectionLock = new object();
 
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -173,7 +173,7 @@ namespace isc.onec.bridge {
 			/*
 			 * Locks *instance* state.
 			 */
-			lock (this.disconnectionLock) {
+			lock (this.connectionLock) {
 				if (!this.Connected) {
 					return;
 				}
